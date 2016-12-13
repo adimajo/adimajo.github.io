@@ -1,1 +1,0 @@
-# adimajo.github.io
