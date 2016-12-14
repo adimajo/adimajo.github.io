@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>Adrien Ehrhardt - Inria, CA CF</title>
+		<title>Read Only by HTML5 UP</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
@@ -19,24 +19,23 @@
 			<section id="header">
 				<header>
 					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
-					<h1 id="logo"><a href="#">Adrien Ehrhardt</a></h1>
-					<p>PhD Student @Lille I University & @Inria<br />
-					in Machine Learning applied to Finance<br />
-					I also work for Crédit Agricole Consuemr Finance</p>
+					<h1 id="logo"><a href="#">Willis Corto</a></h1>
+					<p>I got reprogrammed by a rogue AI<br />
+					and now I'm totally cray</p>
 				</header>
 				<nav id="nav">
 					<ul>
 						<li><a href="#one" class="active">About</a></li>
-						<li><a href="#two">Blog</a></li>
-						<li><a href="#three">Research</a></li>
-						<li><a href="#four">Photography</a></li>
+						<li><a href="#two">Things I Can Do</a></li>
+						<li><a href="#three">A Few Accomplishments</a></li>
+						<li><a href="#four">Contact</a></li>
 					</ul>
 				</nav>
 				<footer>
 					<ul class="icons">
 						<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
 						<li><a href="#" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
-						<li><a href="#" class="icon fa-instagram"><span class="label">Google</span></a></li>
+						<li><a href="#" class="icon fa-instagram"><span class="label">Instagram</span></a></li>
 						<li><a href="#" class="icon fa-github"><span class="label">Github</span></a></li>
 						<li><a href="#" class="icon fa-envelope"><span class="label">Email</span></a></li>
 					</ul>
@@ -53,7 +52,7 @@
 							<section id="one">
 								<div class="container">
 									<header class="major">
-										<h2>AI in Retail Banking</h2>
+										<h2>Read Only</h2>
 										<p>Just an incredibly simple responsive site<br />
 										template freebie by <a href="http://html5up.net">HTML5 UP</a>.</p>
 									</header>
@@ -64,7 +63,7 @@
 						<!-- Two -->
 							<section id="two">
 								<div class="container">
-									<h3>Blog</h3>
+									<h3>Things I Can Do</h3>
 									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer lorem ipsum dolor sit amet.</p>
 									<ul class="feature-icons">
 										<li class="fa-code">Write all the code</li>
@@ -80,7 +79,7 @@
 						<!-- Three -->
 							<section id="three">
 								<div class="container">
-									<h3>Research</h3>
+									<h3>A Few Accomplishments</h3>
 									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer. Integer eu ante ornare amet commetus.</p>
 									<div class="features">
 										<article>
@@ -111,9 +110,9 @@
 						<!-- Four -->
 							<section id="four">
 								<div class="container">
-									<h3>Photography</h3>
+									<h3>Contact Me</h3>
 									<p>Integer eu ante ornare amet commetus vestibulum blandit integer in curae ac faucibus integer non. Adipiscing cubilia elementum integer. Integer eu ante ornare amet commetus.</p>
-									<!--<form method="post" action="#">
+									<form method="post" action="#">
 										<div class="row uniform">
 											<div class="6u 12u(xsmall)"><input type="text" name="name" id="name" placeholder="Name" /></div>
 											<div class="6u 12u(xsmall)"><input type="email" name="email" id="email" placeholder="Email" /></div>
@@ -132,7 +131,7 @@
 												</ul>
 											</div>
 										</div>
-									</form>-->
+									</form>
 								</div>
 							</section>
 
