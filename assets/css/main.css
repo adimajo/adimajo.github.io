@@ -57,7 +57,13 @@
 	}
 
 /* Containers */
-
+.fixed-ratio-resize { /* basic responsive img */
+    max-width: 100%;
+    height: auto;
+    width: auto\9; /* IE8 */
+    display: block;
+    margin-left: auto;
+    margin-right: auto}
 	.container {
 		margin-left: auto;
 		margin-right: auto;
@@ -83,6 +89,14 @@
 
 	.container {
 		width: 45em;
+	}
+	
+
+
+	image_total {
+	width = 100%
+    	height: auto;
+    	width: auto\9; /* ie8 */
 	}
 
 	@media screen and (max-width: 1680px) {
