@@ -10,16 +10,27 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
-		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
 		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
-		<link rel="icon" type="image/png" href="images/favicon.png" />
-	</head>
+	
+	<!-- Start WOWSlider.com HEAD section --> <!-- add to the <head> of your page -->
+	<link rel="stylesheet" type="text/css" href="engine0/style.css" />
+	<script type="text/javascript" src="engine0/jquery.js"></script>
+	<!-- End WOWSlider.com HEAD section -->
+	<!-- Start WOWSlider.com HEAD section --> <!-- add to the <head> of your page -->
+	<link rel="stylesheet" type="text/css" href="engine0/style.css" />
+	<!--script type="text/javascript" src="engine0/jquery.js"></script-->
+	<!-- End WOWSlider.com HEAD section -->
+	<!-- Start WOWSlider.com HEAD section --> <!-- add to the <head> of your page -->
+	<link rel="stylesheet" type="text/css" href="engine0/style.css" />
+	<!--script type="text/javascript" src="engine0/jquery.js"></script-->
+	<!-- End WOWSlider.com HEAD section --></head>
 	<body>
 
 		<!-- Header -->
 			<section id="header">
 				<header>
-					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
+					<span class="image avatar"><img src="../images/avatar.jpg" alt="" /></span>
 					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
 					<p>PhD Student @Lille I University & @Inria<br />
 					in Machine Learning applied to Finance<br />
@@ -27,11 +38,14 @@
 				</header>
 				<nav id="nav">
 					<ul>
-					        <li><a href="index.html" class="active">Home</a></li>
-						<li><a href="cifre.html">Informations CIFRE</a></li>
-						<li><a href="scoring.html">Intro to Credit Scoring</a></li>
-						<li><a href="rejectinference.html">Reject Inference</a></li>                                                
-						<li><a href="discretization.html">Discretization</a></li>
+						<li><a href="../index.html">Home</a></li>
+                                                <li><a href="../tuscany/tuscany.html">Toscana</a></li>
+                                                <li><a href="../budapest/budapest.html">Budapest</a></li>
+                                                <li><a href="../scotland/scotland.html">Scotland</a></li>
+                                                <li><a href="../guyane/guyane.html">Guyane</a></li>
+                                                <li><a href="../wroclaw/wroclaw.html">Wroclaw</a></li>
+                                                <li><a href="../berlin/berlin.html">Berlin</a></li>
+                                                <li><a href="../guadeloupe/guadeloupe.html" class="active">Guadeloupe</a></li>
 					</ul>
 				</nav>
 				<footer>
@@ -56,53 +70,16 @@
 							<section id="one">
 								<div class="container">
 									<header class="major">
-										<h2>Discretization, factor levels grouping and interaction screening in logistic regression</h2>
+										<h2>Photography</h2>
+										<h3>Guadeloupe</h3>
 									</header>
 
-<div w3-include-html="https://github.com/adimajo/glmdisc/blob/master/inst/doc/glmdisc.html"></div>
+							
 
-<script>
-function includeHTML() {
-  var z, i, elmnt, file, xhttp;
-  /*loop through a collection of all HTML elements:*/
-  z = document.getElementsByTagName("*");
-  for (i = 0; i < z.length; i++) {
-    elmnt = z[i];
-    /*search for elements with a certain atrribute:*/
-    file = elmnt.getAttribute("w3-include-html");
-    if (file) {
-      /*make an HTTP request using the attribute value as the file name:*/
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
-          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
-          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
-          /*remove the attribute, and call this function once more:*/
-          elmnt.removeAttribute("w3-include-html");
-          includeHTML();
-        }
-      } 
-      xhttp.open("GET", file, true);
-      xhttp.send();
-      /*exit the function:*/
-      return;
-    }
-  }
-}
-</script>
+					</div>
 
-<script>
-includeHTML();
-</script>
-
-
-
-
-
-								</div>
-							</section>
-
-							<section id="footer">
+				<!-- Footer -->
+					<section id="footer">
 						<div class="container">
 							<ul class="copyright">
 								<li>&copy; Adrien Ehrhardt. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
