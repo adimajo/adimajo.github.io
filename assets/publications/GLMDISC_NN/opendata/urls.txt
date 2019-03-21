@@ -1,0 +1,7 @@
+https://archive.ics.uci.edu/ml/datasets/Credit+Approval
+https://archive.ics.uci.edu/ml/datasets/Cylinder+Bands
+https://archive.ics.uci.edu/ml/datasets/Statlog+%28Australian+Credit+Approval%29
+https://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29
+https://archive.ics.uci.edu/ml/datasets/Statlog+%28Heart%29
+https://archive.ics.uci.edu/ml/datasets/Adult
+https://archive.ics.uci.edu/ml/datasets/Census-Income+%28KDD%29
