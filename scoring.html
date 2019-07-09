@@ -21,17 +21,18 @@
 				<header>
 					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
 					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
-					<p>PhD Student @Lille I University & @Inria<br />
+					<p>PhD Student @Lille University & @Inria<br />
 					in Machine Learning applied to Finance<br />
 					I also work for Crédit Agricole Consumer Finance</p>
 				</header>
 				<nav id="nav">
 					<ul>
-					        <li><a href="index.html" class="active">Home</a></li>
+					        <li><a href="index.html">Home</a></li>
 						<li><a href="cifre.html">Informations CIFRE</a></li>
-						<li><a href="scoring.html">Intro to Credit Scoring</a></li>
+						<li><a href="scoring.html" class="active">Introduction au Credit Scoring</a></li>
 						<li><a href="rejectinference.html">Reject Inference</a></li>                                                
-						<li><a href="discretization.html">Discretization</a></li>
+                        <li><a href="discretization.html">Discretization</a></li>
+                        <li><a href="teaching.html">Teaching</a></li>
 					</ul>
 				</nav>
 				<footer>
@@ -56,14 +57,781 @@
 							<section id="one">
 								<div class="container">
 									<header class="major">
-										<h2>Introduction to Credit Scoring</h2>
-										<p>Under construction</p>
-									</header>
+										<h2 id="chap1">Introduction au Credit Scoring</h2>
+                                        </header>
+                                        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+                                        <p>N.B.: ce post s’inspire librement de mon premier chapitre de thèse.</p>
+                                        <p>Ce post est destiné à poser les bases de l’apprentissage statistique dans le cadre des crédits à la consommation. On introduira dans une première partie la terminologie consacrée du crédit à la consommation avant de s’attarder plus en détails, dans une seconde partie, sur l’état de l’art industriel du <em>Credit Scoring</em> à travers une étude bibliographique et la pratique des institutions financières dont <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>. On clotûrera le post par une troisième partie : les maths qui justifient les pratiques décrites dans les deux premières parties.</p>
+                                        <h2 id="chap1:sec1">Le marché du crédit à la consommation : quels enjeux ?</h2>
+                                        <h3 id="quest-ce-quun-crédit-à-la-consommation">Qu’est-ce qu’un crédit à la consommation ?</h3>
+                                        <p>En pratique, on peut distinguer majoritairement trois produits de crédit à la consommation.</p>
+                                        <p>Le premier d’entre eux, le crédit classique, est le produit historique. De la même manière qu’un crédit immobilier, le client emprunte une somme fixe qui lui est attribuée au moment du financement et qu’il rembourse selon un échéancier défini à l’avance (taux et nombre de mensualités fixes). D’un point de vue statistique, le traitement est relativement simple : que ce soit à l’octroi, pour déterminer le risque du client, ou au cours de la vie du dossier, pour provisionner les pertes potentielles, tout est connu à l’avance. Il suffit en quelque sorte de vérifier le paiement de la mensualité à la date prévue. Il convient également de préciser que certains crédits classiques sont dits affectés, c’est-à-dire qu’ils financent un bien précis et identifié, de sorte que le prêt transite directement de l’organisme prêteur au vendeur (un concessionnaire par exemple). Par ailleurs, la mise en défaut du crédit entraîne généralement une procédure de recouvrement de la dette qui peut se solder, dans le cas d’un crédit affecté, par la récupération du bien par un huissier. Là encore, d’un point de vue statistique, il paraît indispensable de consigner les caractéristiques du bien sous-jacent afin d’intégrer sa valeur résiduelle récupérable en cas de défaut.</p>
+                                        <p>Le second produit, développé à partir de 1965 en France et ayant connu une forte croissance depuis <a href="#ducourant2009credit" class="citation" data-cites="ducourant2009credit">[25]</a> mais néanmoins bien moins répandu en Europe qu’aux Etats-Unis par exemple <a href="#credit_cards_country" class="citation" data-cites="credit_cards_country">[26]</a>, est le crédit renouvelable. Un capital dit accordé ou autorisé est attribué au demandeur qui peut utiliser tout ou partie de ce montant et le rembourse à un taux et par mensualités dépendants tous deux de la proportion du capital consommé. Au fur et à mesure du remboursement du capital emprunté, le capital “empruntable”, c’est-à-dire la différence entre le capital accordé et le capital emprunté à date, se reconstitue et de nouvelles utilisations sont possibles, toujours dans la limite du capital accordé au départ. D’un point de vue statistique à nouveau, plusieurs problèmes se posent du fait du caractère intrinsèquement aléatoire de l’utilisation ou non de tout ou partie de la ligne de crédit accordée. Plus précisément, ce produit présente un risque important porté par deux facteurs : premièrement, le taux élevé attire des clients risqués, au taux de défaut plus élevé que pour un crédit classique par exemple ; deuxièmement, ces crédits portent un risque dit de hors-bilan très fort, puisqu’à tout moment, l’ensemble des crédits accordés mais non utilisés et donc non comptabilisés “au bilan”, c’est-à-dire comme une dette du client envers l’établissement bancaire, peuvent être utilisés et faire défaut. La mauvaise quantification de ce risque est à présent reconnu comme un important catalyseur de la récente crise financière<a href="#karim2013off" class="citation" data-cites="karim2013off">[29]</a>.</p>
+                                        <p>Enfin, la <span data-acronym-label="location" data-acronym-form="singular+short">location</span> a récemment connu un essor important <a href="#peden_2018" class="citation" data-cites="peden_2018">[28]</a>. D’abord concentrée sur le secteur automobile, elle se développe actuellement pour les produits électroniques (smartphones notamment) et même plus récemment pour des produits plus insolites comme les matelas <a href="#dicharry_2017" class="citation" data-cites="dicharry_2017">[27]</a>. Comme le <span data-acronym-label="creditaffecte" data-acronym-form="singular+short">crédit affecté</span>, il est important de prendre en compte les données du bien loué afin d’évaluer le risque que porte ce produit, la difficulté supplémentaire reposant sur l’éventualité de l’exercice de l’hypothétique option d’achat.</p>
+                                        <p>De cette partie, deux considérations statistiques doivent retenir notre attention : d’abord, ces différents produits nécessitent des traitements différents dans la mesure où leur risque est intrinsèquement différent ; ensuite, les données disponibles pour chacun de ces produits diffèrent : par exemple, les données du produit financé ne sont disponibles que pour les crédits affectés et les <span data-acronym-label="location" data-acronym-form="plural+short">locations</span>.</p>
+                                        <h3 id="crédit-agricole-consumer-finance">Crédit Agricole Consumer Finance (CACF)</h3>
+                                        <p><span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> opère dans de nombreux pays. En France, c’est principalement à travers la marque Sofinco que sont commercialisés les crédits à la consommation pour lesquels il existe une relation directe entre <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> et le client (dite B2C), par exemple lorsqu’un demandeur se rend directement sur le site internet <a href="https://www.sofinco.fr">sofinco.fr</a>.</p>
+                                        <p>Par ailleurs, de nombreux crédits à la consommation sont distribués à travers un réseau de partenaires, qui jouent le rôle d’intermédiaires (on parle alors de B2B) : concessionnaires automobile, distributeurs d’électroménager, etc.</p>
+                                        <p>Enfin, <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> faisant partie du groupe Crédit Agricole, de nombreuses agences bancaires distribuent des crédits à la consommation à leur clientèle bancarisé, par l’intermédiaire des gestionnaires de compte.</p>
+                                        <p>Là encore, on constate que les spécificités des canaux de distribution des crédits impactent grandement la collecte des données et leur traitement statistique. En effet, les informations collectées sur le client, le produit et éventuellement l’apporteur d’affaires sont différentes selon le canal.</p>
+                                        <p>Dans la partie suivante, la méthodologie présentée est spécifique à <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> ; il pourra néanmoins être admis que, dans les grandes lignes, cette méthodologie est similaire à la concurrence d’une part, et à la pratique d’autres pays (européens du moins) puisque la législation sur la protection et le traitement des données est sensiblement similaire (du fait de l’entrée en vigueur récente de la GDPR) et le fait que les établissements bancaires possèdent généralement des filiales dans plusieurs pays d’Europe et y font appliquer la même méthodologie.</p>
+                                        <h2 id="chap1:sec2">Le <em>Credit Scoring</em> : état de l’art de la pratique industrielle</h2>
+                                        <h3 id="collecte-des-données">Collecte des données</h3>
+                                        <p>La partie précédente a mis en exergue la pluralité des sources de données : Crédit Agricole, à travers sa filiale dédiée aux crédits à la consommation Crédit Agricole Consumer Finance, finance des crédits en France à travers sa marque Sofinco (B2C), ou en magasins / concessions chez des partenaires (B2B) où les données du demandeur de crédit sont collectées. La figure <a href="#fig:souscription" data-reference-type="ref" data-reference="fig:souscription">[1]</a> présente par exemple le formulaire de souscription en vigueur pour un crédit automobile auprès de Sofinco <em>via</em> son site web. Dans cet exemple, des données socio-démographiques et du véhicule à financer sont demandées. Pour un client, elles sont notées <span class="math inline">\(\boldsymbol{x} = (x_j)_1^d\)</span> dans la suite (on reviendra de manière plus formelle sur l’ensemble des notations introduites pour les besoins du cas d’application en fin de chapitre). Ces informations sont de nature continue, c’est-à-dire <span class="math inline">\(x_j \in \mathbb{R}\(</span>, ou catégorielle, c’est-à-dire que l’on se donne, à titre d’exemple, un encodage “Métier = technicien” <span class="math inline">\(\rightarrow x_j = 1\)</span>, “Métier = ouvrier” <span class="math inline">\(\rightarrow x_j = 2\)</span>, …de telle sorte que l’on considère que <span class="math inline">\(x_j \in \mathbb{N}_{o_j} = \{1, \dots,l_j\}\)</span>, où <span class="math inline">\(l_j\)</span> représente le nombre de modalités de <span class="math inline"><em>x</em><sub><em>j</em></sub></span> et sans notion d’ordre.</p>
+<!--                                        <figure>-->
+<!--                                            <img src="figures/chapitre1/casa.png" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:2cm" /><figcaption>Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits.<span label="fig:marque"></span></figcaption>-->
+<!--                                        </figure>-->
+<!--                                        -->
+<!--                                        -->
+<!--                                        <figure>-->
+<!--                                            <img src="figures/chapitre1/logo.png" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:5cm" /><figcaption>Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits.<span label="fig:marque"></span></figcaption>-->
+<!--                                        </figure>-->
 
+                                        
+                                        
+<!--                                        <p><img src="figures/chapitre1/sofinco.png" title="fig:" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:3.5cm" /> <img src="figures/chapitre1/client.png" title="fig:" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:1.1cm" /></p>-->
+<!--                                        <p><span>4</span></p>-->
+<!--                                        <figure>-->
+<!--                                            <img src="figures/chapitre1/orchestra.jpg" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:2cm" /><figcaption>Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits.<span label="fig:marque"></span></figcaption>-->
+<!--                                        </figure>-->
+<!--                                        -->
+<!--                                        <figure>-->
+<!--                                            <img src="figures/chapitre1/darty.png" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:1cm" /><figcaption>Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits.<span label="fig:marque"></span></figcaption>-->
+<!--                                        </figure>-->
+<!--                                        -->
+<!--                                        <figure>-->
+<!--                                            <img src="figures/chapitre1/redoute.png" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:1.5cm" /><figcaption>Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits.<span label="fig:marque"></span></figcaption>-->
+<!--                                        </figure>-->
+<!--                                        -->
+<!--                                        <p><img src="figures/chapitre1/fnac.png" title="fig:" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:1cm" /> <img src="figures/chapitre1/client.png" title="fig:" alt="Schéma des interactions entre les entreprises / marques et la collecte de demandes de crédits." id="fig:marque" style="width:1.1cm" /></p>-->
+                                        <figure>
+                                            <img src="figures/chapitre1/souscription.png" alt="[1] Formulaire de souscription d’un crédit automobile Sofinco." style="width:15cm" /><figcaption><span id="fig:souscription" label="fig:souscription">[1]</span> Formulaire de souscription d’un crédit automobile Sofinco.</figcaption>
+                                        </figure>
+                                        <p>On considère que ces caractéristiques sont une réalisation du vecteur aléatoire de design <span class="math inline">\(\boldsymbol{x} = (X_j)_1^d \in \mathcal{X}\)</span> sur un espace probabilisé <span class="math inline">(<em>Ω</em>, 𝒜, ℙ)</span>, que l’on observe sur l’ensemble des <span class="math inline"><em>n</em></span> demandeurs de crédit à la consommation pour former, dans la littérature consacrée au <em>machine learning</em>, la matrice de design <span class="math inline">\(\boldsymbol{\mathbf{x}} = (x_{i,j})_{1 \leq i \leq n, 1 \leq j \leq d}\)</span>.</p>
+                                        <p>A ce stade, deux remarques importantes doivent être faites : d’abord, une partie de ces caractéristiques peut être absente. Par ailleurs, elles sont à ce stade déclaratives (des contrôles supplémentaires peuvent avoir lieu en fonction du montant demandé par exemple), et donc associées à un degré de certitude variable, la tentation étant grande, afin de s’assurer de l’attribution du crédit, de déformer la réalité de ses charges, ses revenus, etc. En synthèse, le tableau <a href="#tab:design" data-reference-type="ref" data-reference="tab:design">[1]</a> présente un exemple simplifié de matrice de design en <em>Credit Scoring</em>. En pratique un tel tableau structuré est directement mis à disposition des statisticiens de <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> à travers le logiciel de traitement statistique SAS.</p>
+                                        
+                                        <table>
+                                            <caption><span id="tab:design" label="tab:design">[1]</span> Exemple simplifié de caractéristiques de demandeurs de crédit : présence de valeurs manquantes ou extrêmes.</caption>
+                                            <thead>
+                                                <tr class="header">
+                                                    <th style="text-align: left;">Travail</th>
+                                                    <th style="text-align: left;">Logement</th>
+                                                    <th style="text-align: left;">Durée d’emploi</th>
+                                                    <th style="text-align: left;">Enfants</th>
+                                                    <th style="text-align: left;">Statut familial</th>
+                                                    <th style="text-align: left;">Salaire</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">Ouvrier qualifié</td>
+                                                    <td style="text-align: left;">Propriétaire</td>
+                                                    <td style="text-align: left;">20</td>
+                                                    <td style="text-align: left;">3</td>
+                                                    <td style="text-align: left;">Veuf</td>
+                                                    <td style="text-align: left;">30 000</td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">Technicien</td>
+                                                    <td style="text-align: left;">En location</td>
+                                                    <td style="text-align: left;">Manquant</td>
+                                                    <td style="text-align: left;">1</td>
+                                                    <td style="text-align: left;">Concubinage</td>
+                                                    <td style="text-align: left;"><span>1700</span></td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">Technicien spécialisé</td>
+                                                    <td style="text-align: left;">Accédant</td>
+                                                    <td style="text-align: left;">5</td>
+                                                    <td style="text-align: left;">0</td>
+                                                    <td style="text-align: left;">Divorcé</td>
+                                                    <td style="text-align: left;"><span>4000</span></td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">Cadre</td>
+                                                    <td style="text-align: left;">Par l’employeur</td>
+                                                    <td style="text-align: left;">8</td>
+                                                    <td style="text-align: left;">2</td>
+                                                    <td style="text-align: left;">Célibataire</td>
+                                                    <td style="text-align: left;"><span>2700</span></td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">Employé</td>
+                                                    <td style="text-align: left;">En location</td>
+                                                    <td style="text-align: left;">12</td>
+                                                    <td style="text-align: left;">2</td>
+                                                    <td style="text-align: left;">Marié</td>
+                                                    <td style="text-align: left;"><span>1400</span></td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">Ouvrier</td>
+                                                    <td style="text-align: left;">Par la famille</td>
+                                                    <td style="text-align: left;">2</td>
+                                                    <td style="text-align: left;">0</td>
+                                                    <td style="text-align: left;">Célibataire</td>
+                                                    <td style="text-align: left;"><span>1200</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <h3 id="subsec:segmentation">Préparation des données et segmentation</h3>
+                                        <p>Le tableau <a href="#tab:design" data-reference-type="ref" data-reference="tab:design">[1]</a> fait apparaître deux problèmes bien connus en statistique : la gestion des observations manquantes et celle des valeurs extrêmes (<em>outliers</em>).</p>
+                                        <p>Concernant les observations manquantes, deux stratégies différentes peuvent être employées. <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> réalise une “segmentation” de sa clientèle, de sorte que, à titre d’exemple, plusieurs modèles statistiques spécialisés à un sous-ensemble de la population totale peuvent être employés, chacun d’eux bénéficiant alors de données complètes. Le processus de choix des “segments”, <em>i.e.</em> la partition des lignes de <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> sur lesquels développer des modèles séparés, est basé soit sur l’histoire de l’entreprise (par exemple, un modèle spécifique aux crédits automobiles a pu être développé au début de la commercialisation de ce produit), soit sur des heuristiques très simples.</p>
+                                        <p>L’autre pré-traitement répandu dans le milieu du <em>Credit Scoring</em> pour faire face aux données manquantes et aux valeurs extrêmes est la discrétisation (pour les variables continues uniquement). Cela consiste à transformer une variable continue dont certaines observations sont manquantes en une variable catégorielle dont chaque modalité correspond à un intervalle de la variable continue d’origine et / ou au fait que l’observation d’origine était manquante. Un exemple de discrétisation de la variable “Âge du client” est visible en figure <a href="#tab:disc_ex" data-reference-type="ref" data-reference="tab:disc_ex">[2]</a> ; ainsi, le fait que l’observation soit manquante est considérée comme une information à part entière et les valeurs extrêmes sont regroupées dans le dernier intervalle.</p>
+                                        
+                                        <table>
+                                            <caption><span id="tab:disc_ex" label="tab:disc_ex">[2]</span> Exemple de variable continue discrétisée.</caption>
+                                            <thead>
+                                                <tr class="header">
+                                                    <th style="text-align: left;">Âge du client</th>
+                                                    <th style="text-align: left;">18</th>
+                                                    <th style="text-align: left;">Manquant</th>
+                                                    <th style="text-align: left;">47</th>
+                                                    <th style="text-align: left;">25</th>
+                                                    <th style="text-align: left;">35</th>
+                                                    <th style="text-align: left;">61</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">Âge discrétisé</td>
+                                                    <td style="text-align: left;">18-30 &amp; Manquant</td>
+                                                    <td style="text-align: left;">18-30 &amp; Manquant</td>
+                                                    <td style="text-align: left;">45-<span class="math inline">∞</span></td>
+                                                    <td style="text-align: left;">18-30</td>
+                                                    <td style="text-align: left;">30-45</td>
+                                                    <td style="text-align: left;">45-<span class="math inline">∞</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <p>À présent, on dispose de données rendues complètes sur l’ensemble des demandeurs de crédit et l’on souhaite prédire le niveau de risque présenté par un nouveau demandeur. Il convient donc dans un premier temps de quantifier le risque de chaque échantillon de la matrice de design <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>.</p>
+                                        <h3 id="subsec:critere">Définir les “bons” et “mauvais” payeurs</h3>
+                                        <p>L’institut financier emprunte de l’argent sur les marchés à un taux relativement faible et le redistribue aux demandeurs de crédit qu’il juge profitables, c’est-à-dire susceptible de rembourser cette dette. Il y a donc un système d’acceptation, reposant sur un ensemble de règles automatiques et potentiellement une étude humaine. On considère que le mécanisme qui conduit au financement <em>in fine</em> de la demande de crédit est aléatoire, noté <span class="math inline"><em>Z</em></span> et prenant les valeurs f (pour les clients dont la demande est financée) et nf (pour les non-financés).</p>
+                                        <p>Il convient de noter ici que les différents processus qui conduisent à un non financement du dossier sont très nombreux : interruption / rétractation du demandeur, refus automatique (endettement, <span data-acronym-label="score" data-acronym-form="singular+short">score</span> existant, …) ou refus d’un conseiller clientèle.</p>
+                                        <p>En essence, il est souhaitable de mesurer la profitabilité de chaque crédit, par exemple en actualisant les remboursements et les pertes générés par chaque client à la date de déblocage des fonds, et en déduisant l’ensemble des coûts (financement, traitement, recouvrement, …). En pratique, peu d’institutions procèdent ainsi malgré quelques travaux récents <a href="#finlay2010credit" class="citation" data-cites="finlay2010credit">[21]</a>. Par ailleurs, les caractéristiques du client sont elles-mêmes évolutives : les informations collectées à <span class="math inline"><em>t</em> = 0</span> au moment de la demande peuvent avoir changé au moment du financement du bien à <span class="math inline"><em>t</em> = fin</span> (qui peut intervenir plusieurs mois après pour un véhicule sur commande par exemple), tout comme les moments de vie ultérieurs éventuels comme les divorces, les pertes d’emploi, …qui ne peuvent être collectées ultérieurement par les organismes financiers, comme schématisé sur la figure <a href="#fig:moments" data-reference-type="ref" data-reference="fig:moments">[2]</a>.</p>
+                                        <p>En conséquence, on sélectionne généralement 12 mois de dossiers de demandes de crédit pour s’affranchir de phénomènes de saisonnalité et on observe le mois suivant la date de financement de chaque dossier si la mensualité a été remboursée. On répète le processus jusqu’à un horizon de 12 à 24 mois selon la disponibilité des données. On dispose alors pour chaque client d’une série temporelle qui indique si le remboursement mensuel a été effectué ou non. On cherche ensuite à se ramener à une seule variable aléatoire cible <span class="math inline">\(Y \in \{0,1\}\)</span> qualifiant un client “bon” par <span class="math inline"><em>Y</em> = 1</span> ou “mauvais” par <span class="math inline"><em>Y</em> = 0</span>. L’heuristique actuellement utilisée est la suivante :</p>
+                                        <ul>
+                                            <li><p>Pour un ensemble d’horizons <span class="math inline"><em>T</em> ∈ {6, 12, 18, 24}</span> mois et d’impayés consécutifs <span class="math inline"><em>I</em> ∈ {1, …, 4}</span> ,</p>
+                                                <ul>
+                                                    <li><p>Tracer le graphique d’“horizon du risque” : la proportion de clients ayant <span class="math inline"><em>I</em></span> impayés consécutifs <span class="math inline"><em>T</em></span> mois après leur financement, dont un exemple est donné en figure <a href="#fig:courbe_horizon" data-reference-type="ref" data-reference="fig:courbe_horizon">[3]</a> pour <span class="math inline"><em>I</em> = 2</span>.</p>
+                                                        <p>On cherche un point d’inflexion sur cette courbe, qui traduirait le fait qu’au-delà d’un certain horizon <span class="math inline"><em>T</em></span>, la proportion de dossiers “mauvais” n’évolue plus et l’on considère que tous les “mauvais” clients sont déjà identifiés.</p></li>
+                                                    <li><p>Construire le tableau des <em>Roll Rates</em>, dont un exemple est donné en tableau <a href="#tab:impayes" data-reference-type="ref" data-reference="tab:impayes">[3]</a> pour <span class="math inline"><em>T</em> = 12</span>.</p>
+                                                        <p>On cherche le nombre d’impayés consécutifs <span class="math inline"><em>I</em></span> au-delà duquel la proportion de dossiers se dégradant (et donc fortement susceptibles de générer des pertes) est “importante”, généralement au-delà de 50 %.</p></li>
+                                                </ul></li>
+                                            <li><p>Choisir le couple <span class="math inline">(<em>T</em>, <em>I</em>)</span> qui répond au mieux aux critères ci-dessus et permet d’avoir un nombre significatif de dossiers “mauvais”. Il faut garder à l’esprit que plus l’on choisit un horizon <span class="math inline"><em>T</em></span> faible et / ou un nombre élevé d’impayés consécutifs <span class="math inline"><em>I</em></span>, plus la proportion <span class="math inline"><em>π̂</em><sub>0</sub></span> (l’estimateur de la moyenne pour <span class="math inline"><em>π</em><sub><em>i</em></sub> = <em>p</em>(<em>Y</em> = <em>i</em>)</span>) de dossiers “mauvais” par rapport aux dossiers “bons” devient faible. Or, on veut éviter au maximum les nombreux problèmes que génèrent des classes déséquilibrées en classification supervisée <a href="#sun2009classification" class="citation" data-cites="sun2009classification">[16]</a>.</p></li>
+                                        </ul>
+                                        
+                                        <figure>
+                                            <img src="figures/chapitre1/courbe_risque2.png" alt="[fig:courbe_horizon] Exemple de courbe d’horizon risque : proportion de “mauvais” clients (2 impayés consécutifs) en fonction du nombre de mensualités observées." style="width:10cm" /><figcaption><span id="fig:courbe_horizon" label="fig:courbe_horizon">[3]</span> Exemple de courbe d’horizon risque : proportion de “mauvais” clients (2 impayés consécutifs) en fonction du nombre de mensualités observées.</figcaption>
+                                        </figure>
+                                        
+                                        <table>
+                                            <caption><span id="tab:impayes" label="tab:impayes">[3]</span> Exemple d’évolution de dossiers à différents niveaux d’impayés.</caption>
+                                            <thead>
+                                                <tr class="header">
+                                                    <th style="text-align: left;">Impayés consécutifs</th>
+                                                    <th style="text-align: left;">Amélioration</th>
+                                                    <th style="text-align: left;">Stabilité</th>
+                                                    <th style="text-align: left;">Dégradation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">0</td>
+                                                    <td style="text-align: left;">0 %</td>
+                                                    <td style="text-align: left;">95 %</td>
+                                                    <td style="text-align: left;">5 %</td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">1</td>
+                                                    <td style="text-align: left;">60 %</td>
+                                                    <td style="text-align: left;">10 %</td>
+                                                    <td style="text-align: left;">30 %</td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">2</td>
+                                                    <td style="text-align: left;">10%</td>
+                                                    <td style="text-align: left;">30 %</td>
+                                                    <td style="text-align: left;"><span style="color: red">60 %</span></td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">3</td>
+                                                    <td style="text-align: left;">5%</td>
+                                                    <td style="text-align: left;">25 %</td>
+                                                    <td style="text-align: left;"><span>70 %</span></td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: left;">4</td>
+                                                    <td style="text-align: left;">5%</td>
+                                                    <td style="text-align: left;">15 %</td>
+                                                    <td style="text-align: left;"><span>80 %</span></td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: left;">5</td>
+                                                    <td style="text-align: left;">5%</td>
+                                                    <td style="text-align: left;">5 %</td>
+                                                    <td style="text-align: left;"><span>90 %</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <p>Pour des raisons pratiques et historiques, on choisit généralement <span class="math inline"><em>T</em> = 12</span> mois et <span class="math inline"><em>I</em> = 2</span> impayés consécutifs. On considère donc comme “mauvais” (<span class="math inline"><em>Y</em> = 0</span>) les dossiers financés ayant eu au moins 2 mensualités impayées consécutives dans les 12 mois qui ont suivi leur financement, comme “bons” (<span class="math inline"><em>Y</em> = 1</span>) les dossiers n’ayant pas eu d’impayés, comme “indéterminés” les dossiers ayant eu 1 impayé qui sont exclus de la modélisation, et on exclut également tous les dossiers non financés (<span class="math inline">\(Z=\text{nf}\)</span>). On a alors le vecteur de réponses <span class="math inline">\(\boldsymbol{\mathbf{y}}\)</span> dont un exemple est donné en tableau <a href="#tab:rep_ex" data-reference-type="ref" data-reference="tab:rep_ex">[4]</a>.</p>
+                                        
+                                        <table>
+                                            <caption><span id="tab:rep_ex" label="tab:rep_ex">[4]</span> Exemple de vecteur <span class="math inline">\(\boldsymbol{\mathbf{y}}\)</span> de qualification du risque des clients.</caption>
+                                            <thead>
+                                                <tr class="header">
+                                                    <th style="text-align: center;"><span class="math inline"><em>y</em></span></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="odd">
+                                                    <td style="text-align: center;">1</td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: center;">Manquant - Non-financé</td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: center;">0</td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: center;">Manquant - Indéterminé</td>
+                                                </tr>
+                                                <tr class="odd">
+                                                    <td style="text-align: center;">0</td>
+                                                </tr>
+                                                <tr class="even">
+                                                    <td style="text-align: center;">1</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <p>On en conclut que la performance de remboursement n’est observable que pour les clients financés non indéterminés, que l’on va assimiler dans la suite à ceux pour lesquels <span class="math inline">\(Z=\text{f}\)</span>. Toujours est-il qu’à présent, on dispose de données <span class="math inline">\((\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})\)</span> complètes grâce auxquelles on souhaite apprendre un <span data-acronym-label="score" data-acronym-form="singular+short">score</span> qualifiant la qualité des emprunteurs, et associé à un cutoff produisant une fonction de classification binaire discernant, parmi les futurs demandeurs de crédit, les “bons” des “mauvais” clients.</p>
+                                        <h3 id="subsec:apprentissage">L’apprentissage d’un <span data-acronym-label="score" data-acronym-form="singular+short">score</span></h3>
+                                        <p>Malgré l’existence de nombreux modèles statistiques permettant de prédire <span class="math inline">\(Y\)</span> connaissant les caractéristiques <span class="math inline">\(\boldsymbol{x}\)</span> d’un client et que nous discuterons en partie <a href="#chap1:sec3" data-reference-type="ref" data-reference="chap1:sec3">1.3</a>, la régression logistique est très largement utilisée en <em>Credit Scoring</em> <a href="#thomas2000survey" class="citation" data-cites="thomas2000survey">[20]</a>. Plusieurs travaux empiriques ont suggéré que du fait du faible nombre de covariables et de classes très mélangées (en particulier, absence de frontière de séparation linéaire entre “bons” et “mauvais” clients), aucun autre modèle de classification supervisée ne produit de résultats significativement supérieurs à la régression logistique sur les données à disposition de leurs auteurs respectifs (se référer par exemple à <a href="#hand1997statistical" class="citation" data-cites="hand1997statistical">[23]<a href="#baesens2003benchmarking" class="citation" data-cites="baesens2003benchmarking">[17]<a href="#brown2012experimental" class="citation" data-cites="brown2012experimental">[18]</a>).</p>
+                                        <p>Le modèle de régression logistique, contrairement à ce que son nom suggère, est un modèle de classification qui impose une structure particulière de loi de probabilité d’une variable aléatoire cible binaire <span class="math inline">\(Y\)</span> conditionnellement à des covariables <span class="math inline">\(\boldsymbol{x} \in \mathcal{X}=\mathbb{R}^d\)</span> donnée par : <br /><span class="math display">$$\label{eq:logit}
+                                            \text{logit}[p(Y=1 | \boldsymbol{x}=\boldsymbol{x}, \boldsymbol{\theta})] = \ln \frac{p(Y=1 | \boldsymbol{x}=\boldsymbol{x}, \boldsymbol{\theta})}{1-p(Y=1 | \boldsymbol{x}=\boldsymbol{x}, \boldsymbol{\theta})} = (1,\boldsymbol{x})' \boldsymbol{\theta}.$$</span><br /> Le vecteur <span class="math inline">\(\boldsymbol{\theta} = (\theta_0,\dots,\theta_d) \in \Theta = \mathbb{R}^{d+1}\)</span> est appelé paramètre. Le coefficient <span class="math inline"><em>θ</em><sub>0</sub></span> définit le biais, c’est-à-dire <span class="math inline">\(\text{logit}[p(Y=1 | \boldsymbol{x}=\boldsymbol{0}, \boldsymbol{\theta})]\)</span>. Cette relation est ensuite inversée afin d’obtenir la probabilité d’être “bon” sachant les caractéristiques d’un client et le paramètre <span class="math inline">\(\boldsymbol{\theta}\)</span> : <br /><span class="math display">$$p(Y=1 | \boldsymbol{x}=\boldsymbol{x}, \boldsymbol{\theta}) = \frac{1}{1+\exp(-(1,\boldsymbol{x})' \boldsymbol{\theta})},$$</span><br /> et dont des exemples de courbe sont donnés en figure <a href="#fig:logit" data-reference-type="ref" data-reference="fig:logit">[4]</a>.</p>
+                                        <figure>
+                                            <img src="figures/chapitre1/fig_logit.png" alt="[4] Deux exemples de courbes logistiques à une variable explicative sans paramètre de biais." style="width:15cm" /><figcaption><span id="fig:logit" label="fig:logit">[4]</span> Deux exemples de courbes logistiques à une variable explicative sans paramètre de biais.</figcaption>
+                                        </figure>
 
+                                        <p>On peut facilement étendre ce modèle aux variables catégorielles <span class="math inline">\(X_j \in \mathbb{N}_{o_j}\)</span> en procédant à un encodage <em>one-hot</em>, c’est-à-dire en créant une matrice dite “disjonctive” à <span class="math inline"><em>i</em></span> lignes (correspondant toujours à chaque individu <span class="math inline">1 ≤ <em>i</em> ≤ <em>n</em></span>) et <span class="math inline">\(l_j\)</span> colonnes binaires (correspondant respectivement à la présence ou l’absence de chaque modalité). À l’indice <span class="math inline">\((i, k)\)</span> de cette matrice, on trouve la valeur 1 si <span class="math inline">\(x_{i,j} = k\)</span>, pour toute modalité <span class="math inline">\(1 \leq k \leq l_j\)</span>, 0 sinon. Par exemple pour <span class="math inline">\(l_j=3\)</span>, un encodage possible est : <br /><span class="math display">$$\left( \begin{array}{c} 1 \\ 2 \\ 3 \end{array} \right) \to \left( \begin{array}{ccc} 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{array} \right).$$</span><br /> Cette pratique conduit cependant à une sur-paramétrisation : la somme des colonnes pour chaque ligne vaut 1 et la matrice de design, complétée d’une première colonne de <span class="math inline">1</span> pour le terme d’intercept, n’est alors pas de plein-rang, ce qui pose un problème pour l’estimation de <span class="math inline">\(\boldsymbol{\theta}\)</span> comme nous le verrons en partie <a href="#chap1:sec3" data-reference-type="ref" data-reference="chap1:sec3">1.3</a> ; il faut donc “supprimer” une colonne en considérant une modalité dite de référence (<em>i.e.</em> pour laquelle le coefficient est nul). Cet encodage est implicite dans de nombreux logiciels statistiques, si bien que l’on notera les coefficients de régression logistique associés à chaque valeur d’une variable catégorielle <span class="math inline">\(X_j\)</span> en exposant : <span class="math inline">\(\theta_j^{1},\dots,\theta_j^{l_j}\)</span>. On considérera la dernière modalité comme référence, d’où <span class="math inline">\(\theta_j^{l_j} = 0\)</span>.</p>
+                                        <p>En fonction du risque que l’institut financier est prêt à prendre, on décide d’un <span data-acronym-label="cut" data-acronym-form="singular+short">cut</span>, c’est-à-dire d’une probabilité de défaut au-delà de laquelle on refuse la demande de crédit. On désigne traditionnellement par <span data-acronym-label="score" data-acronym-form="singular+short">score</span> la fonction <span class="math inline">\(S(\cdot,\boldsymbol{\theta}): \boldsymbol{x} \mapsto (1,\boldsymbol{x})' \boldsymbol{\theta}\)</span>.</p>
+                                        <p>La question du support de <span class="math inline">\(\boldsymbol{\theta}\)</span>, <em>i.e.</em> de ses composantes non nulles, est un problème plus connu sous le nom de “sélection de variables” en statistiques comme en <em>machine learning</em>. Un coefficient nul témoigne du fait que la variable associée <span class="math inline">\(X_j\)</span>, conditionnellement aux autres variables que l’on notera <span class="math inline">\(\boldsymbol{X}_{-\{j\}}\)</span> dans la suite, ne permet pas d’expliquer <span class="math inline">\(Y\)</span>. En industrie, il est courant de commencer par sélectionner les variables dont la corrélation avec la variable cible est jugée suffisante. Cette technique univariée ne permet pas de rendre compte de phénomènes multivariées comme la redondance d’information entre covariables ou, à l’inverse, la qualité prédictive d’une variable dont la corrélation avec la cible peut être faible mais qui apporterait une information conditionnellement aux autres variables explicatives. La communauté statistique a donc développé des outils spécifiques à cette question que l’on développera, avec les fondements théoriques des modèles paramétriques comme la régression logistique, en partie <a href="#chap1:sec3" data-reference-type="ref" data-reference="chap1:sec3">1.3</a>.</p>
+                                        <h3 id="subsec:gini">La métrique de performance</h3>
+                                        <p>La métrique utilisée pour comparer la qualité de <span data-acronym-label="score" data-acronym-form="plural+short">scores</span> (le score ancien et un nouveau score proposé par exemple) est traditionnellement l’indice de Gini, qui est en fait directement lié à l’aire sous la courbe (AUC) ROC. Cette courbe représente la sensibilité d’un classificateur binaire (<em>i.e.</em> la proportion de “bons” clients classés comme “bons”) en fonction de son antispécificité (<span class="math inline">1−</span> la spécificité, <em>i.e.</em> la proportion de “mauvais” clients classés comme “bons”). L’AUC s’interprète de plusieurs manières, dont par exemple la probabilité qu’un “bon” (tiré aléatoirement parmi les “bons”) ait un score plus élevé qu’un “mauvais” (tiré aléatoirement parmi les “mauvais”). Un exemple de courbe ROC est donné en figure <a href="#fig:ROC" data-reference-type="ref" data-reference="fig:ROC">[5]</a>.</p>
+                                        <figure>
+                                            <img src="figures/chapitre1/fig_ROC.png" alt="[5] Exemple de courbe ROC sur un petit jeu de données simulées et valeur de l’AUC correspondante." style="width:15cm" /><figcaption><span id="fig:ROC" label="fig:ROC">[5]</span> Exemple de courbe ROC sur un petit jeu de données simulées et valeur de l’AUC correspondante.</figcaption>
+                                        </figure>
+                                        
+                                        <p>Il faut remarquer à ce stade que ce critère est à la fois différent de celui optimisé par la régression logistique, que nous verrons en détails dans la partie suivante, et de l’objectif industriel de maximiser le profit, soit directement par l’usage de variables de nature financière <a href="#finlay2010credit" class="citation" data-cites="finlay2010credit">[21]</a>, soit indirectement par le choix d’un <span data-acronym-label="cut" data-acronym-form="singular+short">cut</span> approprié. Néanmoins, une étude empirique <a href="#finlay2009we" class="citation" data-cites="finlay2009we">[22]</a> montre que la maximisation de ces différents objectifs est <em>a priori</em> relativement équivalente, la qualité prédictive de différents modèles maximisant chacun de ces objectifs étant similaire sur le jeu de données considéré par l’auteur. On suppose cette équivalence dans la suite et sauf indication contraire, les résultats sur données réelles sont donnés en Gini, dont on donnera un intervalle de confiance selon la méthode développée dans <a href="#sun2014fast" class="citation" data-cites="sun2014fast">[15]</a>.</p>
+                                        <h3 id="suivi-temporel-de-la-performance-du-score">Suivi temporel de la performance du <span data-acronym-label="score" data-acronym-form="singular+short">score</span></h3>
+                                        <p>Les changements de contexte économique, agissant à la fois sur le vecteur de variables explicatives <span class="math inline">\(\boldsymbol{x} = (x_1, \dots, x_d)\)</span> défini en section <a href="#subsec:apprentissage" data-reference-type="ref" data-reference="subsec:apprentissage">1.2.4</a> et représentant les caractéristiques du client (l’inflation ou le passage à l’euro impacte l’échelle des salaires par exemple) et la variable cible (la récession entraîne l’augmentation des impayés), la performance du <span data-acronym-label="score" data-acronym-form="singular+short">score</span>, selon la métrique précédemment décrite, évolue au cours du temps. Naturellement, cette évolution est la plupart du temps à la baisse puisque la fonction de <span data-acronym-label="score" data-acronym-form="singular+short">score</span> apprise s’éloigne de la vérité. Par ailleurs, comme vu en partie <a href="#subsec:critere" data-reference-type="ref" data-reference="subsec:critere">1.2.3</a>, l’apprentissage du <span data-acronym-label="score" data-acronym-form="singular+short">score</span> nécessite environ 30 mois de recul, auxquels peuvent s’ajouter un délai de mise en production. Dès lors, le statisticien voit émerger deux questions : premièrement, quels sont les “signes” indiquant qu’une refonte, c’est-à-dire la mise en place d’un nouveau modèle prédictif, est nécessaire ? Deuxièmement, est-il possible de construire un modèle prédictif “robuste” à ce problème, communément désigné par <em>population drift</em> dans la littérature <a href="#hand1997statistical" class="citation" data-cites="hand1997statistical">[23]</a> ?</p>
+                                        <p>En pratique, seules la baisse de performance d’un <span data-acronym-label="score" data-acronym-form="singular+short">score</span> et / ou son ancienneté importante (5 à 10 ans) conduisent à sa refonte et l’aspect temporel n’est pas pris en compte dans la construction ou l’utilisation des <span data-acronym-label="score" data-acronym-form="plural+short">scores</span>.</p>
+                                        
+                                        <p>En conclusion, le <em>Credit Scoring</em> repose sur des bases statistiques qui soulèvent de nombreuses questions, dont certaines trouvent dans le milieu industriel une réponse <em>ad hoc</em>, très empirique, qu’il convient de formaliser. La partie suivante plonge l’apprentissage du <span data-acronym-label="score" data-acronym-form="singular+short">score</span> dans le contexte de l’apprentissage statistique.</p>
+                                        <h2 id="chap1:sec3">Apprentissage statistique : fondements théoriques du <em>Credit Scoring</em></h2>
+                                        <p>Après cette mise en situation industrielle qui aura mis en avant les approximations statistiques et autres heuristiques actuellement utilisées dans le milieu bancaire, il convient de formaliser les concepts introduits en partie <a href="#chap1:sec2" data-reference-type="ref" data-reference="chap1:sec2">1.2</a>. Cette partie s’inspire librement d’introductions de plusieurs ouvrages, dont le bien connu  <a href="#friedman2001elements" class="citation" data-cites="friedman2001elements">[24]</a>.</p>
+                                        <h3 id="mécanisme-de-génération-des-données">Mécanisme de génération des données</h3>
+                                        <p>On rappelle brièvement les notations introduites dans la partie précédente : les clients ont <span class="math inline"><em>d</em></span> caractéristiques indicées par <span class="math inline"><em>j</em> = 1, …, <em>d</em></span> dans la suite du manuscrit. Une caractéristique <span class="math inline">\(X_j\)</span> est une variable aléatoire dont on notera la réalisation <span class="math inline">\(x_j\)</span>. L’aggrégation de toutes ces caractéristiques sous la forme d’un vecteur aléatoire est distinguée, comme les autres vecteurs du manuscrit, par une police grasse, en l’occurence <span class="math inline">\(\boldsymbol{x}\)</span>. Ce vecteur appartient à l’espace <span class="math inline">\(\mathcal{X}\)</span> qui est un produit de <span class="math inline">\(\mathbb{R}\)</span> (variables continues) ou <span class="math inline">\(\mathbb{N}_{o_j}\)</span> (variables catégorielles à <span class="math inline">\(l_j\)</span> modalités). La variable aléatoire binaire à prédire, le caractère bon / mauvais d’un client, et sa réalisation sont notées respectivement <span class="math inline">\(Y \in \{0,1\}\)</span> et <span class="math inline">\(Y\)</span>. Le même raisonnement s’applique à la variable aléatoire binaire de financement / non financement et sa réalisation, notées respectivement <span class="math inline">\(z \in \{\text{f},\text{nf}\}\)</span> et <span class="math inline">\(z\)</span>. Enfin, on dispose d’un <span class="math inline"><em>n</em></span>-échantillon <span class="math inline">\(\mathcal{T} = (\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}},\mathbf{\boldsymbol{z}})\)</span>, où, <span class="math inline">\(\boldsymbol{\mathbf{x}} = (\boldsymbol{x}_i)_1^n\)</span>, <span class="math inline">\(\boldsymbol{\mathbf{y}} = (Y_i)_1^n\)</span> et <span class="math inline">\(\mathbf{\boldsymbol{z}} = (z_i)_1^n\)</span>.</p>
+                                        <p>On note <span class="math inline"><em>p</em></span> la <span data-acronym-label="pdf" data-acronym-form="singular+short">pdf</span> de <span class="math inline">\((\boldsymbol{x},Y)\)</span> et <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> la loi de probabilité de <span class="math inline"><em>Y</em></span> sachant <span class="math inline">\(\boldsymbol{x}\)</span>, qui s’obtient à partir de <span class="math inline"><em>p</em></span> et de la relation de Bayes: <br /><span class="math display">$$p(Y | \boldsymbol{x}) = \frac{p(\boldsymbol{x},y)}{p(\boldsymbol{x})},$$</span><br /> que l’on désignera par “oracle” dans la suite. On aimerait “retrouver” cette loi par calcul, or elle est inconnue (si elle était connue, le problème serait résolu !), et on a uniquement accès au <span class="math inline"><em>n</em></span>-échantillon <span class="math inline">\(\mathcal{T}\)</span>.</p>
+                                        <p>Imaginons un instant que <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> soit connu. Une première approche consiste en quelque sorte à exprimer notre connaissance de cette loi en la forçant à appartenir à un modèle (ou à une famille de modèles). Autrement dit, on suppose que <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> appartient à un ensemble (très) restreint des lois possibles. Comme énoncé plus haut, dans le cadre du <em>Credit Scoring</em>, on s’intéresse au modèle de régression logistique <a href="#eq:logit" data-reference-type="eqref" data-reference="eq:logit">[eq:logit]</a> noté <span class="math inline">\(p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x})\)</span> dans la suite. Dès lors, une formulation simple du problème consiste à se donner une notion de distance entre <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> et <span class="math inline">\(p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x})\)</span> afin d’estimer le “meilleur” paramètre <span class="math inline">\(\boldsymbol{\theta}^\star\)</span> au sens de cette “distance”. Un bon candidat est la divergence de Kullback-Leibler <a href="#kullback1951information" class="citation" data-cites="kullback1951information">[19]</a> : <br /><span class="math display">$$\label{eq:KL}
+                                            \text{KL}(p(\cdot | \boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x})) = \sum_{y \in \{0,1\}} p(y | \boldsymbol{x}) \ln \left( \frac{p(y | \boldsymbol{x})}{p_{\boldsymbol{\theta}}(y | \boldsymbol{x})} \right).$$</span><br /> Cette divergence est donnée pour une valeur particulière <span class="math inline">\(\boldsymbol{x}\)</span> de <span class="math inline">\(\boldsymbol{x}\)</span>. Or, l’institut financier voudrait que le modèle <span class="math inline">\(p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x})\)</span> soit similaire à <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> en moyenne pour tous ses clients, ce qui conduit au paramètre <br /><span class="math display">$${\boldsymbol{\theta}^\star} = \arg\min_{\boldsymbol{\theta}} \mathbb{E}_{\boldsymbol{x}} [\text{KL}(p(\cdot | \boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x}))].$$</span><br /> Comme <span class="math inline">\(\text{KL}(p(\cdot | \boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x})) \geq 0\)</span>, on peut voir cette opération comme une projection de la loi <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> dans l’espace du modèle (ou de la famille de modèles), illustrée sur la figure <a href="#fig:projection" data-reference-type="ref" data-reference="fig:projection">[6]</a>. Cette interprétation géométrique permet d’affirmer que si <span class="math inline">\(\min_{\boldsymbol{\theta}} \mathbb{E}_{\boldsymbol{x}} [\text{KL}(p(\cdot | \boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot | \boldsymbol{x}))] = 0\)</span>, alors on a pour tout <span class="math inline">\(\boldsymbol{x}\)</span>, <span class="math inline">\(p(\cdot | \boldsymbol{x}) = p_{\boldsymbol{\theta}^\star}(\cdot | \boldsymbol{x})\)</span>. Dans ce cas, on parlera dans la suite de “vrai modèle” ; dans le cas contraire, de “modèle mal spécifié” (anglicisme de <em>misspecified model</em>).</p>
+                                        <figure>
+                                            <img src="figures/chapitre1/fig_projection.png" alt="[6] Vision géométrique du biais de modèle." style="width:15cm" /><figcaption><span id="fig:projection" label="fig:projection">[6]</span> Vision géométrique du biais de modèle.</figcaption>
+                                        </figure>
 
+                                        <p>N’ayant accès à <span class="math inline">\(p(\cdot | \boldsymbol{x})\)</span> qu’à travers un échantillon, il nous faut développer un critère empirique à partir du critère théorique (souvent de nature asymptotique) donné ici.</p>
+                                        <h3 id="subsec:gradient">Minimisation du risque empirique et maximum de vraisemblance</h3>
+                                        <p>On peut réécrire <span class="math inline">\(\text{KL}(p(\cdot|\boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot|\boldsymbol{x}))\)</span> pour faire apparaître une quantité indépendante de <span class="math inline">\(p_{\boldsymbol{\theta}}\)</span> : <br /><span class="math display">$$\text{KL}(p(\cdot|\boldsymbol{x})||p_{\boldsymbol{\theta}}(\cdot|\boldsymbol{x})) = \sum_{y \in \{0,1\}} p(y|\boldsymbol{x}) \ln [p(y|\boldsymbol{x})] - \underbrace{\sum_{y \in \{0,1\}} p(y|\boldsymbol{x}) \ln [p_{\boldsymbol{\theta}}(y|\boldsymbol{x})]}_{\mathbb{E}_{Y | \boldsymbol{x} = \boldsymbol{x}} [\ln[p_{\boldsymbol{\theta}}(\cdot|\boldsymbol{x})]]}.$$</span><br /> On va donc naturellement se concentrer sur la maximisation du second terme pour l’ensemble des clients en moyenne, c’est-à-dire <br /><span class="math display">$$\boldsymbol{\theta}^\star = \arg\max_{\boldsymbol{\theta}} \mathbb{E}_{\boldsymbol{x}}  [\mathbb{E}_{Y | \boldsymbol{x}} [\ln[p_{\boldsymbol{\theta}}(\cdot|\boldsymbol{x})]]] = \arg\max_{\boldsymbol{\theta}} \mathbb{E}_{(\boldsymbol{x},Y) \sim p} [\ln[p_{\boldsymbol{\theta}}(Y | \boldsymbol{x})]].$$</span><br /></p>
+                                        <p>On se place dans le cadre d’un <span class="math inline"><em>n</em></span>-échantillon i.i.d. ce qui est toujours le cas en <em>Credit Scoring</em> sous réserve que les crédits observés soient issus de clients différents (ce que l’on supposera dans la suite). L’hypothèse d’indépendance nous permet aussi d’approximer l’espérance sur <span class="math inline">\(\mathcal{X} \times \mathcal{Y}\)</span> par l’espérance sur l’échantillon et on obtient le critère <span class="math inline">\(\ell(\theta;\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})\)</span> : <br /><span class="math display">$$\label{eq:vraisemblance}
+                                            \ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = \sum_{i=1}^n \ln[p_{\boldsymbol{\theta}}(y_i | \boldsymbol{x}_i) ].$$</span><br /> Ce critère correspond en fait au maximum de vraisemblance : la probabilité d’observer les données <span class="math inline">\(\boldsymbol{\mathbf{y}}\)</span> sachant les covariables <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> et le paramètre <span class="math inline">\(\boldsymbol{\theta}\)</span>. L’hypothèse d’indépendance nous permet d’écrire la vraisemblance sous la forme d’un produit : <br /><span class="math display">$$\mathcal{L}(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = p_{\boldsymbol{\theta}}(y_1,\dots,y_n | \boldsymbol{x}_1,\dots \boldsymbol{x}_n) = \prod_{i=1}^n p_{\boldsymbol{\theta}}(y_i | \boldsymbol{x}_i).$$</span><br /> En passant cette expression au logarithme, fonction strictement croissante, on retrouve bien la formulation de <span class="math inline">\(\ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})\)</span>.</p>
+                                        <p>Dans la littérature <em>machine learning</em>, où l’on minimise plutôt un risque empirique, sous-entendu de “mauvais classement” au sens d’une fonction de coût à définir, le maximum de vraisemblance est équivalent au minimum de la “log loss”. Dans la suite, on préférera la notion de vraisemblance.</p>
+                                        <p>Dans le cas de la régression logistique <a href="#eq:logit" data-reference-type="eqref" data-reference="eq:logit">[eq:logit]</a>, la log-vraisemblance prend la forme suivante : <br /><span class="math display">$$\ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = \underbrace{\sum_{i=1}^n y_i (\boldsymbol{\theta}' \times (1,\boldsymbol{x}))}_{\text{fonction affine de } \boldsymbol{\theta}} - \underbrace{\ln(1 + \exp(\boldsymbol{\theta}' \times (1,\boldsymbol{x}))}_{\text{log-sum-exp d'une fonction affine de } \boldsymbol{\theta}}.$$</span><br /> Cette fonction est concave et tout maximum local est donc global.</p>
+                                        <h4 id="passage-à-la-dérivée-du-critère-de-log-vraisemblance">Passage à la dérivée du critère de log-vraisemblance</h4>
+                                        <p>Le “réflexe” pour obtenir un maximum local conduit à dériver la fonction de vraisemblance et trouver <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> pour lequel cette dérivée est nulle : <br /><span class="math display">$$\dfrac{\partial \ell}{\partial \theta_j} (\hat{\boldsymbol{\theta}};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})= \sum_{i=1}^n (y_i - p_{\hat{\boldsymbol{\theta}}}(1|\boldsymbol{x}_i)) x_{i,j} = 0.$$</span><br /></p>
+                                        <p>Cependant, contrairement à la régression linéaire où l’on dispose d’une formule explicite pour l’estimateur du maximum de vraisemblance <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span>, il n’existe rien de tel pour la régression logistique puisque cette équation n’est pas linéaire en <span class="math inline">\(\boldsymbol{\theta}\)</span> et l’on doit recourir à des algorithmes itératifs, dont le plus connu est la descente de gradient.</p>
+                                        <h4 id="algorithmes-itératifs-de-descente-de-gradient">Algorithmes itératifs de descente de gradient</h4>
+                                        <p>On désigne le gradient de la log-vraisemblance par rapport à <span class="math inline">\(\boldsymbol{\theta}\)</span> par <span class="math inline">\(\nabla_{\boldsymbol{\theta}} \ell = \left( \dfrac{\partial \ell}{\partial \theta_j} \right)_0^d\)</span>. L’algorithme de descente de gradient consiste à mettre à jour à l’étape <span class="math inline">(<em>s</em>)</span> le paramètre <span class="math inline">\(\boldsymbol{\theta}^{(s)}\)</span> dans la direction qui améliore le critère <span class="math inline">\(\ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})\)</span> : <br /><span class="math display">$$\boldsymbol{\theta}^{(s+1)} = \boldsymbol{\theta}^{(s)} + \epsilon \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}).$$</span><br /> Une immense littérature est dédiée au choix de <span class="math inline"><em>ϵ</em></span>, appelé <em>learning rate</em> en <em>machine learning</em> et à d’autres astuces destinées à accélérer la convergence éventuelle vers <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span>. Cette littérature s’est particulièrement développée dans le cadre des réseaux de neurones, pour lesquels la méthode de Newton, bien adaptée à la régression logistique et que l’on développera ci-après, n’est pas adaptée.</p>
+                                        <h4 id="méthode-de-newton-raphson">Méthode de Newton-Raphson</h4>
+                                        <p>On note la matrice hessienne de <span class="math inline">ℓ</span> en <span class="math inline">\(\boldsymbol{\theta}\)</span> par <span class="math inline">\(\mathbf{H}_{\boldsymbol{\theta}} = \left( \dfrac{\partial^2 \ell}{\partial \theta_j \partial \theta_k} \right)_{0 \leq j,k \leq d}\)</span>. Le développement de Taylor, qui revient à considérer que la log-vraisemblance est localement quadratique, donne à l’étape <span class="math inline">(<em>s</em>)</span> : <br /><span class="math display">$$\ell(\boldsymbol{\theta}^{(s+1)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = \ell({\boldsymbol{\theta}}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) + \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})' (\boldsymbol{\theta}^{(s+1)} - {\boldsymbol{\theta}}^{(s)}) + \dfrac{1}{2}(\boldsymbol{\theta}^{(s+1)} - {\boldsymbol{\theta}}^{(s)})'  \mathbf{H}_{{\boldsymbol{\theta}}}(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) (\boldsymbol{\theta}^{(s+1)} - {\boldsymbol{\theta}}^{(s)}).$$</span><br /> En dérivant cette expression par rapport à <span class="math inline">\(\boldsymbol{\theta}^{(s+1)}\)</span> et en remarquant que l’on souhaiterait arriver au maximum de <span class="math inline">ℓ</span> à l’étape <span class="math inline">(<em>s</em> + 1)</span>, autrement dit en posant <span class="math inline">\(\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s+1)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})=0\)</span>, on obtient : <br /><span class="math display">$$0 = \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) + (\boldsymbol{\theta}^{(s+1)} - {\boldsymbol{\theta}}^{(s)}) \mathbf{H}_{{\boldsymbol{\theta}}^{(s)}}(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}).$$</span><br /> En réarrangeant cette expression, on obtient la valeur mise à jour du paramètre : <br /><span class="math display">$$\boldsymbol{\theta}^{(s+1)} = \boldsymbol{\theta}^{(s)} - \mathbf{H}_{{\boldsymbol{\theta}}}(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}})^{-1} \nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}),$$</span><br /> où <span class="math inline">\(\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = (\boldsymbol{1},\boldsymbol{\mathbf{x}})' (\boldsymbol{\mathbf{y}} - \Pi)\)</span> et <span class="math inline">\(\mathbf{H}_{{\boldsymbol{\theta}}}(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = (\boldsymbol{1},\boldsymbol{\mathbf{x}}) \mathbf{W} (\boldsymbol{1},\boldsymbol{\mathbf{x}})'\)</span> avec <span class="math inline">\(\Pi = (p_{\boldsymbol{\theta}^{(s)}}(1|\boldsymbol{x}_1),\dots,p_{\boldsymbol{\theta}^{(s)}}(1|\boldsymbol{x}_n))\)</span> et <span class="math inline"><strong>W</strong> = diag(<em>Π</em> ⊙ (<strong>1</strong> − <em>Π</em>))</span> où <span class="math inline">⊙</span> désigne le produit d’Hadamard (<em>i.e.</em> élément par élément). Plusieurs points importants transparaissent de cette dernière équation. D’abord, si à une étape <span class="math inline">(<em>s</em>)</span>, le point fixe est trouvé, <em>i.e.</em> <span class="math inline">\(\boldsymbol{\theta}^{(s)} = \hat{\boldsymbol{\theta}}\)</span>, alors <span class="math inline">\(\nabla_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}^{(s)};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) = 0\)</span> et on ne bouge plus : <span class="math inline">\(\forall s' \geq s, \: \boldsymbol{\theta}^{(s')} = \boldsymbol{\theta}^{(s)}\)</span>. En pratique, cela conduit la majorité des bibliothèques logicielles implémentant la méthode de Newton à laisser à leur utilisateur le soin de calibrer deux paramètres : la précision au-delà de laquelle l’algorithme s’arrête, c’est-à-dire <span class="math inline"><em>η</em></span> tel que s’il existe <span class="math inline"><em>s</em></span> tel que <span class="math inline">\(||\boldsymbol{\theta}^{(s+1)} - \boldsymbol{\theta}^{(s)}||_{\infty} \leq \eta\)</span>, où <span class="math inline">\(|| \boldsymbol{x} ||_{\infty} = \max_{j} |x_j|\)</span>, alors <span class="math inline">\(\hat{\boldsymbol{\theta}} \approx \boldsymbol{\theta}^{(s+1)}\)</span> et le nombre de pas maximum <span class="math inline"><em>s</em><sub>max</sub></span> à effectuer (la condition précédente n’étant potentiellement jamais remplie, l’algorithme pourrait ne pas se terminer). Une revue des principales méthodes d’optimisation utilisables dans le cadre de la régression logistique, suivie de leur étude empirique <a href="#minka2003comparison" class="citation" data-cites="minka2003comparison">[11]</a> montre que l’algorithme de Newton et la méthode BFGS <a href="#byrd1995limited" class="citation" data-cites="byrd1995limited">[10]</a>, de complexité respective <span class="math inline"><em>O</em>(<em>n</em><em>d</em><sup>2</sup>)</span> et <span class="math inline"><em>O</em>(<em>d</em><sup>2</sup> + <em>n</em><em>d</em>)</span> présentent un bon compromis précision / coût de calcul lorsque comparées à d’autres méthodes de descente de gradient et sous différents scénarios de génération des données. Tous les paramètres de régression logistique de ce manuscrit sont par conséquent estimées par l’algorithme de Newton, car à l’exception des remarques sur la grande dimension données en conclusion, le nombre de covariables <span class="math inline"><em>d</em></span> est faible (<span class="math inline">10</span>-<span class="math inline">100</span>) relativement à <span class="math inline"><em>n</em></span> (<span class="math inline">10<sup>5</sup></span>-<span class="math inline">10<sup>6</sup></span>). Enfin, l’algorithme requiert une initialisation <span class="math inline">\(\boldsymbol{\theta}^{(0)}\)</span> qui peut en influencer la vitesse de convergence. Les bibliothèques utilisent généralement <span class="math inline">\(\boldsymbol{\theta}^{(0)}=0\)</span>.</p>
+                                        <h4 id="subsubsec:tradeoff">Compromis biais-variance</h4>
+                                        <p>En conclusion, là où le probabiliste, en figure <a href="#fig:projection" data-reference-type="ref" data-reference="fig:projection">[6]</a> n’avait qu’un problème de biais de modèle, le statisticien qui souhaite estimer ce modèle à partir de données est préoccupé par deux problèmes supplémentaires. Le premier est l’erreur d’estimation, c’est-à-dire la différence entre le meilleur modèle de paramètre <span class="math inline">\(\boldsymbol{\theta}^\star\)</span> et le modèle estimé de paramètre <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span>: <br /><span class="math display">$$\begin{aligned}
+                                            &amp; \mathbb{E}_{\mathcal{T}} \mathbb{E}_{\boldsymbol{x}} [p_{\hat{\boldsymbol{\theta}}}(y| \boldsymbol{x}) - p(y| \boldsymbol{x})]^2  \nonumber \\
+                                            = &amp; \mathbb{E}_{\boldsymbol{x}} [ \underbrace{[p(y| \boldsymbol{x}) - \mathbb{E}_{\mathcal{T}} [ p_{\hat{\boldsymbol{\theta}}}(y| \boldsymbol{x})]]^2}_{\text{biais de modèle}} + \underbrace{\mathbb{E}_{\mathcal{T}} [[ p_{\hat{\boldsymbol{\theta}}}(y| \boldsymbol{x}) - \mathbb{E}_{\mathcal{T}} [ p_{\hat{\boldsymbol{\theta}}}(y| \boldsymbol{x}) ]]^2]}_{\text{variance}} ] \label{eq:bias1} \\
+                                            \approx &amp; \mathbb{E}_{\boldsymbol{x}} [ \underbrace{[p(y| \boldsymbol{x}) - p_{\boldsymbol{\theta}^\star}(y| \boldsymbol{x})]^2}_{\text{biais de modèle}} + \underbrace{\mathbb{E}_{\mathcal{T}} [[ p_{\hat{\boldsymbol{\theta}}}(y| \boldsymbol{x}) - p_{\boldsymbol{\theta}^\star}(y| \boldsymbol{x})  ]^2}_{\text{erreur d'estimation}} ]]. \label{eq:bias2}\end{aligned}$$</span><br /> Pour la dérivation rigoureuse de ce résultat, se référer à <a href="#schutze2008introduction" class="citation" data-cites="schutze2008introduction">[8]</a> (p. 308–314). Le passage de <a href="#eq:bias1" data-reference-type="ref" data-reference="eq:bias1">[eq:bias1]</a> à <a href="#eq:bias2" data-reference-type="ref" data-reference="eq:bias2">[eq:bias2]</a> est garanti par le caractère asymptotiquement sans biais de l’estimateur du maximum de vraisemblance, même dans le cas du modèle mal spécifié <a href="#white1982maximum" class="citation" data-cites="white1982maximum">[7]</a>. Autrement dit, pour <span class="math inline"><em>n</em></span> assez grand, on a <span class="math inline">\(\sqrt{n} (\hat{\boldsymbol{\theta}} - \boldsymbol{\theta}^\star) \sim \mathcal{N}(\boldsymbol{0} , \mathcal{I}(\boldsymbol{\theta}^\star)^{-1})\)</span>, où <span class="math inline">\(\mathcal{I}(\boldsymbol{\theta}) = - \mathbb{E}_{(\boldsymbol{x}, Y)}[ (\frac{\partial^2 \ln p_{\boldsymbol{\theta}}(Y | \boldsymbol{x})}{\partial \theta_j \partial \theta_k})_{0 \leq j,k, \leq d} | \boldsymbol{\theta}]\)</span> est la matrice d’information de Fisher. On a alors la consistance asymptotique en probabilité de l’estimateur du maximum de vraisemblance <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> vers <span class="math inline">\(\boldsymbol{\theta}^\star\)</span>. Le dernier terme de variance a été introduit en quelque sorte par le passage du critère KL asymptotique <a href="#eq:KL" data-reference-type="eqref" data-reference="eq:KL">[eq:KL]</a> au critère empirique de vraisemblance <a href="#eq:vraisemblance" data-reference-type="eqref" data-reference="eq:vraisemblance">[eq:vraisemblance]</a>. Ce terme est matérialisé en <span style="color: blue">bleu</span> sur la figure <a href="#fig:projection2" data-reference-type="ref" data-reference="fig:projection2">[7]</a> Le deuxième problème est numérique et généralement négligé : il s’agit de l’erreur de précision développée au paragraphe précédent et matérialisée en <span style="color: orange">orange</span> sur la figure <a href="#fig:projection2" data-reference-type="ref" data-reference="fig:projection2">[7]</a>.</p>
+                                        <figure>
+                                            <img src="figures/chapitre1/fig_projection2.png" alt="[7] Vision géométrique du biais de modèle, biais et variance d’estimation." style="width:15cm" /><figcaption><span id="fig:projection2" label="fig:projection2">[7]</span> Vision géométrique du biais de modèle, biais et variance d’estimation.</figcaption>
+                                        </figure>
 
-
+                                        <h3 id="sélection-de-modèle-en-credit-scoring">Sélection de modèle en <em>Credit Scoring</em></h3>
+                                        <p>Dans la partie précédente, on a réduit le problème à la seule estimation de <span class="math inline">\(\boldsymbol{\theta}\)</span>, et on a implicitement utilisé l’ensemble des <span class="math inline"><em>d</em></span> variables dans <span class="math inline">\(\boldsymbol{x}\)</span>. En théorie, se faisant, les variables indépendantes de <span class="math inline"><em>Y</em></span> conditionnellement aux autres variables devraient avoir un coefficient <span class="math inline"><em>θ</em><sub><em>j</em></sub></span> nul. C’est le cas lorsqu’une variable est totalement indépendante de la cible, par exemple la météo du jour de la demande du prêt, ou lorsqu’une variable est redondante avec une autre variable, par exemple les revenus annuels et mensuels qui sont égaux à un facteur multiplicatif près.</p>
+                                        <p>En pratique, tous les coefficients de <span class="math inline">\(\boldsymbol{\theta}\)</span> seront différents de <span class="math inline">0</span> du fait des deux phénomènes illustrés sur le graphique <a href="#fig:projection2" data-reference-type="ref" data-reference="fig:projection2">[7]</a> : l’(im)précision numérique abordée dans la partie précédente et le design <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span> fixe introduisant un biais et une variance d’estimation. C’est pourquoi il est nécessaire de sélectionner les “bonnes” variables prédictives parmi <span class="math inline">\(x_1,\dots,x_d\)</span> au sens d’un critère que l’on développe ci-après, afin de réduire l’erreur d’estimation.</p>
+                                        <p>Par ailleurs et toujours dans le but de trouver un compromis entre biais de modèle et erreur d’estimation, il peut s’avérer nécessaire d’ajouter des variables par calcul ou combinaison des variables <span class="math inline">\(x_1,\dots,x_d\)</span>. On s’intéressera plus précisément aux processus de discrétisation de variables continues, de regroupement de modalités de variables catégorielles et d’introduction d’interactions, c’est-à-dire de produits de variables pré-existantes.</p>
+                                        <h4 id="subsubsec:selection">Sélection de variables</h4>
+                                        <p>Le premier réflexe du statisticien face à un problème de classification est la sélection de variables. A l’extrême, lorsque <span class="math inline"><em>d</em> &gt; <em>n</em></span>, le problème est mal défini (la matrice hessienne n’est pas inversible) ; dans une moindre mesure, lorsque <span class="math inline"><em>n</em> &gt; <em>d</em></span> mais que certaines variables n’ont pas de pouvoir prédictif conditionnellement à celles déjà dans le modèle, c’est-à-dire par exemple <span class="math inline">\(p(y | \boldsymbol{x}) = p(y|x_2,\dots,x_d)\)</span>, alors le coefficient <span class="math inline"><em>θ̂</em><sub>1</sub></span> ajoute une dimension “inutile” à l’espace <span class="math inline"><strong>Θ</strong></span> (on parle de la capacité d’un modèle en <em>machine learning</em>) qui augmente la variance du modèle <span class="math inline">\(p_{\boldsymbol{\theta}}\)</span> (on parle d’<em>overfitting</em> en <em>machine learning</em>) en essayant en quelque sorte de prédire le bruit, c’est-à-dire les résidus du modèle. Dans les chapitres suivants, on utilisera abusivement la notation <span class="math inline"><em>p</em></span> pour toute <span data-acronym-label="pdf" data-acronym-form="singular+short">pdf</span> lorsque les variables dont elle dépend sont explicites.</p>
+                                        <p>Dans le cas particulier du <em>Credit Scoring</em>, une thèse CIFRE récente a même été consacrée au sujet de la sélection de variables <a href="#vital2016" class="citation" data-cites="vital2016">[9]</a> et recommande l’utilisation de la procédure LASSO, de la “famille” des méthodes de pénalisation : une contrainte est ajoutée à la vraisemblance pour l’optimisation des paramètres. Le critère devient : <br /><span class="math display">$$\begin{aligned}
+                                            \hat{\boldsymbol{\theta}}^{\text{Lasso}} &amp; = \arg\min_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) \text{ avec } \sum_{j=1}^d |\boldsymbol{\theta}_j| \leq t \\
+                                            &amp; = \arg\min_{\boldsymbol{\theta}}  \ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) + \lambda \sum_{j=1}^d |\boldsymbol{\theta}_j|\end{aligned}$$</span><br /> où <span class="math inline"><em>t</em></span> et <span class="math inline"><em>λ</em></span> sont mutuellement dépendants et règlent la sévérité de la régularisation. De manière générale, la régularisation présente plusieurs avantages, et la motivation première est le contrôle du compromis biais-variance. Néanmoins, par l’utilisation d’une pénalisation de type <span class="math inline"><em>L</em><sup>1</sup></span> comme le LASSO, un effet de bord désirable est la sélection de variables, c’est-à-dire la capacité à “forcer” des coefficients estimés exactement à <span class="math inline">0</span>. Plusieurs variantes ou raffinements du LASSO existent aujourd’hui et possèdent des propriétés asymptotiques différentes ou meilleures.</p>
+                                        <h4 id="subsubsec:choix_modele">Critère de sélection de modèle</h4>
+                                        <p>Une approche de résolution indirecte du problème de sélection de variables est le choix de modèle : considérons <span class="math inline"><em>M</em></span> modèles <span class="math inline"><em>Θ</em><sup>(1)</sup>, …, <em>Θ</em><sup>(<em>M</em>)</sup></span> de régression logistique différents, c’est-à-dire pour lesquels les variables incluses ne sont pas les mêmes. On peut d’ailleurs voir le problème de sélection de variables comme un choix entre tous les <span class="math inline">2<sup><em>d</em></sup></span> modèles possibles. Dans ce cadre, de nombreux critères de choix de modèle, voire d’aggrégation de modèles, c’est-à-dire de sélection de tout ou partie de ces modèles en pondérant leur contribution globale, ont été proposés. La justification de ces critères sort largement du cadre de ce manuscrit ; aussi nous nous limiterons, dans le cadre de la sélection de modèle, au critère BIC (proposé dans <a href="#BIC" class="citation" data-cites="BIC">[6]</a>). Outre sa consistance asymptotique, autrement dit la capacité de sélectionner, sous certaines conditions sur la famille notamment, le “quasi-vrai” modèle (le modèle de plus faible divergence <span class="math inline">\(\text{KL}\)</span> et de complexité <span class="math inline"><em>ν</em></span> minimale - cf ci-après) avec une probabilité tendant vers <span class="math inline">1</span> lorsque la taille d’échantillon <span class="math inline"><em>n</em></span> augmente, ce critère possède une propriété qui le lie à la probabilité <em>a posteriori</em> d’un modèle conditionnellement aux données.</p>
+                                        <p>Le critère BIC s’écrit de la manière suivante et doit être minimisé : <br /><span class="math display">$$\label{eq:BIC}
+                                            \text{BIC}(\hat{\boldsymbol{\theta}}) =  -2 \ell(\hat{\boldsymbol{\theta}} ; \boldsymbol{\mathbf{x}},\boldsymbol{\mathbf{y}}) + \nu \ln (n),$$</span><br /> où <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> est l’estimateur du maximum de vraisemblance et <span class="math inline"><em>ν</em> = dim(<em>Θ</em>)</span>.</p>
+                                        <h3 id="autres-modèles-prédictifs">Autres modèles prédictifs</h3>
+                                        <p>L’objectif de cette partie est de donner un éclairage à d’autres familles de modèles prédictifs qui pourraient être utilisés en lieu et place de la régression logistique traditionnellement utilisée en <em>Credit Scoring</em> pour les nombreuses raisons pratiques et statistiques précédemment évoquées.</p>
+                                        <h4 id="arbres-de-décision">Arbres de décision</h4>
+                                        <h5 id="principe">Principe</h5>
+                                        <p>Toutes les observations entrent au sommet de l’arbre qui dispose d’un seul noeud. Ce noeud contient une règle de classement parmi les noeuds fils de type <code>si ... alors ...</code>. Chacun de ces noeuds fils dispose alors d’un sous-ensemble des observations de départ, et la procédure se répète récursivement jusqu’aux feuilles de l’arbre, c’est-à-dire les noeuds dépourvus de fils, dont les observations sont affectées, dans le cadre de l’apprentissage supervisée, à une classe bon / mauvais payeur. Cette structure est utilisée en <em>Credit Scoring</em> dans le cadre de la segmentation (section <a href="#subsec:segmentation" data-reference-type="ref" data-reference="subsec:segmentation">1.2.2</a>), pratique que l’on revisite au chapitre <a href="#chap6" data-reference-type="ref" data-reference="chap6">[chap6]</a> et où un exemple d’arbre est visible en figure <a href="#fig:arbre" data-reference-type="ref" data-reference="fig:arbre">[8]</a>.</p>
+                                        <figure>
+                                            <img src="figures/chapitre1/fig_arbre.png" alt="[8] Simplified cartography of the application scorecards." style="width:15cm" /><figcaption><span id="fig:arbre" label="fig:arbre">[8]</span> Simplified cartography of the application scorecards.</figcaption>
+                                        </figure>
+                                        
+                                        <h5 id="algorithmes">Algorithmes</h5>
+                                        <p>Ainsi posé, l’arbre de décision semble à la fois simple dans sa formulation, et complexe dans la mise en oeuvre de son apprentissage : comment choisir les règles de chaque noeud, le nombre de noeuds fils à chaque noeud, le critère d’arrêt, etc. En pratique, de nombreux algorithmes ont été proposés. Dans les expériences du chapitre <a href="#chap2" data-reference-type="ref" data-reference="chap2">[chap2]</a>, on utilise l’algorithme C4.5 <a href="#quinlan2014c4" class="citation" data-cites="quinlan2014c4">[4]</a> qui repose sur la divergence de Kullback-Leibler pour choisir une variable <span class="math inline"><em>x</em><sub><em>j</em></sub></span> à chaque noeud et un ensemble <span class="math inline"><em>C</em><sub><em>j</em></sub></span> tel que les observations vérifiant <span class="math inline"><em>x</em><sub><em>j</em></sub> ∈ <em>C</em><sub><em>j</em></sub></span> (resp. <span class="math inline"><em>x</em><sub><em>j</em></sub> ∉ <em>C</em><sub><em>j</em></sub></span>) soient orientées vers le noeud fils gauche (resp. droit), où <span class="math inline"><em>C</em><sub><em>j</em></sub> = ] − ∞; <em>c</em><sub><em>j</em></sub>]</span>, <span class="math inline">\(c_j \in \mathbb{R}\)</span> pour les variables continues et <span class="math inline">\(C_j \subset \mathbb{N}_{o_j}\)</span> pour les variables catégorielles. L’algorithme s’arrête lorsque les feuilles ne contiennent qu’une seule classe, et des techniques d’“élagage” permettent ensuite de réduire la complexité de l’arbre résultant pour garantir un bon compromis biais-variance.</p>
+                                        <h5 id="faiblesses">Faiblesses</h5>
+                                        <p>Les arbres de décision souffrent souvent de large variance <a href="#geurts2000investigation" class="citation" data-cites="geurts2000investigation">[3]</a>. C’est pourquoi, les Forêts Aléatoires <a href="#breiman2001random" class="citation" data-cites="breiman2001random">[2]</a> et / ou algorithmes dits de “Boosting” <a href="#zhou2012ensemble" class="citation" data-cites="zhou2012ensemble">[1]</a> sont plébiscités : plusieurs arbres de décision sont appris, sur des sous-échantillons et / ou en pondérant les observations d’apprentissage, dont les décisions sont ensuite combinées. Pour les données de <em>Credit Scoring</em>, il a été constaté en interne à <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> que ces modèles permettent d’obtenir de bonnes performances, en perdant cependant l’interprétation aisée des arbres de décision ou de la régression logistique.</p>
+                                        <h4 id="réseaux-de-neurones">Réseaux de neurones</h4>
+                                        <h5 id="principe-1">Principe</h5>
+                                        <p>Chaque variable d’entrée, c’est-à-dire une covariable <span class="math inline">\(\boldsymbol{x}_j\)</span>, est vue comme un neurone, tout comme la variable de sortie, c’est-à-dire la variable dépendante à prédire <span class="math inline"><em>y</em></span>. Les neurones intermédiaires, formant la (les) couche(s) cachée(s) réalisent un calcul à partir de leur(s) neurone(s) parent(s) (phase de propagation dite <em>feedforward</em>) consistant typiquement en une addition et une transformation non-linéaire (comme la fonction sigmoïde - l’application réciproque du logit - qui sert en régression logistique). Les résultats prédits <span class="math inline">\(\hat{\boldsymbol{\mathbf{y}}}\)</span> sont comparés aux exemples d’apprentissage <span class="math inline">\(\boldsymbol{\mathbf{y}}\)</span> et l’erreur est rétropropagée (phase dite <em>backpropagation</em>) : comme en régression logistique, les couches cachées disposent de coefficients <span class="math inline">\(\boldsymbol{\theta}\)</span> qui sont ajustés par descente de gradient. La comparaison biologique est cependant bien plus limitée que ce que leur nom laisse supposer : les neurones représentent simplement un état résultant d’un calcul, et les synapses sont les arêtes du graphe de calcul (qui déterminent le(s) neurone(s) parent(s) / enfant(s) de chaque neurone).</p>
+                                        <h5 id="limites-et-développements-récents">Limites et développements récents</h5>
+                                        <p>Les inconvénients de ce type de modèle vont de paire avec leur avantage de flexibilité : le grand nombre de paramètres et hyperparamètres rendent leur interprétation et leur apprentissage compliqués. L’interprétation aisée du modèle, <em>e.g.</em> de l’effet de chaque variable (et de la significativité de cet effet), de la forme de la frontière de décision, est primordial dans de nombreux contextes applicatifs comme le <em>Credit Scoring</em> : le management, dont l’exposition aux statistiques est faible ou nulle, doit pouvoir comprendre le processus de décision de même que le client pouvant se voir refuser l’accès au crédit. C’est pourquoi les régulateurs bancaires sont attentifs à ce que les décisions soient explicables au client, ce qui est généralement garanti par l’usage massif de la régression logistique, modèle développé dans les parties précédentes, mais qui est moins immédiat dans le cas présent des réseaux de neurones du fait de l’introduction de nombreuses non-linéarités et combinaisons de plusieurs variables (toutes les variables dans le cas des réseaux dits densément connectés). Par ailleurs, ces modèles reposent sur des techniques de descente de gradient, brièvement évoqués en partie <a href="#subsec:gradient" data-reference-type="ref" data-reference="subsec:gradient">1.3.2</a>, qui demandent des connaissances <em>ad hoc</em> et / ou spécifiques au domaine d’application pour la calibration des nombreux hyperparamètres entre autres liés au pas de gradient.</p>
+                                        <p>Le lecteur désireux d’approfondir sa connaissance sur ce type de modèle, devenu une discipline de recherche à part entière, peut se référer à l’ouvrage  <a href="#goodfellow2016deep" class="citation" data-cites="goodfellow2016deep">[13]</a>.</p>
+                                        
+                                        
+                                        
+                                        <br></br>
+                                        <h4>Références</h4>
+                                        <table>
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="zhou2012ensemble">1</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Zhi-Hua Zhou.
+                                                    <em>Ensemble methods: foundations and algorithms</em>.
+                                                    Chapman and Hall/CRC, 2012.
+                                                    [&nbsp;<a href="chapitre1_bib.html#zhou2012ensemble">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="breiman2001random">2</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Leo Breiman.
+                                                    Random forests.
+                                                    <em>Machine learning</em>, 45(1):5-32, 2001.
+                                                    [&nbsp;<a href="chapitre1_bib.html#breiman2001random">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="geurts2000investigation">3</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Pierre Geurts and Louis Wehenkel.
+                                                    Investigation and reduction of discretization variance in decision
+                                                    tree induction.
+                                                    In <em>European Conference on Machine Learning</em>, pages 162-170.
+                                                    Springer, 2000.
+                                                    [&nbsp;<a href="chapitre1_bib.html#geurts2000investigation">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="quinlan2014c4">4</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    J&nbsp;Ross Quinlan.
+                                                    <em>C4. 5: programs for machine learning</em>.
+                                                    Elsevier, 2014.
+                                                    [&nbsp;<a href="chapitre1_bib.html#quinlan2014c4">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="scholkopf2002learning">5</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Bernhard Sch&ouml;lkopf, Alexander&nbsp;J Smola, Francis Bach, et&nbsp;al.
+                                                    <em>Learning with kernels: support vector machines, regularization,
+                                                        optimization, and beyond</em>.
+                                                    MIT press, 2002.
+                                                    [&nbsp;<a href="chapitre1_bib.html#scholkopf2002learning">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="BIC">6</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Gideon Schwarz.
+                                                    Estimating the dimension of a model.
+                                                    <em>The Annals of Statistics</em>, 6(2):461-464, 1978.
+                                                    [&nbsp;<a href="chapitre1_bib.html#BIC">bib</a>&nbsp;|
+                                                    <a href="http://www.jstor.org/stable/2958889">http</a>&nbsp;]
+                                                    <blockquote><font size="-1">
+                                                        The problem of selecting one of a number of models of different dimensions is treated by finding its Bayes solution, and evaluating the leading terms of its asymptotic expansion. These terms are a valid large-sample criterion beyond the Bayesian context, since they do not depend on the a priori distribution.
+                                                    </font></blockquote>
+                                                    <p>
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="white1982maximum">7</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Halbert White.
+                                                    Maximum likelihood estimation of misspecified models.
+                                                    <em>Econometrica: Journal of the Econometric Society</em>, pages 1-25,
+                                                    1982.
+                                                    [&nbsp;<a href="chapitre1_bib.html#white1982maximum">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="schutze2008introduction">8</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Hinrich Sch&uuml;tze, Christopher&nbsp;D Manning, and Prabhakar Raghavan.
+                                                    <em>Introduction to information retrieval</em>, volume&nbsp;39.
+                                                    Cambridge University Press, 2008.
+                                                    [&nbsp;<a href="chapitre1_bib.html#schutze2008introduction">bib</a>&nbsp;|
+                                                    <a href="https://nlp.stanford.edu/IR-book/pdf/irbookprint.pdf">.pdf</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="vital2016">9</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Clément Vital.
+                                                    <em>Scoring pour le risque de crédit : variable réponse
+                                                        polytomique, sélection de variables, réduction de la dimension,
+                                                        applications</em>.
+                                                    PhD thesis, 2016.
+                                                    Thèse de doctorat dirigée par Patilea, Valentin et Rouviere,
+                                                    Laurent Mathématiques et applications Rennes 1 2016.
+                                                    [&nbsp;<a href="chapitre1_bib.html#vital2016">bib</a>&nbsp;|
+                                                    <a href="http://www.theses.fr/2016REN1S111">http</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="byrd1995limited">10</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Richard&nbsp;H Byrd, Peihuang Lu, Jorge Nocedal, and Ciyou Zhu.
+                                                    A limited memory algorithm for bound constrained optimization.
+                                                    <em>SIAM Journal on Scientific Computing</em>, 16(5):1190-1208, 1995.
+                                                    [&nbsp;<a href="chapitre1_bib.html#byrd1995limited">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="minka2003comparison">11</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Thomas&nbsp;P Minka.
+                                                    A comparison of numerical optimizers for logistic regression.
+                                                    <em>Unpublished draft</em>, pages 1-18, 2003.
+                                                    [&nbsp;<a href="chapitre1_bib.html#minka2003comparison">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="vapnik2013nature">12</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Vladimir Vapnik.
+                                                    <em>The nature of statistical learning theory</em>.
+                                                    Springer science &amp; business media, 2013.
+                                                    [&nbsp;<a href="chapitre1_bib.html#vapnik2013nature">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="goodfellow2016deep">13</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Ian Goodfellow, Yoshua Bengio, Aaron Courville, and Yoshua Bengio.
+                                                    <em>Deep Learning</em>, volume&nbsp;1.
+                                                    MIT press Cambridge, 2016.
+                                                    [&nbsp;<a href="chapitre1_bib.html#goodfellow2016deep">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="cortes2005confidence">14</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Corinna Cortes and Mehryar Mohri.
+                                                    Confidence intervals for the area under the roc curve.
+                                                    In <em>Advances in neural information processing systems</em>, pages
+                                                    305-312, 2005.
+                                                    [&nbsp;<a href="chapitre1_bib.html#cortes2005confidence">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="sun2014fast">15</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Xu&nbsp;Sun and Weichao Xu.
+                                                    Fast implementation of delong's algorithm for comparing the areas
+                                                    under correlated receiver oerating characteristic curves.
+                                                    <em>IEEE Signal Processing Letters</em>, 21(11):1389-1393, 2014.
+                                                    [&nbsp;<a href="chapitre1_bib.html#sun2014fast">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="sun2009classification">16</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Yanmin Sun, Andrew&nbsp;KC Wong, and Mohamed&nbsp;S Kamel.
+                                                    Classification of imbalanced data: A review.
+                                                    <em>International Journal of Pattern Recognition and Artificial
+                                                        Intelligence</em>, 23(04):687-719, 2009.
+                                                    [&nbsp;<a href="chapitre1_bib.html#sun2009classification">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="baesens2003benchmarking">17</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Bart Baesens, Tony Van&nbsp;Gestel, Stijn Viaene, Maria Stepanova, Johan Suykens,
+                                                    and Jan Vanthienen.
+                                                    Benchmarking state-of-the-art classification algorithms for credit
+                                                    scoring.
+                                                    <em>Journal of the operational research society</em>, 54(6):627-635,
+                                                    2003.
+                                                    [&nbsp;<a href="chapitre1_bib.html#baesens2003benchmarking">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="brown2012experimental">18</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Iain Brown and Christophe Mues.
+                                                    An experimental comparison of classification algorithms for
+                                                    imbalanced credit scoring data sets.
+                                                    <em>Expert Systems with Applications</em>, 39(3):3446-3453, 2012.
+                                                    [&nbsp;<a href="chapitre1_bib.html#brown2012experimental">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="kullback1951information">19</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Solomon Kullback and Richard&nbsp;A Leibler.
+                                                    On information and sufficiency.
+                                                    <em>The annals of mathematical statistics</em>, 22(1):79-86, 1951.
+                                                    [&nbsp;<a href="chapitre1_bib.html#kullback1951information">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="thomas2000survey">20</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Lyn&nbsp;C Thomas.
+                                                    A survey of credit and behavioural scoring: forecasting financial
+                                                    risk of lending to consumers.
+                                                    <em>International journal of forecasting</em>, 16(2):149-172, 2000.
+                                                    [&nbsp;<a href="chapitre1_bib.html#thomas2000survey">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="finlay2010credit">21</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Steven Finlay.
+                                                    Credit scoring for profitability objectives.
+                                                    <em>European Journal of Operational Research</em>, 202(2):528-537,
+                                                    2010.
+                                                    [&nbsp;<a href="chapitre1_bib.html#finlay2010credit">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="finlay2009we">22</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Steven Finlay.
+                                                    Are we modelling the right thing? the impact of incorrect problem
+                                                    specification in credit scoring.
+                                                    <em>Expert Systems with Applications</em>, 36(5):9065-9071, 2009.
+                                                    [&nbsp;<a href="chapitre1_bib.html#finlay2009we">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="hand1997statistical">23</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    David&nbsp;J Hand and William&nbsp;E Henley.
+                                                    Statistical classification methods in consumer credit scoring: a
+                                                    review.
+                                                    <em>Journal of the Royal Statistical Society: Series A (Statistics
+                                                        in Society)</em>, 160(3):523-541, 1997.
+                                                    [&nbsp;<a href="chapitre1_bib.html#hand1997statistical">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="friedman2001elements">24</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Jerome Friedman, Trevor Hastie, and Robert Tibshirani.
+                                                    <em>The Elements of Statistical Learning</em>, volume&nbsp;1.
+                                                    Springer series in statistics New York, NY, USA:, 2001.
+                                                    [&nbsp;<a href="chapitre1_bib.html#friedman2001elements">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="ducourant2009credit">25</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    H&eacute;l&egrave;ne Ducourant.
+                                                    Le cr&eacute;dit revolving, un succ&egrave;s populaire.
+                                                    <em>Soci&eacute;t&eacute;s contemporaines</em>, (4):41-65, 2009.
+                                                    [&nbsp;<a href="chapitre1_bib.html#ducourant2009credit">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="credit_cards_country">26</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Statista.
+                                                    Credit cards per household by country in 2016, 2016.
+                                                    [&nbsp;<a href="chapitre1_bib.html#credit_cards_country">bib</a>&nbsp;|
+                                                    <a href="https://www.statista.com/statistics/650858/credit-cards-per-household-by-country/">http</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="dicharry_2017">27</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Elsa Dicharry.
+                                                    Maison de la literie lance la location avec option d'achat, 10 2017.
+                                                    [&nbsp;<a href="chapitre1_bib.html#dicharry_2017">bib</a>&nbsp;|
+                                                    <a href="https://www.lesechos.fr/26/10/2017/lesechos.fr/030786701376_maison-de-la-literie-lance-la-location-avec-option-d-achat.htm">http</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="peden_2018">28</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Jean-Philippe Peden.
+                                                    Vente de voitures : la part des formules de location a décollé en
+                                                    2017, 01 2018.
+                                                    [&nbsp;<a href="chapitre1_bib.html#peden_2018">bib</a>&nbsp;|
+                                                    <a href="https://news.autoplus.fr/Location-LLD-LOA-Vente-Marques-premium-1523494.html">.html</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                            
+                                            
+                                            <tr valign="top">
+                                                <td align="right" class="bibtexnumber">
+                                                    [<a name="karim2013off">29</a>]
+                                                </td>
+                                                <td class="bibtexitem">
+                                                    Dilruba Karim, Iana Liadze, Ray Barrell, and E&nbsp;Philip Davis.
+                                                    Off-balance sheet exposures and banking crises in oecd countries.
+                                                    <em>Journal of Financial Stability</em>, 9(4):673-681, 2013.
+                                                    [&nbsp;<a href="chapitre1_bib.html#karim2013off">bib</a>&nbsp;]
+                                                    
+                                                </td>
+                                            </tr>
+                                        </table>
 
 
 

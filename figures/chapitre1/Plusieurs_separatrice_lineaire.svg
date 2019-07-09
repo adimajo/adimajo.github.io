@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Creator: fig2dev Version 3.2 Patchlevel 5-alpha7 -->
+
+<!-- CreationDate: Wed Jan  2 18:51:37 2008 -->
+
+<!-- Magnification: 1.050 -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="5.2796021in"
+   height="3.9119101in"
+   viewBox="3763 239 6307.63 4744.8608"
+   version="1.1"
+   id="svg5462"
+   sodipodi:docname="Plusieurs_separatrice_lineaire.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <metadata
+     id="metadata5468">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs5466" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2100"
+     inkscape:window-height="1234"
+     id="namedview5464"
+     showgrid="false"
+     inkscape:zoom="0.59959351"
+     inkscape:cx="249.04892"
+     inkscape:cy="191.88888"
+     inkscape:window-x="221"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5462" />
+  <g
+     style="fill:none;stroke:#000000;stroke-width:0.025in"
+     id="g5460"
+     transform="translate(-67.609147,-166.08906)">
+    <!-- Line -->
+    <polyline
+       points="6377,3070 8834,614 "
+       style="stroke:#d10000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5364" />
+    <!-- Line -->
+    <polyline
+       points="6377,3070 4488,4960 "
+       style="stroke:#d10000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5366" />
+    <!-- Line -->
+    <polyline
+       points="6377,723 6377,4582 "
+       style="stroke:#000000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5368" />
+    <!-- Arrowhead on XXXpoint -->
+    <polyline
+       points="6409 852 6377 726 6346 852 "
+       style="stroke:#000000;stroke-width:8"
+       id="polyline5370" />
+    <!-- Line -->
+    <polyline
+       points="4251,3070 9953,3070 "
+       style="stroke:#000000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5372" />
+    <!-- Arrowhead on XXXpoint -->
+    <polyline
+       points="9824 3102 9950 3070 9824 3039 "
+       style="stroke:#000000;stroke-width:8"
+       id="polyline5374" />
+    <!-- Line -->
+    <polyline
+       points="4960,4960 8551,519 "
+       style="stroke:#d10000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5376" />
+    <!-- Line -->
+    <polyline
+       points="4346,4677 9165,897 "
+       style="stroke:#d10000;stroke-width:8;stroke-linecap:butt;stroke-linejoin:miter"
+       id="polyline5378" />
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5102"
+       y="3685"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5380"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5999"
+       y="4582"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5382"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6047"
+       y="5196"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5384"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5622"
+       y="2173"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5386"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5055"
+       y="2362"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5388"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="4346"
+       y="2740"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5390"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="4629"
+       y="2078"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5392"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="4913"
+       y="1464"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5394"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5858"
+       y="2598"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5396"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5622"
+       y="3212"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5398"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="4393"
+       y="3496"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5400"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="3779"
+       y="3874"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5402"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6755"
+       y="1937"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5404"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6803"
+       y="944"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5406"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7889"
+       y="614"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5408"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6850"
+       y="3732"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5410"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7984"
+       y="3779"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5412"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7417"
+       y="3448"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5414"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7086"
+       y="4299"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5416"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6708"
+       y="4818"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5418"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7370"
+       y="5007"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5420"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="8362"
+       y="4818"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5422"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="8314"
+       y="2173"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5424"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="8503"
+       y="1606"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5426"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9307"
+       y="1275"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5428"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9212"
+       y="1984"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5430"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="8976"
+       y="2645"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5432"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9590"
+       y="2692"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5434"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5669"
+       y="1464"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5436"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9968"
+       y="1653"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5438"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9070"
+       y="3921"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5440"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5385"
+       y="5055"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5442"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6141"
+       y="4110"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5444"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="9070"
+       y="661"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5446"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">y=x</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="10062"
+       y="3165"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5448"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">x</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="6330"
+       y="519"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5450"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">y</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7275"
+       y="2692"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5452"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="5622"
+       y="4346"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5454"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">-</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="4677"
+       y="4299"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5456"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+    <!-- Text -->
+    <text
+       xml:space="preserve"
+       x="7700"
+       y="1275"
+       font-style="normal"
+       font-weight="normal"
+       font-size="252"
+       id="text5458"
+       style="font-style:normal;font-weight:normal;font-size:252px;font-family:Times;text-anchor:start;fill:#000000;stroke:#000000">+</text>
+  </g>
+</svg>
