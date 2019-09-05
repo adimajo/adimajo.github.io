@@ -1,0 +1,932 @@
+<!DOCTYPE HTML>
+<!--
+	Read Only by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Adrien Ehrhardt - Inria, CA CF</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<link rel="icon" type="image/png" href="images/favicon.png" />
+	</head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<header>
+					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
+					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
+					<p>PhD Student @Lille University & @Inria<br />
+					in Machine Learning applied to Finance<br />
+					I also work for Crédit Agricole Consumer Finance</p>
+				</header>
+				<nav id="nav">
+                <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#">Informations CIFRE</a></li>
+                <li><a href="scoring.html">Intro to Credit Scoring</a></li>
+                <li><a href="rejectinference.html">Reject Inference</a></li>
+                <li><a href="discretization.html">Discretization</a></li>
+                <li><a href="interaction_screening.html">Interaction screening</a></li>
+                <li><a href="logistic_trees.html">Logistic regression trees</a></li>
+                <li><a href="teaching.html">Teaching</a></li>
+                </ul>
+				</nav>
+				<footer>
+					<ul class="icons">
+						<!--<li><a href="https://www.linkedin.com/in/adrien-ehrhardt" class="icon fa-linkedin"><span class="label">Linked-In</span></a></li>-->
+						<!--<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>-->
+						<li><a href="https://www.facebook.com/adrien.ehrhardt.9" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="https://scholar.google.fr/citations?hl=fr&user=ISAbU0cAAAAJ&view_op=list_works" class="icon fa-google"><span class="label">Google</span></a></li>
+						<li><a href="https://www.github.com/adimajo/" class="icon fa-github"><span class="label">Github</span></a></li>
+						<li><a href="mailto:adrien.ehrhardt@centraliens-lille.org" class="icon fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+				</footer>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- One -->
+							<section id="one">
+								<div class="container">
+									<header class="major">
+										<h2>Reject Inference - Appendix</h2>
+									</header>
+                                    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+
+                                    <h2 id="fuzzy">Fuzzy augmentation</h2>
+                                    <p>Fuzzy augmentation can be found in <a href="#economix" class="citation" data-cites="economix">[1]</a>; it is the following procedure:</p>
+                                    <ol>
+                                        <li><p>Construct Scorecard “Known Good Bad” (KGB) <span class="math inline">\(\hat{\boldsymbol{\theta}}_\text{f}\)</span> with financed clients’ data (Figure <a href="#fuzzy:sfig1" data-reference-type="ref" data-reference="fuzzy:sfig1">[1a]</a>);</p></li>
+                                        <li><p>Calculate <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{\mathbf{x}}_{\text{nf}})\)</span> for rejects (Figure <a href="#fuzzy:sfig2" data-reference-type="ref" data-reference="fuzzy:sfig2">[1b]</a>);</p></li>
+                                        <li><p>Infer rejected client <span class="math inline"><em>i</em></span> as good with weight <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{\mathbf{x}}_{\text{nf}})\)</span> and as bad with weight</p>
+                                            <p><span class="math inline">\(1-p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{\mathbf{x}}_{\text{nf}})\)</span> (Figures <a href="#fuzzy:sfig2" data-reference-type="ref" data-reference="fuzzy:sfig2">[1b]</a> and <a href="#fuzzy:sfig3" data-reference-type="ref" data-reference="fuzzy:sfig3">[1c]</a>);</p></li>
+                                        <li><p>Calibrate a new scorecard with the “augmented” dataset (Figure <a href="#fuzzy:sfig4" data-reference-type="ref" data-reference="fuzzy:sfig4">[1d]</a>).</p></li>
+                                    </ol>
+                                    
+                                    <p><span id="fuzzy:sfig1" label="fuzzy:sfig1">[1a]</span></p>
+
+                                    <table>
+                                        <caption><span label="fuzzy:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}_{\text{f}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{f}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="fuzzy:sfig2" label="fuzzy:sfig2">[1b]</span></p>
+                                    
+                                    <table>
+                                        <caption><span label="fuzzy:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\(\hat{\boldsymbol{\mathbf{y}}}_{\text{nf}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{nf}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.68</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.10</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.35</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="fuzzy:sfig3" label="fuzzy:sfig3">[1c]</span></p>
+
+                                    <table>
+                                        <caption><span label="fuzzy:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\(\hat{\boldsymbol{\mathbf{y}}}_{\text{nf}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{nf}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.32</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.90</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.65</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="fuzzy:sfig4" label="fuzzy:sfig4">[1d]</span></p>
+
+                                    <table>
+                                        <caption><span label="fuzzy:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.68</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.10</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.35</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.32</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.90</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.65</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p>Clearly:</p>
+                                    <p><br /><span class="math display">$$\forall j = 1, \ldots, d, \: \frac{\partial \sum_{i=n+1}^{m+n} \sum_{y_i = 0}^{1} p_{\hat{\boldsymbol{\theta}}_\text{f}}(y_i| \boldsymbol{x}_i)\ln (p_{\boldsymbol{\theta}}(y_i| \boldsymbol{x}_i))}{\partial \theta_j} = 0 \Leftrightarrow \theta = \hat{\boldsymbol{\theta}}_{\text{f}},$$</span><br /></p>
+                                    <p>such that: <br /><span class="math display">$$\arg\!\max_{\boldsymbol{\theta} \in \Theta}  \sum_{i=n+1}^{m+n} \sum_{y_i = 0}^{1} p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(y_i| \boldsymbol{x}_i)\ln (p_{\boldsymbol{\theta}}(y_i| \boldsymbol{x}_i)) = \hat{\boldsymbol{\theta}}_{\text{f}},$$</span><br /></p>
+                                    <p>and finally: <br /><span class="math display">$$\arg\!\max_{\boldsymbol{\theta} \in \Theta} \ell(\boldsymbol{\theta};\mathcal{T}_{c}) = \arg\!\max_{\boldsymbol{\theta} \in \Theta} \ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}}) = \hat{\boldsymbol{\theta}}_{\text{f}}.$$</span><br /></p>
+                                    <p>To conclude, this method will not change the estimated parameters of any discriminant model, asymptotically and with a finite set of observations, regardless of any assumption on the missingness mechanism or the true model hypothesis. In other words, Fuzzy Augmentation has no effect on the <span class="math inline">\(\text{KL}\)</span> divergence, making this method useless because it is no different than the financed clients model.</p>
+                                    <h2 id="reclassification">Reclassification</h2>
+                                    <p>Reclassification can be found in <a href="#RI6" class="citation" data-cites="RI6">[2]</a>, also sometimes referred to as extrapolation as in <a href="#banasik" class="citation" data-cites="banasik">[3]</a>; it is the following procedure:</p>
+                                    <ol>
+                                        <li><p>Construct Scorecard “Known Good Bad” (KGB) <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\text{f}}\)</span> with financed clients’ data (Figure <a href="#reclass:sfig1" data-reference-type="ref" data-reference="reclass:sfig1">[2a]</a>);</p></li>
+                                        <li><p>Calculate <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{x})\)</span> for rejects;</p></li>
+                                        <li><p>Infer default status of rejected client <span class="math inline"><em>i</em></span> if <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{x}) &gt; \text{threshold}\)</span>; typically threshold <span class="math inline"> = 0.5</span> (Figure <a href="#reclass:sfig2" data-reference-type="ref" data-reference="reclass:sfig2">[2b]</a>);</p></li>
+                                        <li><p>Calibrate a new scorecard with the “augmented” dataset (Figure <a href="#reclass:sfig3" data-reference-type="ref" data-reference="reclass:sfig3">[2c]</a>).</p></li>
+                                    </ol>
+                                    
+                                    <p><span id="reclass:sfig1" label="reclass:sfig1">[2a]</span></p>
+                                    
+                                    <table>
+                                        <caption><span label="reclass:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}_{\text{f}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{f}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="reclass:sfig2" label="reclass:sfig2">[2b]</span></p>
+
+                                    <table>
+                                        <caption><span label="reclass:sfig2"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_{\text{f}}}(1|\boldsymbol{\mathbf{x}})\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\(\hat{\boldsymbol{\mathbf{y}}}_{\text{nf}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{nf}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.68</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.10</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.35</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="reclass:sfig3" label="reclass:sfig3">[2c]</span></p>
+
+                                    <table>
+                                        <caption><span label="reclass:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <h2 id="augmentation">Augmentation</h2>
+                                    <p>Augmentation can be found in <a href="#RI6" class="citation" data-cites="RI6">[2]</a>. It is also documented as a “Re-Weighting method” in <a href="#saporta" class="citation" data-cites="saporta">[4]</a>, <a href="#banasik" class="citation" data-cites="banasik">[3]</a> and <a href="#economix" class="citation" data-cites="economix">[1]</a>.</p>
+                                    <ol>
+                                        <li><p>Construct Scorecard “Accept Reject” (ACRJ) <span class="math inline">\(\hat{\boldsymbol{\phi}}\)</span> with financed clients’ data on target variable <span class="math inline"><em>Z</em></span> (Figure <a href="#augment:sfig1" data-reference-type="ref" data-reference="augment:sfig1">[3a]</a>);</p></li>
+                                        <li><p>Create <span class="math inline"><em>K</em></span> score bands <span class="math inline"><em>B</em><sub>1</sub>, …, <em>B</em><sub><em>K</em></sub></span> according to <span class="math inline">\(p_{\hat{\boldsymbol{\phi}}}(z | \boldsymbol{x})\)</span>;</p></li>
+                                        <li><p>Compute in each score band <span class="math inline">\(\hat{p}(\text{f}|p_{\hat{\boldsymbol{\phi}}}(z | \boldsymbol{x}) \in B_k) = \dfrac{|B_k|}{|\text{F}|}\)</span> (Figure <a href="#augment:sfig2" data-reference-type="ref" data-reference="augment:sfig2">[3b]</a>);</p></li>
+                                        <li><p>Construct a new scorecard on target variable Good/Bad with financed clients’ data re-weighted (Figure <a href="#augment:sfig3" data-reference-type="ref" data-reference="augment:sfig3">[3c]</a>).</p></li>
+                                    </ol>
+                                    
+                                    <p><span id="augment:sfig1" label="augment:sfig1">[3a]</span></p>
+                                    
+                                    <table>
+                                        <caption><span label="augment:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline"><strong>z</strong></span></strong></th>
+                                                <th style="text-align: left;"><strong>Score-band</strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">1</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="augment:sfig2" label="augment:sfig2">[3b]</span></p>
+
+                                    <table>
+                                        <caption><span label="augment:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Score-band</strong></th>
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">2</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">K</td>
+                                                <td style="text-align: left;">1.1</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="augment:sfig3" label="augment:sfig3">[3c]</span></p>
+
+                                    <table>
+                                        <caption><span label="augment:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong>Score-band</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">2</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.123</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">2</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.432</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">2</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1.1</td>
+                                                <td style="text-align: left;">K</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.962</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1.1</td>
+                                                <td style="text-align: left;">K</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.812</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <h2 id="Twins">Twins</h2>
+                                    <p>The twins method is an internal method at <span data-acronym-label="cacf" data-acronym-form="singular+short">cacf</span> documented in <a href="#groupe" class="citation" data-cites="groupe">[5]</a> (confidential) where Figure <a href="#fig:twins" data-reference-type="ref" data-reference="fig:twins">[4]</a> is given; it consists in the following procedure:</p>
+                                    <ol>
+                                        <li><p>Develop KGB (“Known Good/Bad”) scorecard <span class="math inline">\(\hat{\boldsymbol{\theta}}_\text{f}\)</span> on financed clients’ data predicting <span class="math inline">\(\boldsymbol{\mathbf{y}}_\text{f}\)</span> given <span class="math inline">\(\boldsymbol{\mathbf{x}}_\text{f}\)</span> (Figure <a href="#twins:sfig1" data-reference-type="ref" data-reference="twins:sfig1">[5a]</a>);</p></li>
+                                        <li><p>Develop ACRJ (Accept/Reject) scorecard <span class="math inline">\(\hat{\boldsymbol{\phi}}\)</span> on all applicants predicting <span class="math inline"><strong>z</strong></span> given <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>; this gives us <span class="math inline">\(\hat{\boldsymbol{\phi}}\)</span> (Figure <a href="#twins:sfig2" data-reference-type="ref" data-reference="twins:sfig2">[5b]</a>);</p></li>
+                                        <li><p>Develop a scorecard on financed clients’ data predicting <span class="math inline">\(\boldsymbol{\mathbf{y}}_\text{f}\)</span> based solely on <span class="math inline">\((1,\boldsymbol{\mathbf{x}}_\text{f})' \hat{\boldsymbol{\theta}}_\text{f}\)</span> and <span class="math inline">\((1,\boldsymbol{\mathbf{x}}_\text{f})' \hat{\boldsymbol{\phi}}\)</span>; this gives us <span class="math inline">\(\hat{\boldsymbol{\theta}}^{\text{twins}}\)</span> (Figure <a href="#twins:sfig3" data-reference-type="ref" data-reference="twins:sfig3">[5c]</a>);</p></li>
+                                        <li><p>Calculate <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}^{\text{twins}}}(1 | \boldsymbol{x})\)</span> on rejected applicants and reintegrate them twice in the training dataset like we did with fuzzy augmentation in Section <a href="#fuzzy" data-reference-type="ref" data-reference="fuzzy">1.1</a> (Figure <a href="#twins:sfig4" data-reference-type="ref" data-reference="twins:sfig4">[5d]</a>);</p></li>
+                                        <li><p>Develop a new scorecard on all applicants’ data.</p></li>
+                                    </ol>
+                                    
+                                    <figure>
+                                        <img src="figures/appendix/processusTwins.png" alt="The accompanying Figure of the Twins method in the internal documentation." id="fig:twins" style="width:100.0%" /><figcaption>[4] The accompanying Figure of the Twins method in the internal documentation.<span label="fig:twins"></span></figcaption>
+                                    </figure>
+                                    
+                                    <p><span id="twins:sfig1" label="twins:sfig1">[5a]</span></p>
+                                    
+                                    <table>
+                                        <caption><span label="twins:sfig1"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                                <th style="text-align: left;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">0.361</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">0.402</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">0.294</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="twins:sfig2" label="twins:sfig2">[5b]</span></p>
+
+                                    <table>
+                                        <caption><span label="twins:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline"><strong>z</strong></span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                                <th style="text-align: left;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.562</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.910</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.430</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.361</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.402</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;"></td>
+                                                <td style="text-align: left;">0.294</td>
+                                                <td style="text-align: left;"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="twins:sfig3" label="twins:sfig3">[5c]</span></p>
+
+                                    <table>
+                                        <caption><span label="twins:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\((1,\boldsymbol{\mathbf{x}}_\text{f})' \hat{\boldsymbol{\theta}}_\text{f}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\((1,\boldsymbol{\mathbf{x}}_\text{f})' \hat{\boldsymbol{\phi}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1.3</td>
+                                                <td style="text-align: left;">2.5</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">3.1</td>
+                                                <td style="text-align: left;">4.5</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">-0.3</td>
+                                                <td style="text-align: left;">0.4</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">-1.2</td>
+                                                <td style="text-align: left;">-0.5</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">-0.4</td>
+                                                <td style="text-align: left;">0.3</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">NA</td>
+                                                <td style="text-align: left;">-2.0</td>
+                                                <td style="text-align: left;">-2.5</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="twins:sfig4" label="twins:sfig4">[5d]</span></p>
+
+                                    <table>
+                                        <caption><span label="twins:sfig4"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\(\hat{\boldsymbol{\mathbf{y}}}_{\text{nf}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{nf}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.64</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.361</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.73</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.402</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.44</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.294</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.36</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.361</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">0.27</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.402</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">0.37</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.294</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <p>Following notations introduced in Chapter <a href="#chap2" data-reference-type="ref" data-reference="chap2">[chap2]</a>, we have: <br /><span class="math display">$$\ell(\boldsymbol{\theta};(\boldsymbol{1},\boldsymbol{\mathbf{x}}_{\text{f}})' \hat{\boldsymbol{\phi}}, (\boldsymbol{1},\boldsymbol{\mathbf{x}}_{\text{f}})' \hat{\boldsymbol{\theta}}_\text{f}, \boldsymbol{\mathbf{y}}_{\text{f}}) = \sum_{i=1}^{n} \ln(p_{\boldsymbol{\theta}}(y_i | (1, \boldsymbol{x}_i)' \hat{\boldsymbol{\theta}}_{\text{f}}, (1, \boldsymbol{x}_i)' \hat{\boldsymbol{\phi}})).$$</span><br /> We can rewrite <span class="math inline">\(\ell(\boldsymbol{\theta};(\boldsymbol{1},\boldsymbol{\mathbf{x}}_{\text{f}})' \hat{\boldsymbol{\phi}}, (\boldsymbol{1},\boldsymbol{\mathbf{x}}_{\text{f}})' \hat{\boldsymbol{\theta}}_\text{f}, \boldsymbol{\mathbf{y}}_{\text{f}})\)</span> by remarking that the logit of <span class="math inline">\(p_{\boldsymbol{\theta}}(y_i | (1, \boldsymbol{x}_i)' \hat{\boldsymbol{\theta}}_{\text{f}}, (1, \boldsymbol{x}_i)' \hat{\boldsymbol{\phi}})\)</span> is a linear combination of <span class="math inline">\(\boldsymbol{x}\)</span>. We know that <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\text{f}} \in \arg\!\max_{\boldsymbol{\theta} \in \Theta} \ell(\boldsymbol{\theta};\boldsymbol{\mathbf{x}}_{\text{f}},\boldsymbol{\mathbf{y}}_{\text{f}})\)</span> so that under the identifiability assumption, this method will give the same results as <span class="math inline">\(\hat{\boldsymbol{\theta}}^{\text{f}}\)</span>. In terms of <span class="math inline">\(\text{KL}\)</span> divergence and as for Fuzzy Augmentation, this method is useless because it is no different than the financed clients model.</p>
+                                    <h2 id="Parceling">Parcelling</h2>
+                                    <p>Parcelling is a process of reweighing according to the probability of default by score-band that is adjusted by the credit modeler. It has been documented in <a href="#saporta" class="citation" data-cites="saporta">[4]</a>, <a href="#banasik" class="citation" data-cites="banasik">[3]</a> and <a href="#RI6" class="citation" data-cites="RI6">[2]</a>, as well as in <a href="#groupe" class="citation" data-cites="groupe">[5]</a> where Figure <a href="#fig:parceling" data-reference-type="ref" data-reference="fig:parceling">[6]</a> is given.</p>
+                                    <ol>
+                                        <li><p>Construct Scorecard “Known Good Bad” (KGB) <span class="math inline">\(\hat{\boldsymbol{\theta}}_\text{f}\)</span> with financed clients’ data (Figure <a href="#parcel:sfig1" data-reference-type="ref" data-reference="parcel:sfig1">[7a]</a>);</p></li>
+                                        <li><p>Create <span class="math inline"><em>K</em></span> score bands <span class="math inline"><em>B</em><sub>1</sub>, …, <em>B</em><sub><em>K</em></sub></span> according to <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_\text{f}}(1 | \boldsymbol{x})\)</span>;</p></li>
+                                        <li><p>Compute the observed default rate for each band <span class="math inline">\(T(k) = \dfrac{|\text{Bad financed in } B_k|}{|B_k|}\)</span>, <span class="math inline">1 ≤ <em>k</em> ≤ <em>K</em></span>;</p></li>
+                                        <li><p>Infer for each band the not financed default rate <span class="math inline"><em>U</em>(<em>k</em>) = <em>ϵ</em><sub><em>k</em></sub><em>T</em>(<em>k</em>)</span> where <span class="math inline">1 &lt; <em>ϵ</em><sub>1</sub> &lt; … &lt; <em>ϵ</em><sub><em>k</em></sub> &lt; … &lt; <em>ϵ</em><sub><em>K</em></sub></span> (Figure <a href="#parcel:sfig2" data-reference-type="ref" data-reference="parcel:sfig2">[7b]</a>);</p></li>
+                                        <li><p>Reintegrate 2 times each rejected applicant from <span class="math inline"><em>B</em><sub><em>k</em></sub></span> with weight <span class="math inline"><em>U</em>(<em>k</em>)</span> as bad and weight <span class="math inline">1 − <em>U</em>(<em>k</em>)</span> as good, like the Fuzzy Augmentation method in Section <a href="#fuzzy" data-reference-type="ref" data-reference="fuzzy">1.1</a> (Figure <a href="#parcel:sfig3" data-reference-type="ref" data-reference="parcel:sfig3">[7c]</a>);</p></li>
+                                        <li><p>Construct the final scorecard.</p></li>
+                                    </ol>
+                                    
+                                    <figure>
+                                        <img src="figures/appendix/processusParcelling.png" alt="The accompanying Figure of the Parceling method in the internal documentation." id="fig:parceling" style="width:100.0%" /><figcaption>[6] The accompanying Figure of the Parceling method in the internal documentation.<span label="fig:parceling"></span></figcaption>
+                                    </figure>
+                                    
+                                    <p><span id="parcel:sfig1" label="twins:sfig1">[7a]</span></p>
+
+                                    <table>
+                                        <caption><span label="parcel:sfig1"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}_{\text{f}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}_{\text{f}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="parcel:sfig2" label="twins:sfig2">[7b]</span></p>
+
+                                    <table>
+                                        <caption><span label="parcel:sfig2"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Score-band</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline"><em>T</em></span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline"><em>U</em></span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.5</td>
+                                                <td style="text-align: left;">0.8</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                                <td style="text-align: left;">...</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">K</td>
+                                                <td style="text-align: left;">0.01</td>
+                                                <td style="text-align: left;">0.04</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p><span id="parcel:sfig3" label="twins:sfig3">[7c]</span></p>
+
+                                    <table>
+                                        <caption><span label="parcel:sfig3"></span></caption>
+                                        <thead>
+                                            <tr class="header">
+                                                <th style="text-align: left;"><strong>Weight</strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{y}}}\)</span></strong></th>
+                                                <th style="text-align: left;"><strong><span class="math inline">\({\boldsymbol{\mathbf{x}}}\)</span></strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.562</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.910</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.430</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0.347</td>
+                                            </tr>
+                                            <tr class="odd">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.140</td>
+                                            </tr>
+                                            <tr class="even">
+                                                <td style="text-align: left;">1</td>
+                                                <td style="text-align: left;">0</td>
+                                                <td style="text-align: left;">0.295</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <h2 id="subsec:app_reject_sim">Simulation of reject inference methods applied to multivariate gaussian data</h2>
+                                    <p>This early work aimed at comparing several reject inference methods in the well-specified model-case for 8 multivariate Gaussian features on Figure <a href="#fig:simu_4var" data-reference-type="ref" data-reference="fig:simu_4var">[fig:simu_4var]</a> and 20 features on Figure <a href="#fig:simu_30var" data-reference-type="ref" data-reference="fig:simu_30var">[fig:simu_30var]</a> in terms of error rate. The horizontal axis represents the cut-off value of a <span data-acronym-label="lr" data-acronym-form="singular+short">lr</span> that simulates the acceptance / rejection mechanism <span class="math inline">\(p_{\boldsymbol{\phi}}(z | \boldsymbol{x})\)</span>, such that it roughly corresponds to the fraction of missing labels <span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span>. In this setting, the semi-supervised generative approach obviously yields better results since the data lies in its restricted hypothesis space and it is able to use the predictors with missing labels <span class="math inline">\(\boldsymbol{\mathbf{x}}_{\text{nf}}\)</span>. As explained thoroughly in Chapter <a href="#chap2" data-reference-type="ref" data-reference="chap2">[chap2]</a>, standard <span data-acronym-label="lr" data-acronym-form="singular+short">lr</span> and Augmentation perform similarly (since they are both well-specified models and we are in a <span data-acronym-label="mar" data-acronym-form="singular+short">mar</span> setting). Parcelling does not work well since it is designed for a <span data-acronym-label="mnar" data-acronym-form="singular+short">mnar</span> setting. In presence of well-separated data, Reclassification works well with 20 features since the true decision boundary is “sharp” (see the very small error rate) such that <span class="math inline">\(\arg\!\max_y \hat{p}(y | \boldsymbol{x}) \approx \max_y \hat{p}(y | \boldsymbol{x})\)</span>, which is less apparent with 8 features. In both cases, the mean of all features is <span class="math inline">0</span> (resp. <span class="math inline">1</span>) if <span class="math inline"><em>Y</em> = 0</span> (resp. <span class="math inline"><em>Y</em> = 1</span>) and the respective variance matrices are random positive definite matrices (see the Github repository of the manuscript at <a href="https://www.github.com/adimajo/manuscrit_these" class="uri">https://www.github.com/adimajo/manuscrit_these</a> to reproduce them).</p>
+                                    
+                                    <figure>
+                                        <img src="figures/chapitre2/reintegration_simu_4var.png" alt="" id="fig:simu_4var" style="width:100.00%" /><figcaption>[8]<span label="fig:simu_4var"></span></figcaption>
+                                    </figure>
+
+                                    <figure>
+                                        <img src="figures/chapitre2/reintegration_simu_20var.png" alt="" id="fig:simu_30var" style="width:100.00%" /><figcaption>[9]<span label="fig:simu_30var"></span></figcaption>
+                                    </figure>
+                                    
+                                    <h2 id="subsec:app_reject_real_method">Performance of other predictive models w.r.t. the acceptance level</h2>
+                                    <p>Also part of an earlier work, this section’s aim was to compare the performance of other “machine learning” models (although we purposely restricted our focus in Chapter <a href="#chap2" data-reference-type="ref" data-reference="chap2">[chap2]</a> to the <span data-acronym-label="lr" data-acronym-form="singular+short">lr</span>) to see if, when presented with the same data and in presence of a simulated acceptance / rejection mechanism as earlier showcased, it would not be of better interest to switch to a different model, although it was argued in Chapter <a href="#chap2" data-reference-type="ref" data-reference="chap2">[chap2]</a> that these models would not perform good under a <span data-acronym-label="mar" data-acronym-form="singular+short">mar</span> setting. The same datasets as in the previous section are used: the proposed models all perform poorer than <span data-acronym-label="lr" data-acronym-form="singular+short">lr</span> but most importantly their performance drops significantly with the proportion of simulated accepted clients. Some studies of the reject inference problem have focused on these “machine learning” models.</p>
+                                    
+                                    <figure>
+                                        <img src="figures/appendix/newmodelsdarty.png" alt="Performance resulting from the use of other predictive methods in terms of Gini on an Electronics loans dataset from cacf." style="width:100.0%" /><figcaption>Performance resulting from the use of other predictive methods in terms of Gini on an Electronics loans dataset from <span data-acronym-label="cacf" data-acronym-form="singular+short">cacf</span>.</figcaption>
+                                    </figure>
+                                    <p><span id="fig:darty_othermodels" label="fig:darty_othermodels">[10]</span></p>
+                                    
+                                    <figure>
+                                        <img src="figures/appendix/newmodelsdecathlon.png" alt="Performance resulting from the use of other predictive methods in terms of Gini on a Sports good loans dataset from cacf." style="width:100.0%" /><figcaption>Performance resulting from the use of other predictive methods in terms of Gini on a Sports good loans dataset from <span data-acronym-label="cacf" data-acronym-form="singular+short">cacf</span>.</figcaption>
+                                    </figure>
+                                    <p><span id="fig:decathlon_othermodels" label="fig:decathlon_othermodels">[11]</span></p>
+                                    
+                                    <figure>
+                                        <img src="figures/appendix/newmodelsm3web.png" alt="Performance resulting from the use of other predictive methods in terms of Gini on a Standard loans dataset from cacf." style="width:100.0%" /><figcaption>Performance resulting from the use of other predictive methods in terms of Gini on a Standard loans dataset from <span data-acronym-label="cacf" data-acronym-form="singular+short">cacf</span>.</figcaption>
+                                    </figure>
+                                    <p><span id="fig:M3_othermodels" label="fig:M3_othermodels">[12]</span></p>
+                                    
+
+                                    <h4>Références</h4>
+                                    
+                                    <table>
+
+                                        <tr valign="top">
+                                            <td align="right" class="bibtexnumber">
+                                                [<a name="economix">1</a>]
+                                            </td>
+                                            <td class="bibtexitem">
+                                                Ha&nbsp;Thu Nguyen.
+                                                Reject inference in application scorecards: evidence from France.
+                                                Technical report, University of Paris West-Nanterre la Défense,
+                                                EconomiX, 2016.
+                                                [&nbsp;<a href="chapitre2_bib.html#economix">bib</a>&nbsp;|
+                                                <a href="http://economix.fr/pdf/dt/2016/WP_EcoX_2016-10.pdf">.pdf</a>&nbsp;]
+                                                
+                                            </td>
+                                        </tr>
+
+                                        <tr valign="top">
+                                            <td align="right" class="bibtexnumber">
+                                                [<a name="RI6">2</a>]
+                                            </td>
+                                            <td class="bibtexitem">
+                                                Emmanuel Viennet, Françoise&nbsp;Fogelman Soulié, and Benoît Rognier.
+                                                Evaluation de techniques de traitement des refusés pour l'octroi de
+                                                crédit.
+                                                <em>arXiv preprint cs/0607048</em>, 2006.
+                                                [&nbsp;<a href="chapitre2_bib.html#RI6">bib</a>&nbsp;|
+                                                <a href="http://arxiv.org/abs/cs/0607048">http</a>&nbsp;]
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr valign="top">
+                                            <td align="right" class="bibtexnumber">
+                                                [<a name="banasik">3</a>]
+                                            </td>
+                                            <td class="bibtexitem">
+                                                John Banasik and Jonathan Crook.
+                                                Reject inference, augmentation, and sample selection.
+                                                <em>European Journal of Operational Research</em>, 183(3):1582-1594,
+                                                2007.
+                                                [&nbsp;<a href="chapitre2_bib.html#banasik">bib</a>&nbsp;|
+                                                <a href="http://www.sciencedirect.com/science/article/pii/S0377221706011969">http</a>&nbsp;]
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr valign="top">
+                                            <td align="right" class="bibtexnumber">
+                                                [<a name="saporta">4</a>]
+                                            </td>
+                                            <td class="bibtexitem">
+                                                Asma Guizani, Besma Souissi, Salwa&nbsp;Ben Ammou, and Gilbert Saporta.
+                                                Une comparaison de quatre techniques d'inférence des refusés dans
+                                                le processus d'octroi de crédit.
+                                                In <em>45 emes Journées de statistique</em>, 2013.
+                                                [&nbsp;<a href="chapitre2_bib.html#saporta">bib</a>&nbsp;|
+                                                <a href="http://cedric.cnam.fr/fichiers/art_2753.pdf">.pdf</a>&nbsp;]
+                                                
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr valign="top">
+                                            <td align="right" class="bibtexnumber">
+                                                [<a name="groupe">5</a>]
+                                            </td>
+                                            <td class="bibtexitem">
+                                                Cr&eacute;dit Groupe.
+                                                Scorecard development methodology guidelines.
+                                                <em>Cr&eacute;dit Agricole Internal Guidelines</em>, 2015.
+                                                [&nbsp;<a href="chapitre2_bib.html#groupe">bib</a>&nbsp;]
+                                                
+                                            </td>
+                                        </tr>
+
+
+
+                                    </table>
+
+								</div>
+							</section>
+
+							<section id="footer">
+						<div class="container">
+							<ul class="copyright">
+								<li>&copy; Adrien Ehrhardt. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
