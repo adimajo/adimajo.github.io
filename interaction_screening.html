@@ -1,0 +1,781 @@
+<!DOCTYPE HTML>
+<!--
+	Read Only by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Adrien Ehrhardt - Inria, CA CF</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<link rel="icon" type="image/png" href="images/favicon.png" />
+	</head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<header>
+					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
+					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
+					<p>PhD Student @Lille University & @Inria<br />
+					in Machine Learning applied to Finance<br />
+					I also work for Crédit Agricole Consumer Finance</p>
+				</header>
+				<nav id="nav">
+					<ul>
+					        <li><a href="index.html">Home</a></li>
+						<li><a href="cifre.html">Informations CIFRE</a></li>
+						<li><a href="scoring.html">Intro to Credit Scoring</a></li>
+						<li><a href="rejectinference.html">Reject Inference</a></li>
+                        <li><a href="discretization.html">Discretization</a></li>
+                        <li><a href="interaction_screening.html" class="active">Interaction screening</a></li>
+                        <li><a href="logistic_trees.html">Logistic regression trees</a></li>
+                        <li><a href="teaching.html">Teaching</a></li>
+					</ul>
+				</nav>
+				<footer>
+					<ul class="icons">
+						<!--<li><a href="https://www.linkedin.com/in/adrien-ehrhardt" class="icon fa-linkedin"><span class="label">Linked-In</span></a></li>-->
+						<!--<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>-->
+						<li><a href="https://www.facebook.com/adrien.ehrhardt.9" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="https://scholar.google.fr/citations?hl=fr&user=ISAbU0cAAAAJ&view_op=list_works" class="icon fa-google"><span class="label">Google</span></a></li>
+						<li><a href="https://www.github.com/adimajo/" class="icon fa-github"><span class="label">Github</span></a></li>
+						<li><a href="mailto:adrien.ehrhardt@centraliens-lille.org" class="icon fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+				</footer>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- One -->
+							<section id="one">
+								<div class="container">
+									<header class="major">
+										<h2>Interaction discovery for logistic regression</h2>
+									</header>
+                                    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+                                    <p>N.B.: ce post s’inspire librement de mon manuscrit de thèse.</p>
+
+                                    <p>Continuing our pursuit of interpretable representation learning algorithms for logistic regression, we tackle in this post a common problem in <em>Credit Scoring</em> and other application contexts relying either on logistic regression or additive models of the form <span class="math inline">\(f(y) = \sum_{j=1}^d \boldsymbol{q}_j(x_j)' \boldsymbol{\theta}_j\)</span>. To further reduce the model bias and thus obtain better predictive performance while maintaining interpretability, <em>Credit Scoring</em> practitioners are used to introducing pairwise interactions.</p>
+                                    <h2 id="sec:xor">Motivation: XOR function</h2>
+                                    <p>As described in the introduction, logistic regression is linear in its inputs which does not allow to take into account conditional dependency: the change of slope of a feature’s log-odds given another (moderator) feature (see <a href="#berry2010testing" class="citation" data-cites="berry2010testing">(25)</a>). This problem is often dealt with by sparsely introducing “interactions”, <em>i.e.</em> products of two features. Unfortunately, this leads again to a model selection challenge as the number of pairs of features is <span class="math inline">\(\dfrac{d(d-1)}{2}\)</span>. We denote by <span class="math inline">\(\boldsymbol{\delta}\)</span> the triangular inferior matrix with <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub> = 1</span> if <span class="math inline"><em>k</em> &lt; ℓ</span> and features <span class="math inline"><em>k</em></span> and <span class="math inline">ℓ</span> “interact” in the logistic regression in the sense of <a href="#berry2010testing" class="citation" data-cites="berry2010testing">(25)</a>. The logistic regression with interactions <span class="math inline">\(\boldsymbol{\delta}\)</span> is thus: <br /><span class="math display">$$\label{eq:reglog_sans}
+                                        %\text{logit}[p_{\boldsymbol{\theta}}(1|\boldsymbol{q}(\boldsymbol{x}),\boldsymbol{\delta})] = \theta_{0} + \sum_{j=1}^d \boldsymbol{q}_j(x_j)' \boldsymbol{\theta}_j + \sum_{1 \leq k &lt; \ell \leq d} \delta_{k,\ell} \sigma( \boldsymbol{\theta}_{k,\ell} \odot \boldsymbol{q}_k(x_k) \boldsymbol{q}_\ell(x_\ell)' ),
+                                        \text{logit}[p_{\boldsymbol{\theta}}(1|\boldsymbol{q}(\boldsymbol{x}),\boldsymbol{\delta})] = \theta_{0} + \sum_{j=1}^d \boldsymbol{q}_j(x_j)' \boldsymbol{\theta}_j + \sum_{1 \leq k &lt; \ell \leq d} \delta_{k,\ell} \boldsymbol{q}_k(x_k)' \boldsymbol{\theta}_{k,\ell} \boldsymbol{q}_\ell(x_\ell),$$</span><br /> where <span class="math inline">\(\boldsymbol{\theta}_{j} = (\theta_j^1, \theta_j^{m_j})\)</span>, <span class="math inline">\(\boldsymbol{\theta}_{k,\ell} = (\theta_{k,\ell}^{r,t})_{1 \leq r \leq m_k, 1 \leq t \leq m_\ell}\)</span> and for all features <span class="math inline"><em>j</em></span>, <span class="math inline">\(m_j\)</span> is set as the “reference” value and consequently for all <span class="math inline"><em>j</em></span>, <span class="math inline">\(\theta_{j}^{m_j}=0\)</span> and for all <span class="math inline">1 ≤ <em>k</em> &lt; ℓ ≤ <em>d</em></span>, <span class="math inline"><em>θ</em><sub><em>k</em>, ℓ</sub><sup><em>m</em><sub><em>k</em></sub>, <em>m</em><sub>ℓ</sub></sup> = 0</span>. The resulting coefficient <span class="math inline">\(\boldsymbol{\theta}\)</span> is the vector of all main effects <span class="math inline">\((\boldsymbol{\theta}_j)_1^d\)</span> and the interaction coefficients <span class="math inline">\((\boldsymbol{\theta}_{k,\ell})_{1 \leq k,\ell \leq d}\)</span>.</p>
+                                    <p>Since, in presence of an interaction between <span class="math inline"><em>k</em></span> and <span class="math inline">ℓ</span>, <span class="math inline">\(\boldsymbol{\theta}_{k}\)</span> already encodes the log-odd ratio of feature <span class="math inline"><em>k</em></span> conditionally to <span class="math inline">ℓ</span> being at its reference value <span class="math inline"><em>m</em><sub>ℓ</sub></span>, <span class="math inline"><em>θ</em><sub><em>k</em>, ℓ</sub><sup>1, <em>m</em><sub>ℓ</sub></sup>, …, <em>θ</em><sub><em>k</em>, ℓ</sub><sup><em>m</em><sub><em>k</em></sub> − 1, <em>m</em><sub>ℓ</sub></sup></span> are redundant and thus set to <span class="math inline">0</span>. Note that we could have removed the “main effect” <span class="math inline">\(\boldsymbol{\theta}_k\)</span> altogether instead (which is the classical, in-house formulation of interactions at <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>) but since we will be adding / removing interactions back and forth, the present formulation seems more adequate.</p>
+                                    <p>This formulation seems rather complicated visually and in terms of parameter dimension: a single interaction between two quantized features (or more broadly speaking, categorical features) amounts to adding <span class="math inline">(<em>m</em><sub><em>k</em></sub> − 1) ⋅ (<em>m</em><sub>ℓ</sub> − 1)</span> coefficients. Since we advocated “interpretable”, <em>i.e.</em> sparse, simple models to yield scorecards, it does not seem like a good idea. As a side note, interpretation of the resulting parameters can be rather tricky. The monographs <a href="#james2001interaction" class="citation" data-cites="james2001interaction">(1)</a>, <a href="#jaccard2003interaction" class="citation" data-cites="jaccard2003interaction">(2)</a> were really helpful and are sincerely recommended to the interested reader.</p>
+                                    <p>Nevertheless, as thoroughly explained in <a href="#berry2010testing" class="citation" data-cites="berry2010testing">(25)</a>, there are situations where interactions terms are unavoidable. A simple (but quite extreme) example is the XOR (exclusive or) function <span class="math inline"><em>f</em>(<em>x</em><sub>1</sub>, <em>x</em><sub>2</sub>) = (<em>x</em><sub>1</sub> + <em>x</em><sub>2</sub>) ⋅ (2 − <em>x</em><sub>1</sub> − <em>x</em><sub>2</sub>)</span> where <span class="math inline"><em>x</em><sub>1</sub>, <em>x</em><sub>2</sub> ∈ {0, 1}</span>. Such functions cannot be learnt by a standard logistic regression. For a more illustrative example, the broad field of medicine is often interested in knowing the factors of risks of a given disease and if these factors have additive or cumulative effects (see <a href="#morgan2014adversity" class="citation" data-cites="morgan2014adversity">(3)</a> for an example), <em>e.g.</em> risk of contracting disease A is doubled with factors B and C individually, but 6 times more when both factors are present. This is precisely what is observed in the <em>Credit Scoring</em> industry: we observe higher risk among workers than executives but when associated with the time spent in the current job position, workers with “stability” of employment may appear less risky than less “stable” executives in a non-additive way.</p>
+                                    <p>Moreover, the number of coefficients is nevertheless kept low by having few levels and few interactions, as emphasized by the <span class="math inline">\(\boldsymbol{\delta}\)</span> notation. Additionally and traditionally in <em>Credit Scoring</em>, so-called “main-effects”, <em>i.e.</em> features <span class="math inline">\(\boldsymbol{q}_k(x_k)\)</span> and <span class="math inline">\(\boldsymbol{q}_\ell(x_\ell)\)</span> are removed when their interaction term is present (<span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub> = 1</span>) because as stated earlier, on categorical features, it is strictly equivalent, which is not true in the general case (mixed data). In biostatistics for example, it is usually the contrary (interactions are only considered when main effects are present), as will be seen in the following section, where a literature review is given, alongside a reformulation of the problem.</p>
+                                    <p>Besides, we assume the dependence structure of Figure <a href="#fig:dep2" data-reference-type="ref" data-reference="fig:dep2">[1]</a> such that: <br /><span class="math display">$$\begin{aligned}
+                                        p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{x}) &amp; = p(\boldsymbol{\delta}), \label{indep:delta} \\
+                                        p(\boldsymbol{q}(\boldsymbol{x}) | \boldsymbol{\delta}) &amp; = p(\boldsymbol{q}(\boldsymbol{x})). \label{indep:qx}\end{aligned}$$</span><br /></p>
+                                    <figure>
+                                    <img src="figures/chapitre5/fig_dep.png" alt="" width="30%"/></span>
+                                    <figurecaption><a id="fig:dep2">[1]</a> Dependence structure</figurecaption>
+                                    </figure>
+
+                                    <h2 id="sec:pairwise">Pairwise interaction screening as a feature selection problem</h2>
+                                    <p>The following criterion can be used to select interactions: <br /><span class="math display">$$\label{eq:criterion_inter}
+                                        (\boldsymbol{q}^\star,\boldsymbol{\delta}^\star) = \arg\!\min_{\boldsymbol{q} \in \boldsymbol{q}, \boldsymbol{\delta} \in \{0,1\}^{\frac{d(d-1)}{2})}} \text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q},\boldsymbol{\delta}}),$$</span><br /> where <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\boldsymbol{q},\boldsymbol{\delta}}\)</span> is the <span data-acronym-label="mle" data-acronym-form="singular+short">MLE</span> of <span class="math inline">\(\boldsymbol{\theta}\)</span> given <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span>, <span class="math inline">\(\boldsymbol{q}\)</span> and <span class="math inline">\(\boldsymbol{\delta}\)</span>. Here, <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub></span> is an estimated parameter of the model and an additional <span class="math inline">\(\frac{d(d-1)}{2}\)</span> term shall be added to the penalization term <span class="math inline"><em>ν</em></span> of the BIC criterion. The combinatorics involved in this problem are much higher than those involved solely in the quantization problem, which already lead to an intractable greedy approach. For each feasible quantization scheme, there is now <span class="math inline">\(2^{\frac{d(d-1)}{2}}\)</span> models to test! In this section, we will first consider the discretization fixed and develop a stochastic approach similar to the one proposed for quantization.</p>
+                                    <p>With a fixed quantization scheme <span class="math inline">\(\boldsymbol{q}\)</span>, the above mentioned BIC criterion amounts to <span class="math inline">\(\boldsymbol{\delta}^\star = \arg\!\min_{\boldsymbol{\delta}} \text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q},\boldsymbol{\delta}})\)</span> which optimization through a greedy approach is intractable with more than a few features (<span class="math inline"><em>d</em> &gt; 10</span>). The first approach that seems straightforward in this setting is to simply see all <span class="math inline">\(\frac{d(d-1)}{2}\)</span> interactions as features to select from. It is worth mentioning that software to do so is available, for example in the <span class="sans-serif">R</span> package <em>glmulti</em> <a href="#calcagno2010glmulti" class="citation" data-cites="calcagno2010glmulti">(4)</a> which is not restricted to interaction screening but aims at selecting features based on <em>e.g.</em> the BIC criterion. It can build all subset models of the hypothesis space or, optionnally, conduct a random search using a genetic algorithm. However, with interactions, the search space is too vast to do such a brute force algorithm. In this potentially high-dimensional parameter space, the most computationnaly-effective approach is to resort to penalization. Various penalization approaches have been developed recently, among which LASSO <a href="#tibshirani1996regression" class="citation" data-cites="tibshirani1996regression">(5)</a> and its derivatives can effectively perform feature selection. A CIFRE PhD has even been dedicated to the subject with application to <em>Credit Scoring</em> <a href="#vital2016" class="citation" data-cites="vital2016">(24)</a>.</p>
+                                    <p>The penalization approach has been applied to the interaction screening problem, very often in biostatistics-related problems, <em>e.g.</em> gene-gene interactions. Its first use <a href="#park2007penalized" class="citation" data-cites="park2007penalized">(6)</a> relies on <span class="math inline"><em>L</em><sup>2</sup></span> regularization, for stability of estimation of the large number of coefficients, and forward stagewise selection of features to avoid a phenomenon where an interaction between a meaningful feature and a meaningless one would remain in the model: it would imply that the main effect coefficient of the meaningful feature could be lower, and thus preferable w.r.t. the <span class="math inline"><em>L</em><sup>2</sup></span> penalty. The LASSO has been applied to this problem as well <a href="#wu2009genome" class="citation" data-cites="wu2009genome">(7)</a> by first selecting features with the LASSO based solely on main effects, then selecting pairwise interactions among the selected main effects, again with the LASSO, which requires all main effects of the considered interactions to be present in the model. Rather than conducting such a two-stage procedure, which might greatly influence the considered interactions and does not work under the “weak hierarchy” hypothesis (only one of the features of a pairwise interaction need to be present as a main effect), a set of convex constraints is added to the LASSO in <a href="#bien2013lasso" class="citation" data-cites="bien2013lasso">(8)</a> such that main effects and pairwise interactions are selected in a one-shot procedure with the hierarchy constraint. Other stepwise methods have been proposed, <em>e.g.</em> relying on <span class="math inline"><em>χ</em><sup>2</sup></span> tests <a href="#wang2012interaction" class="citation" data-cites="wang2012interaction">(9)</a> or on a Reversible-Jump MCMC method <a href="#kooperberg2005identifiying" class="citation" data-cites="kooperberg2005identifying">(10)</a>, <a href="#schwender2007identification" class="citation" data-cites="schwender2007identification">(11)</a> which resembles what is proposed in this post but is not limited to pairwise interactions at the cost of added computational complexity. In a different setting, with much stricter hypotheses on the data, namely that they are Gaussian for each class, a statistical test involving the sample pairwise correlations is derived in <a href="#simon" class="citation" data-cites="simon">(12)</a> to characterize the probability of an interaction. Other works <a href="#fan2015innovated" class="citation" data-cites="fan2015innovated">(13)</a>, <a href="#li2018robust" class="citation" data-cites="li2018robust">(14)</a> focus on this setting and propose a stepwise procedure and a dimensionality reduction technique respectively. Finally, a much simpler intuition found in <a href="#berry2010testing" class="citation" data-cites="berry2010testing">(25)</a>, on which we rely in subsequent sections, is that testing for the presence of interaction in bivariate logistic regression (for all pairs of features) is roughly equivalent to the full multivariate logistic regression (in absence of correlation) but is much simpler since it amounts to construct <span class="math inline">2<sup><em>d</em>(<em>d</em> − 1)/2</sup></span> bivariate logistic regression and conduct a t-test for each interaction coefficient.</p>
+                                    <p>Model-free approaches have been proposed in the biostatistics literature (<a href="#yang2008snpharvester" class="citation" data-cites="yang2008snpharvester">(15)</a>, <a href="#zhang2010team" class="citation" data-cites="zhang2010team">(16)</a>, <a href="#li2013model" class="citation" data-cites="li2013model">(17)</a>, <a href="#dong2008exploration" class="citation" data-cites="dong2008exploration">(18)</a>, <a href="#zhang2007bayesian" class="citation" data-cites="zhang2007bayesian">(19)</a>, <a href="#wan2010boost" class="citation" data-cites="wan2010boost">(20)</a> and references therein) where focus is given to large <span class="math inline"><em>d</em></span>, small <span class="math inline"><em>n</em></span> settings. Moreover, these approaches are not multivariate (<em>i.e.</em> other features than the ones involved in the pair that is tested are discarded) and are not directly applicable to a particular predictive model <span class="math inline">\(p_{\boldsymbol{\theta}}\)</span>. Since interaction screening will be considered alongside quantization, we discard these methods from the present study.</p>
+                                    <h2 id="a-novel-model-selection-approach">A novel model selection approach</h2>
+                                    <p>We take another approach here, which foremost benefit will appear in the subsequent section, and which closely resembles the strategy employed in the quantization setting and in particular the <span data-acronym-label="sem" data-acronym-form="singular+short">Stochastic-EM</span> approach. The variable <span class="math inline">\(\boldsymbol{\delta}\)</span> can be seen as an observation of a latent random matrix so that we will employ a stochastic approach to search for <span class="math inline">\(\boldsymbol{\delta}^\star\)</span>.</p>
+                                    <h3 id="relation-of-the-bic-criterion-and-the-interaction-probability">Relation of the BIC criterion and the interaction probability</h3>
+                                    <p>The BIC criterion has a desirable property, from a Bayesian perspective, relating it to the likelihood of the data given the model (in our case, a given interaction matrix <span class="math inline">\(\boldsymbol{\delta}\)</span>) given the data (see <a href="#lebarbier" class="citation" data-cites="lebarbier">(21)</a>), where the parameter space <span class="math inline"><em>Θ</em></span> depends on the model <span class="math inline">\(\boldsymbol{\delta}\)</span>: <br /><span class="math display">$$\begin{aligned}
+                                        p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{\delta}) &amp; = \int_{\Theta} p_{\boldsymbol{\theta}}(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{\delta}) p(\boldsymbol{\theta} | \boldsymbol{\delta})d\boldsymbol{\theta} \\
+                                        &amp; = \int_{\Theta} p_{\boldsymbol{\theta}}(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\delta}) p(\boldsymbol{\theta} | \boldsymbol{\delta}) p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}} | \boldsymbol{\delta})) d\boldsymbol{\theta} \\
+                                        &amp; = \int_{\Theta} p_{\boldsymbol{\theta}}(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\delta}) p(\boldsymbol{\theta} | \boldsymbol{\delta}) p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}})) d\boldsymbol{\theta} &amp; \text{.}\end{aligned}$$</span><br /> Thus, we have: <br /><span class="math display">$$\begin{aligned}
+                                            \ln p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{\delta}) &amp; = \int_{\Theta} \ln p_{\boldsymbol{\theta}}(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\delta}) p(\boldsymbol{\theta} | \boldsymbol{\delta}) d\boldsymbol{\theta} + \ln p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}})) \\
+                                            &amp; = -\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{\delta}})/2 + \ln p(\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}})) + O(1).\end{aligned}$$</span><br /> Rewriting the posterior probability of the model by introducing the preceding likelihood, we get: <br /><span class="math display">$$\begin{aligned}
+                                                p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\boldsymbol{\mathbf{y}}_{\text{f}}) &amp; \propto p(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\delta}) p(\boldsymbol{\delta}) \\
+                                                &amp; \propto p(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\delta}) p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}})) &amp; \\
+                                                &amp; \approx \exp(-\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q},\boldsymbol{\delta}})/2) p(\boldsymbol{\delta}).\end{aligned}$$</span><br /> This last expression will be useful to design a stochastic algorithm proposing clever interaction matrices: the Metropolis-Hastings algorithm described hereafter.</p>
+                                            <h3 id="metropolis-hastings-sampling-algorithm">Metropolis-Hastings sampling algorithm</h3>
+                                            <p>This section is dedicated to describing the Metropolis-Hastings <a href="#hastings2970monte" class="citation" data-cites="hastings1970monte">(22)</a> sampling algorithm that will be used in the next section to sample from <span class="math inline">\(p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}),\boldsymbol{\mathbf{y}})\)</span> that will be denoted, for simplicity, by <span class="math inline">\(\pi(\boldsymbol{\delta})\)</span> in this section.</p>
+                                            <p>The distribution <span class="math inline">\(\pi(\boldsymbol{\delta})\)</span> is not known explicitly but <span class="math inline">\(f(\boldsymbol{\delta}) = \exp(-\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q},\boldsymbol{\delta}})/2) p(\boldsymbol{\delta})\)</span> is approximately proportional to <span class="math inline">\(\pi(\boldsymbol{\delta})\)</span>. Consequently, given two matrices <span class="math inline">\(\boldsymbol{\delta}\)</span> and <span class="math inline">\(\boldsymbol{\delta}'\)</span>, the <span data-acronym-label="pdf" data-acronym-form="singular+short">pdf</span> ratio is: <span class="math inline">\(\frac{\pi(\boldsymbol{\delta})}{\pi(\boldsymbol{\delta}')} \approx \frac{f(\boldsymbol{\delta})}{f(\boldsymbol{\delta}')}\)</span>.</p>
+                                            <p>Now suppose we have at our disposal a transition kernel, that defines a probability distribution, of the form: <br /><span class="math display">$$\begin{aligned}
+                                                
+                                                T: \; &amp; ({\{0,1\}}^{\frac{d(d-1)}{2}},{\{0,1\}}^{\frac{d(d-1)}{2}}) &amp;&amp; \to [0;1] \nonumber \\
+                                                &amp; (\boldsymbol{\delta},\boldsymbol{\delta}') &amp;&amp; \mapsto T(\boldsymbol{\delta},\boldsymbol{\delta}'). \nonumber\end{aligned}$$</span><br /> This instrumental conditional distribution will be used to design a Markov Chain which empirical distribution of drawn matrices <span class="math inline">\(\boldsymbol{\delta}^{(0)}, \dots, \boldsymbol{\delta}^{(\text{iter})}\)</span> approaches <span class="math inline">\(\pi(\boldsymbol{\delta})\)</span>. The algorithm is the following:</p>
+                                            
+                                            
+                                            <p>This algorithm reaches asymptotically the target distribution <span class="math inline">\(\pi(\boldsymbol{\delta})\)</span> if such a stationary distribution exists and is unique <a href="#meyn2012markov" class="citation" data-cites="meyn2012markov">(23)</a>. “Detailed balance” is a sufficient but not necessary condition of existence according to which each transition <span class="math inline">\(\boldsymbol{\delta}^{(s)} \rightarrow \boldsymbol{\delta}^{(s+1)}\)</span> is reversible. Uniqueness is guaranteed if the resulting Markov Chain is ergodic. This is satisfied if every interaction matrix <span class="math inline">\(\boldsymbol{\delta}\)</span> is aperiodic and positive recurrent ( each matrix <span class="math inline">\(\boldsymbol{\delta} \in {\{0,1\}}^{\frac{d(d-1)}{2}}\)</span> is reachable in a finite number of iterations).</p>
+                                            <p>It is also important to notice that, apart from verifying the above assumptions, there are no guidelines about how to choose the proposal distribution or the number of iterations necessary for proper estimation. These are “hyperparameters” that may influence greatly the effectiveness of the method.</p>
+                                            <h3 id="subsec:mcmc">Designing a Markov Chain of good interactions</h3>
+                                            <p>It follows from the preceding section that one can design a Metropolis-Hastings algorithm which draws “good” interaction matrices <span class="math inline">\(\boldsymbol{\delta}\)</span> from the target posterior distribution <span class="math inline">\(p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}),\boldsymbol{\mathbf{y}})\)</span>.</p>
+                                            <h4 id="transition-probability">Transition probability</h4>
+                                            <p>Metropolis-Hastings only requires a proposal of a transition probability between two matrices of the Markov chain that was denoted by <span class="math inline">\(T\)</span>. This approach would require to compute <span class="math inline">2<sup><em>d</em>(<em>d</em> − 1)</sup></span> probabilities (<em>i.e.</em> one per unique couple of matrices (<span class="math inline">\(\boldsymbol{\delta},\boldsymbol{\delta}'\)</span>)). It is thus desirable to reduce this combinatorics by making further assumptions. In what follows, we restrict possible transitions to matrices that are on a one unit <span class="math inline"><em>L</em><sup>1, 1</sup></span> distance (sum of all absolute entries) to the current interaction matrix, or equivalently which belong to the <span class="math inline">\(\left( \frac{d(d-1)}{2}-1 \right)\)</span>-sphere of center <span class="math inline">\(\boldsymbol{\delta}\)</span> denoted by <span class="math inline">\(S^{\left( \frac{d(d-1)}{2}-1 \right)}_{\boldsymbol{\delta}}\)</span>: <br /><span class="math display">$$\begin{aligned}
+                                                T(\boldsymbol{\delta},\boldsymbol{\delta}') = 0 &amp; \text{ if } \sum_{k=1}^d \sum_{\ell=1}^d |\delta_{k,\ell} - \delta'_{k,\ell}| \neq 1 \\
+                                                &amp; \equiv ||\boldsymbol{\delta} - \boldsymbol{\delta}'||_{1,1} \neq 1 \\
+                                                &amp; \equiv \boldsymbol{\delta}' \not\in S^{\left( \frac{d(d-1)}{2}-1 \right)}_{\boldsymbol{\delta}}.\end{aligned}$$</span><br /> Only <span class="math inline">\(\frac{d(d-1)}{2}\)</span> coefficients are now needed, which can be reinterpreted as the probability to switch on (resp. off) an entry of <span class="math inline">\(\boldsymbol{\delta}\)</span> which is currently off (resp. on). We claim that a good intuition about whether two features interact is the relative gain (or loss) in BIC between their bivariate model <em>with</em> their interaction and this model <em>without</em> their interaction. The rationale behind such a procedure, relying again on the properties of BIC, is the following: <br /><span class="math display">$$\begin{aligned}
+                                                    \forall \: 1 \leq k &lt; \ell \leq d, \; p(\delta_{k,\ell} | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_{\text{f},k}), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_{\text{f},\ell}), \boldsymbol{\mathbf{y}}_{\text{f}}) &amp; \propto p(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_{\text{f},k}), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_{\text{f},\ell}), \delta_{k,\ell}) p(\delta_{k,\ell} | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_k), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_\ell)) \\
+                                                    &amp; \propto p(\boldsymbol{\mathbf{y}}_{\text{f}} | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_{\text{f},k}), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_{\text{f},\ell}), \delta_{k,\ell}) p(\delta_{k,\ell}) &amp; \\
+                                                    &amp; \approx \exp(-\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q}_k,\boldsymbol{q}_\ell,\delta_{k,\ell}})/2) p(\delta_{k,\ell}).\end{aligned}$$</span><br /></p>
+                                                <p>Setting a uniform prior which will simplify all subsequent calculations (see next section) <span class="math inline">\(p(\delta_{k,\ell}=1) =\begin{cases} 0 \text{ if } k \geq \ell \\ \frac{1}{2} \text{ otherwise} \end{cases}\)</span> and denoting by <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> the probability of an interaction given features <span class="math inline">\(\boldsymbol{q}_k(x_k)\)</span> and <span class="math inline">\(\boldsymbol{q}_\ell(x_\ell)\)</span>: <br /><span class="math display">$$\label{eq:pkl}
+                                                    p_{k,\ell} = p(\delta_{k,\ell} = 1 | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_k), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_\ell), \boldsymbol{\mathbf{y}}) \propto \exp \left( \frac{\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q}_k,\boldsymbol{q}_\ell,\delta_{k,\ell}=0}) - \text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q}_k,\boldsymbol{q}_\ell,\delta_{k,\ell}=1})}{2} \right).$$</span><br /> We normalize <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> s.t. <span class="math inline">∑<sub>1 ≤ <em>k</em> &lt; ℓ ≤ <em>d</em></sub><em>p</em><sub><em>k</em>, ℓ</sub> = 1</span> and denote their triangular inferior matrix arrangement by <span class="math inline"><em>P</em></span>. Note that in this setting, we have nested models such that the approximation in <a href="#eq:pkl" data-reference-type="eqref" data-reference="eq:pkl">[eq:pkl]</a> is consistent in <span class="math inline"><em>n</em></span>. We claim that if <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> is close to <span class="math inline">1</span> (resp. <span class="math inline">0</span>), then there is a strong chance that <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>⋆</sup> = 1</span> (resp. <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>⋆</sup> = 0</span>) even in the full multivariate model, which amounts to: <br /><span class="math display">$$p_{k,\ell} \approx p(\delta_{k,\ell} = 1 | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\boldsymbol{\mathbf{y}}_{\text{f}}) .$$</span><br /> This holds in particular if features <span class="math inline">\(\boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_k)\)</span> and <span class="math inline">\(\boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_\ell)\)</span> are independent to other features <span class="math inline">\(\boldsymbol{q}_{-\{k,\ell\}}(\boldsymbol{\mathbf{x}}_{-\{k,\ell\}})\)</span>: the presence or absence of their interaction in the logistic regression <span class="math inline">\(p_{\boldsymbol{\theta}}(y | \boldsymbol{q}(\bm{x}), \boldsymbol{\delta})\)</span> controlled by <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub></span> depends solely on <span class="math inline">\(y, \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_k)\)</span> and <span class="math inline">\(\boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_\ell)\)</span>, as formalized in the following lemma.</p>
+                                                <h5 id="lemma">Lemma</h5>
+                                                <p>Our target distribution <span class="math inline">\(p(\delta_{k,\ell} = 1 | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\boldsymbol{\mathbf{y}}_{\text{f}})\)</span> is equal to our instrumental distribution <span class="math inline">\(p_{k,\ell} = p(\delta_{k,\ell} = 1 | \boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_{\text{f},k}), \boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_{\text{f},\ell}), \boldsymbol{\mathbf{y}}_{\text{f}})\)</span> if quantized features <span class="math inline">\(\boldsymbol{q}_k(\boldsymbol{\mathbf{x}}_{\text{f},k})\)</span> and <span class="math inline">\(\boldsymbol{q}_\ell(\boldsymbol{\mathbf{x}}_{\text{f},\ell})\)</span> are independent to other features <span class="math inline">\(\boldsymbol{q}_{-\{k,\ell\}}(\boldsymbol{\mathbf{x}}_{\text{f},-\{k,\ell\}})\)</span>.</p>
+                                                <p>Note also that in this setting and for <span class="math inline"><em>n</em> →  + ∞</span>, the first step of the Metropolis-Hastings described hereafter suffices since the <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span>’s converge to <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>⋆</sup></span> thanks to the properties of the BIC criterion.</p>
+                                                <p>Consequently, if at step <span class="math inline">(<em>s</em>)</span> of the Markov chain, <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>(<em>s</em>)</sup> = 1</span> (resp. <span class="math inline">0</span>) and <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> is close to <span class="math inline">0</span> (resp. <span class="math inline">1</span>), a good candidate for <span class="math inline">\(\boldsymbol{\delta}^{(s+1)}\)</span> should be to change <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub></span> to <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>(<em>s</em> + 1)</sup> = 0</span> (resp. <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub><sup>(<em>s</em> + 1)</sup> = 1</span>). Our proposal is thus to calculate the difference between the current interaction matrix and <span class="math inline"><em>P</em></span> which is denoted by <span class="math inline">\(T^{(s)} = |\boldsymbol{\delta}^{(s)} - P|\)</span> and normalized.</p>
+                                                <p>This defines a proper transition probability between two interaction matrices (<span class="math inline">⊙</span> denotes the element-wise Hadamard product): <br /><span class="math display">$$T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}') = \begin{cases} 0 \text{ if } ||\boldsymbol{\delta}^{(s)} - \boldsymbol{\delta}'||_{1,1} \neq 1, \\ T^{(s)} \odot |\boldsymbol{\delta}^{(s)} - \boldsymbol{\delta}'| \text{ otherwise}. \end{cases}$$</span><br /></p>
+                                                <h4 id="acceptance-probability-of-the-proposed-transition">Acceptance probability of the proposed transition</h4>
+                                                <p>A Metropolis-Hastings step can now be conducted by drawing <span class="math inline">\(\boldsymbol{\delta}' \sim T(\boldsymbol{\delta}^{(s)},\cdot)\)</span>. The acceptance probability of this candidate is given by: <br /><span class="math display">$$\begin{aligned}
+                                                    A &amp; = \min \left( 1, \frac{p(\boldsymbol{\delta}' | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\mathbf{y}}_{\text{f}})}{p(\boldsymbol{\delta}^{(s)} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}), \boldsymbol{\mathbf{y}}_{\text{f}})} \frac{1-T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')}{T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')} \right) \\
+                                                    &amp; \approx \min \left( 1, \exp \left( \frac{\text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\delta_{k,\ell}=0}) - \text{BIC}(\hat{\boldsymbol{\theta}}_{\boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\delta_{k,\ell}=1})}{2} \right) \frac{1-T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')}{T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')} \right).\end{aligned}$$</span><br /> It must here be remarked that by construction of <span class="math inline">\(T^{(s)}\)</span> and the transition probability <span class="math inline">\(T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')\)</span>, we have <span class="math inline">\(T(\boldsymbol{\delta}',\boldsymbol{\delta}^{(s)}) = 1 - T(\boldsymbol{\delta}^{(s)},\boldsymbol{\delta}')\)</span>. The candidate <span class="math inline">\(\boldsymbol{\delta}'\)</span> is accepted with probability <span class="math inline"><em>A</em></span> s.t. <span class="math inline">\(\boldsymbol{\delta}^{(s+1)} = \begin{cases} \boldsymbol{\delta}' \text{ with probability } A, \\ \boldsymbol{\delta}^{(s)} \text{ with probability } 1-A. \end{cases}\)</span></p>
+                                                <h4 id="validity-of-the-approach">Validity of the approach</h4>
+                                                <p>The existence of the stationary distribution <span class="math inline">\(p(\boldsymbol{\delta} | \boldsymbol{q}(\boldsymbol{\mathbf{x}}_{\text{f}}),\boldsymbol{\mathbf{y}}_{\text{f}})\)</span> is guaranteed by construction of the Metropolis-Hastings algorithm as the generated Markov chain fulfills the detailed balance condition. The uniqueness of the stationary distribution is given by the ergodicity of the Markov chain: as <span class="math inline">\(\forall \: 1 \leq  k &lt; \ell \leq d, \: T_{k,\ell}^{(s)} &gt; 0\)</span> and a transition changes only one entry <span class="math inline"><em>δ</em><sub><em>k</em>, ℓ</sub></span> of the interaction matrix, every state can be reached in at most <span class="math inline">\(\frac{d(d-1)}{2}\)</span> steps.</p>
+                                                <p>In practice with a fixed quantization scheme, this stochastic approach is probably outperformed in computing time by LASSO-based methods or correlation-based methods like <a href="#simon" class="citation" data-cites="simon">(12)</a>, which might obtain a suboptimal model in a fixed computing time, contrary to our approach which might take lots of steps to converge in distribution. Its double benefit however lies in the ability of the practitioner to define before-hand how many steps shall be performed and the natural integration to the quantization algorithm proposed in an earlier post, which we develop in the next section.</p>
+                                                <h2 id="interaction-screening-and-quantization">Interaction screening and quantization</h2>
+                                                <p>We return to our original objective and consider optimizing the BIC criterion both in terms of quantization and pairwise interactions, as varying the quantization <span class="math inline">\(\boldsymbol{q}\)</span> might influence the “best” interactions <span class="math inline">\(\boldsymbol{\delta}^\star\)</span> and vice versa.</p>
+                                                <p>We can mix the MCMC approach proposed in the previous section with the <em>glmdisc</em> algorithm. A brute force way of doing this is to conduct a full Metropolis-Hastings algorithm, as proposed in the previous section, for each proposed quantization <span class="math inline">\(\hat{\boldsymbol{q}}^{(s)}\)</span>. Of course, this is too computationally intensive: our proposed Metropolis-Hastings algorithm necessitates the calculation of 2 bivariate logistic regression per <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> <em>i.e.</em> <span class="math inline"><em>d</em>(<em>d</em> − 1)</span> logistic regressions and one logistic regression per step <span class="math inline">(<em>s</em>)</span>. These <span class="math inline"><em>O</em>(<em>d</em><sup>2</sup> + <em>S</em>)</span> logistic regressions shall be estimated for each proposed quantization which itself requires the estimation of <span class="math inline"><em>O</em>(<em>d</em>)</span> softmax or polytomous logistic regression and contingency tables. Focus is given to the <em>glmdisc</em>-SEM approach in what follows.</p>
+                                                <p>The foremost bottleneck lies in the aforementioned initialization of the Metropolis-Hastings algorithm. In essence, the proposed initialization is not required: the closer the proposal distribution to the target distribution, the quicker the convergence, which was our aim with the formulation of <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span>. However, the asymptotic convergence in distribution is nevertheless maintained whatever proposal distribution is used, provided the resulting Markov Chain has a unique stationary distribution. We will consequently design a proposal distribution of <span class="math inline">\(\boldsymbol{\delta}\)</span> for all quantizations <span class="math inline">\(\boldsymbol{\mathfrak{q}} \in \boldsymbol{\mathfrak{Q}}_{\boldsymbol{m}}\)</span> (<span class="math inline">\(\boldsymbol{\mathfrak{q}}\)</span> is the latent features representing the quantization <span class="math inline">\(\boldsymbol{q}(\boldsymbol{x})\)</span> of <span class="math inline">\(\boldsymbol{x}\)</span> and <span class="math inline">\(\boldsymbol{\mathfrak{Q}}_{\boldsymbol{m}}\)</span> is the space of all latent quantizations with <span class="math inline">\(\boldsymbol{m} = (m_j)_1^d\)</span> levels. To still put “<em>prior</em>” information (to the Markov Chain, it is not <em>a priori</em> in the Bayesian sense) about potential interactions into it, we will rely, to construct the transition kernel <span class="math inline"><em>t</em></span> from bivariate logistic regression, on the “raw” features instead: <br /><span class="math display">$$\label{eq:pklnew}
+                                                    p_{k,\ell} = p(\delta_{k,\ell} = 1 | \boldsymbol{\mathbf{x}}_k, \boldsymbol{\mathbf{x}}_\ell, \boldsymbol{\mathbf{y}}) \propto \exp \left( \frac{\text{BIC}(\hat{\boldsymbol{\theta}}_{x_k,x_\ell,\delta_{k,\ell}=0}) - \text{BIC}(\hat{\boldsymbol{\theta}}_{x_k,x_\ell,\delta_{k,\ell}=1})}{2} \right).$$</span><br /> The second bottleneck is the number of Metropolis-Hastings steps per <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span> step. It must be remembered that these two stochastic algorithms are meant to be used for their asymptotic properties. The target distribution of <span class="math inline">\(\boldsymbol{\mathfrak{q}}\)</span> in the <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span> algorithm is thought to be extremely dominated by <span class="math inline">\(\boldsymbol{\mathfrak{q}}^\star\)</span>, such that after some step <span class="math inline">(<em>s</em>)</span>, proposed quantizations are very close to <span class="math inline">\(\boldsymbol{q}^\star\)</span> (and consequently very similar to each others) at which point the interaction screening algorithm while performing the quantization steps is somewhat similar to its “static” counterpart developed in the preceding section.</p>
+                                                <p>As a consequence, a single interaction matrix can be proposed at each step of the <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span>-Gibbs algorithm proposed in an earlier post. Apart from the initialization defined above, nothing changes in the <em>glmdisc</em>-SEM algorithm: the <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span>-Gibbs sampler allowed us to “hold” latent features <span class="math inline">\(\boldsymbol{\mathfrak{q}}_{-\{j\}}^{(s)}\)</span> while drawing <span class="math inline">\(\boldsymbol{\mathfrak{q}}_{j}^{(s+1)}\)</span> for all features, resulting in the latent features of all features and observations <span class="math inline">\(\boldsymbol{\mathbf{\mathfrak{q}}}^{(s+1)}\)</span>. Here, the same applies with the interaction matrix <span class="math inline">\(\boldsymbol{\delta}\)</span> that is drawn holding <span class="math inline">\(\boldsymbol{\mathbf{\mathfrak{q}}}^{(s+1)}\)</span>. The formal algorithm is reproduced partially hereafter.</p>
+                                                <h5 id="initialization">Initialization</h5>
+                                                <p>First, <span class="math inline"><em>P</em></span> is computed according to the formulation of <span class="math inline"><em>p</em><sub><em>k</em>, ℓ</sub></span> given above. Second, related to the Metropolis-Hastings algorithm, we need to initialize the interaction matrix <span class="math inline">\(\boldsymbol{\delta}^{(0)}\)</span> following a uniform distribution, as hypothesized earlier. Related to the <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span> algorithm, <span class="math inline">\(\boldsymbol{\mathbf{\mathfrak{q}}}^{(0)}\)</span> is also initialized uniformly (from an equiprobable multinouilli distribution).</p>
+                                                <h5 id="s-steps">S-steps</h5>
+                                                <p>Then, the <span data-acronym-label="sem" data-acronym-form="singular+short">SEM</span> algorithm begins: SEM-Gibbs sampler is applicable and <span class="math inline">\(\boldsymbol{\mathfrak{q}}_j^{(s+1)}\)</span> can be drawn according to: <br /><span class="math display">$$\begin{aligned}
+                                                    \boldsymbol{\mathfrak{q}}_j^{(s)} &amp; \sim p_{\hat{\boldsymbol{\theta}}^{(s-1)}}(y | \boldsymbol{\mathfrak{q}}_{-\{j\}}^{(s-1)}, \cdot, \boldsymbol{\delta}^{(s-1)}) p_{\hat{\boldsymbol{\alpha}}^{(s-1)}}(\cdot | x_j).\end{aligned}$$</span><br /> At this point, <span class="math inline">\(\boldsymbol{\delta}^{(s)}\)</span> can be computed from the Metropolis-Hastings algorithm similarly to the preceding section.</p>
+                                                <h5 id="m-steps">M-steps</h5>
+                                                <p>Then the logistic regression parameters are estimated: <br /><span class="math display">$$\begin{aligned}
+                                                    {\boldsymbol{\theta}}^{(s)} &amp; = \arg\!\max_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta} ; \boldsymbol{\mathbf{\mathfrak{q}}}^{(s)}, \boldsymbol{\mathbf{y}}, \boldsymbol{\delta}^{(s)}) \\
+                                                    {\boldsymbol{\alpha}}_j^{(s)} &amp; = \arg\!\max_{\boldsymbol{\alpha}_j} \ell(\boldsymbol{\alpha}_j ; \boldsymbol{\mathbf{x}}_j, \boldsymbol{\mathbf{\mathfrak{q}}}^{(s)}_j) \text{ for } 1 \leq j \leq d.\end{aligned}$$</span><br /></p>
+                                                <h5 id="quantization-and-interaction-provider">Quantization and interaction provider</h5>
+                                                <p>We iterate this procedure for a user-defined number of steps <span class="math inline"><em>S</em></span>. Parallel to these steps, “hard” quantizations <span class="math inline">\(\hat{\boldsymbol{q}}^{(s)}\)</span> are derived from the MAP rule and their associated logistic regression coefficients <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(s)}\)</span> follows from the <span data-acronym-label="mle" data-acronym-form="singular+short">MLE</span>: <br /><span class="math display">$$\hat{\boldsymbol{\theta}}^{(s)} = \arg\!\max_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \hat{\boldsymbol{q}}^{(s)}(\boldsymbol{\mathbf{x}}), \boldsymbol{\mathbf{y}}, \boldsymbol{\delta}^{(s)}).$$</span><br /> The best quantization and interaction matrix can then be selected via BIC, or any other model selection tool as emphasized earlier.</p>
+                                                <p>This procedure is much less costly than what could originally be thought of: the <span class="math inline"><em>d</em>(<em>d</em> − 1)/2</span> logistic regression necessary to initialize the Metropolis-Hastings algorithm are still needed, but only once, and at each step, only one logistic regression, supplementary to the complexity of the original <em>glmdisc</em>-SEM approach, is needed.</p>
+                                                <p>The full algorithm is described schematically in Figure <a href="#fig:schema_sem_inter" data-reference-type="ref" data-reference="fig:schema_sem_inter">[2]</a>. We turn to numerical experiments in the next section on simulated, benchmark and real data.</p>
+                                                
+                                                <figure>
+                                                    <img src="figures/chapitre5/fig_schema_inter.png" alt="" width="100%"></span>
+                                                    <figurecaption><a id="fig:schema_sem_inter">[2]</a> Full algorithm description</figurecaption>
+                                                </figure>
+                                                
+                                                
+                                                <h2 id="numerical-experiments">Numerical experiments</h2>
+                                                <p>The proposed algorithm for interaction screening is first tested on simulated data, to show empirically its consistency, then on benchmark datasets and on <em>Credit Scoring</em> data from <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>. The same scheme is applied for the <em>glmdisc</em> algorithm augmented with the interaction screening approach as described in the previous section.</p>
+                                                <h3 id="simulated-data">Simulated data</h3>
+                                                <p>In this first part, focus is given on showing empirically the consistency of the approach. Two continuous features <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are sampled from the uniform distribution on <span class="math inline">[0, 1]</span> and discretized by using <br /><span class="math display">$$\boldsymbol{q}_1(\cdot)=\boldsymbol{q}_2(\cdot) = ({1}_{]-\infty,1/3]}(\cdot),{1}_{]1/3,2/3]}(\cdot),{1}_{]2/3,\infty[}(\cdot)).$$</span><br /> Here, we have <span class="math inline"><em>d</em> = 2</span> and <span class="math inline"><em>m</em><sub>1</sub> = <em>m</em><sub>2</sub> = 3</span> and the cutpoints are <span class="math inline"><em>c</em><sub><em>j</em>, 1</sub> = 1/3</span> and <span class="math inline"><em>c</em><sub><em>j</em>, 2</sub> = 2/3</span> for <span class="math inline"><em>j</em> = 1, 2</span>. Setting <span class="math inline">\(\boldsymbol{\theta}^{1}=(0,-2,2,0,-2,2,0)\)</span>, <span class="math inline">\(\boldsymbol{\delta}^{1} = 0\)</span>, <span class="math inline">\(\boldsymbol{\theta}^{2} = (\boldsymbol{\theta}^{1},\boldsymbol{\theta}_{1,2})\)</span>, where <span class="math inline"><em>θ</em><sub>1, 2</sub><sup><em>r</em>, 3</sup> = <em>θ</em><sub>1, 2</sub><sup>3, <em>t</em></sup> = 0</span> for all <span class="math inline">1 ≤ <em>r</em>, <em>t</em> ≤ 3</span> as defined in Section <a href="#sec:xor" data-reference-type="ref" data-reference="sec:xor">1.1</a>, <span class="math inline"><em>θ</em><sub>1, 2</sub><sup>1, 1</sup> = <em>θ</em><sub>1, 2</sub><sup>2, 2</sup> = 4</span> and <span class="math inline"><em>θ</em><sub>1, 2</sub><sup>1, 2</sup> = <em>θ</em><sub>1, 2</sub><sup>2, 1</sup> =  − 4</span>, <span class="math inline">\(\boldsymbol{\delta}^{2} = 1\)</span>; the target feature <span class="math inline"><em>y</em></span> is then sampled from <span class="math inline">\(p_{\boldsymbol{\theta}^{o}}(\cdot | \boldsymbol{q}(\boldsymbol{\mathbf{x}}), \boldsymbol{\delta}^{o}), o = \{1,2\}\)</span> via the logistic model. Two cases are studied:</p>
+                                                <ol type="a">
+                                                    <li><p>First, we assess that in the absence of a true interaction, no interaction is found by <em>glmdisc</em> while quantizing the data, so that we simulate <span class="math inline">\(Y \sim p_{\boldsymbol{\theta}^{1}}\)</span> and provide <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>;</p></li>
+                                                    <li><p>Second, we assess that in the presence of a true interaction, it is discovered by <em>glmdisc</em> while quantizing the data, so that we simulate <span class="math inline">\(Y \sim p_{\boldsymbol{\theta}^{2}}\)</span> and provide <span class="math inline">\(\boldsymbol{\mathbf{x}}\)</span>.</p></li>
+                                                </ol>
+                                                <p>Note that the interaction screening procedure is also applicable to continuous features, which is not tested here. These 2 experiments are run 100 times with <span class="math inline"><em>n</em> = {1, 000, 10, 000}</span> and histograms are given in Table <a href="#tab:simu_inter" data-reference-type="ref" data-reference="tab:simu_inter">[1]</a>. They show good performance and empirical consistency.</p>
+                                                
+                                                <p><span id="tab:simu_inter" label="tab:simu_inter">[1]</span></p>
+                                                <table>
+                                                    <caption>For <em>glmdisc</em> w.o. providing true quantization and different sample sizes <span class="math inline"><em>n</em></span>, (a) Bar plot of <span class="math inline">\(\hat{\boldsymbol{\delta}} = 0,1\)</span> (resp.) for <span class="math inline">\(\boldsymbol{\delta}=0\)</span>. (b) Bar plot of <span class="math inline">\(\hat{\boldsymbol{\delta}} = 0,1\)</span> (resp.) for <span class="math inline">\(\boldsymbol{\delta}=1\)</span>.</caption>
+                                                    <thead>
+                                                        <tr class="header">
+                                                            <th style="text-align: left;">Algorithm</th>
+                                                            <th style="text-align: left;"><span class="math inline"><em>n</em></span></th>
+                                                            <th style="text-align: left;">(a)</th>
+                                                            <th style="text-align: left;"><span class="math inline">\(\hat{\boldsymbol{\delta}}\)</span></th>
+                                                            <th style="text-align: left;">(b)</th>
+                                                            <th style="text-align: left;"><span class="math inline">\(\hat{\boldsymbol{\delta}}\)</span></th>
+                                                            <th style="text-align: left;"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;"><em>glmdisc</em> w.o. provided quantization</td>
+                                                            <td style="text-align: left;"><span class="math inline">1, 000</span></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;"><em>glmdisc</em> w.o. provided quantization</td>
+                                                            <td style="text-align: left;"><span class="math inline">10, 000</span></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                            <td style="text-align: left;"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <h3 id="benchmark-datasets">Benchmark datasets</h3>
+                                                <p>Half of the datasets do not benefit from the enriched model space but the performance of <em>glmdisc</em> without interactions was already high such that it is likely that the proposed decision boundaries were already close to the oracle and interaction coefficients are not significant. The other half shows a slightly superior performance.</p>
+                                                
+                                                <p><span id="tab:banchmark_inter" label="tab:banchmark_inter">[2]</span></p>
+                                                <table>
+                                                    <caption>Gini indices (the greater the value, the better the performance) of our proposed quantization algorithm <em>glmdisc</em> and two baselines: ALLR and MDLP / <span class="math inline"><em>χ</em><sup>2</sup></span> tests obtained on several benchmark datasets from the UCI library.</caption>
+                                                    <tbody>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Dataset</td>
+                                                            <td style="text-align: left;">ALLR</td>
+                                                            <td style="text-align: left;"><em>ad hoc</em> methods</td>
+                                                            <td style="text-align: left;">glmdisc-NN</td>
+                                                            <td style="text-align: left;">glmdisc-SEM</td>
+                                                            <td style="text-align: left;">glmdisc-SEM w. interactions</td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Adult</td>
+                                                            <td style="text-align: left;">81.4 (1.0)</td>
+                                                            <td style="text-align: left;"><strong>85.3</strong> (0.9)</td>
+                                                            <td style="text-align: left;">80.4 (1.0)</td>
+                                                            <td style="text-align: left;">81.5 (1.0)</td>
+                                                            <td style="text-align: left;">81.5 (1.0 - no interaction)</td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Australian</td>
+                                                            <td style="text-align: left;">72.1 (10.4)</td>
+                                                            <td style="text-align: left;">84.1 (7.5)</td>
+                                                            <td style="text-align: left;">92.5 (4.5)</td>
+                                                            <td style="text-align: left;"><strong>100</strong> (0)</td>
+                                                            <td style="text-align: left;"><strong>100</strong> (0 - no interaction)</td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Bands</td>
+                                                            <td style="text-align: left;">48.3 (17.8)</td>
+                                                            <td style="text-align: left;">47.3 (17.6)</td>
+                                                            <td style="text-align: left;">58.5 (12.0)</td>
+                                                            <td style="text-align: left;"><strong>58.7</strong> (12.0)</td>
+                                                            <td style="text-align: left;"><strong>58.8</strong> (13.0)</td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Credit</td>
+                                                            <td style="text-align: left;">81.3 (9.6)</td>
+                                                            <td style="text-align: left;">88.7 (6.4)</td>
+                                                            <td style="text-align: left;"><strong>92.0</strong> (4.7)</td>
+                                                            <td style="text-align: left;">87.7 (6.4)</td>
+                                                            <td style="text-align: left;">87.7 (6.4 - no interaction)</td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">German</td>
+                                                            <td style="text-align: left;">52.0 (11.3)</td>
+                                                            <td style="text-align: left;">54.6 (11.2)</td>
+                                                            <td style="text-align: left;"><strong>69.2</strong> (9.1)</td>
+                                                            <td style="text-align: left;">54.5 (10)</td>
+                                                            <td style="text-align: left;">56.5 (9.0)</td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Heart</td>
+                                                            <td style="text-align: left;">80.3 (12.1)</td>
+                                                            <td style="text-align: left;">78.7 (13.1)</td>
+                                                            <td style="text-align: left;"><strong>86.3</strong> (10.6)</td>
+                                                            <td style="text-align: left;">82.2 (11.2)</td>
+                                                            <td style="text-align: left;">84.5 (10.8)</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <p>In addition to these datasets, we used <em>glmdisc</em>-SEM on medicine-related datasets for a seminar talk in a biostatistics research team. These new benchmark datasets are Pima (available in <span class="sans-serif">R</span>, <span class="math inline"><em>n</em> = 768</span>, <span class="math inline"><em>d</em> = 8</span>), Breast (available in <span class="sans-serif">R</span> and also available on UCI under the name “Breast Cancer Wisconsin (Original)”, <span class="math inline"><em>n</em> = 699</span>, <span class="math inline"><em>d</em> = 10</span>) and Birthwt (available in <span class="sans-serif">R</span>, <span class="math inline"><em>n</em> = 189</span>, <span class="math inline"><em>d</em> = 16</span>). Table <a href="#tab:banchmark_medicine" data-reference-type="ref" data-reference="tab:banchmark_medicine">[3]</a> shows the obtained Gini indices: for Pima, ALLR performs best such that the linearity assumption is probably “not as false” as in our motivational example; for Breast, ALLR, <em>glmdisc</em>-SEM and <em>glmdisc</em>-SEM w. interactions show similar results, but at least for <em>Credit Scoring</em> practitioners, the resulting quantized scorecard is more interpretable. For Birthwt, <em>glmdisc</em>-SEM w. interactions clearly outperforms all other approaches.</p>
+                                                <p><span id="tab:banchmark_medicine" label="tab:banchmark_medicine">[3]</span></p>
+                                                <table>
+                                                    <caption>Gini indices of our proposed quantization algorithm <em>glmdisc</em>-SEM and two baselines: ALLR and ALLR with all pairwise interactions on several medicine-related benchmark datasets.</caption>
+                                                    <thead>
+                                                        <tr class="header">
+                                                            <th style="text-align: right;"></th>
+                                                            <th style="text-align: right;">Pima</th>
+                                                            <th style="text-align: right;">Breast</th>
+                                                            <th style="text-align: right;">Birthwt</th>
+                                                            <th style="text-align: right;"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="odd">
+                                                            <td style="text-align: right;">ALLR</td>
+                                                            <td style="text-align: right;"><span><strong>73.0</strong></span></td>
+                                                            <td style="text-align: right;">94.0</td>
+                                                            <td style="text-align: right;">34.0</td>
+                                                            <td style="text-align: right;"></td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: right;">ALLR LR w. interactions</td>
+                                                            <td style="text-align: right;">60.0</td>
+                                                            <td style="text-align: right;">51.0</td>
+                                                            <td style="text-align: right;">15.0</td>
+                                                            <td style="text-align: right;"></td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: right;"><em>glmdisc</em>-SEM</td>
+                                                            <td style="text-align: right;">57.0</td>
+                                                            <td style="text-align: right;">93.0</td>
+                                                            <td style="text-align: right;">18.0</td>
+                                                            <td style="text-align: right;"></td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: right;"><em>glmdisc</em> w. interactions</td>
+                                                            <td style="text-align: right;">62.0</td>
+                                                            <td style="text-align: right;"><span><strong>95.0</strong></span></td>
+                                                            <td style="text-align: right;"><span><strong>54.0</strong></span></td>
+                                                            <td style="text-align: right;"></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <h3 id="real-data-from-crédit-agricole-consumer-finance">Real data from Crédit Agricole Consumer Finance</h3>
+                                                <p>The enriched model space allows obviously for better predictive performance, provided this space can be effectively visited by the Metropolis-Hastings algorithm, itself very dependent of the propositional transition probability. It seems effective on real data since it yields the best performance on most datasets, significantly above all other methods, at the price of higher computational cost.</p>
+                                                
+                                                <p><span id="tab:real_data_inter" label="tab:real_data_inter">[4]</span></p>
+                                                <table>
+                                                    <caption>Gini indices (the greater the value, the better the performance) of our proposed quantization algorithm <em>glmdisc</em>, the two baselines and the current scorecard (manual / expert representation) obtained on several portfolios of Crédit Agricole Consumer Finance.</caption>
+                                                    <tbody>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Portfolio</td>
+                                                            <td style="text-align: left;">ALLR</td>
+                                                            <td style="text-align: left;">Current performance</td>
+                                                            <td style="text-align: left;">ad hoc methods</td>
+                                                            <td style="text-align: left;">glmdisc-NN</td>
+                                                            <td style="text-align: left;">glmdisc-SEM</td>
+                                                            <td style="text-align: left;">glmdisc-SEM w. interactions</td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Automobile</td>
+                                                            <td style="text-align: left;"><strong><span>59.3</span> (3.1)</strong></td>
+                                                            <td style="text-align: left;">55.6 (3.4)</td>
+                                                            <td style="text-align: left;">59.3 (3.0)</td>
+                                                            <td style="text-align: left;">58.9 (2.6)</td>
+                                                            <td style="text-align: left;">57.8 (2.9)</td>
+                                                            <td style="text-align: left;"><strong><span>64.8</span> (2.0)</strong></td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Renovation</td>
+                                                            <td style="text-align: left;">52.3 (5.5)</td>
+                                                            <td style="text-align: left;">50.9 (5.6)</td>
+                                                            <td style="text-align: left;">54.0 (5.1)</td>
+                                                            <td style="text-align: left;"><strong><span>56.7</span> (4.8)</strong></td>
+                                                            <td style="text-align: left;">55.5 (5.2)</td>
+                                                            <td style="text-align: left;">55.5 (5.2 - no interaction)</td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Standard</td>
+                                                            <td style="text-align: left;">39.7 (3.3)</td>
+                                                            <td style="text-align: left;">37.1 (3.8)</td>
+                                                            <td style="text-align: left;">45.3 (3.1)</td>
+                                                            <td style="text-align: left;">43.8 (3.2)</td>
+                                                            <td style="text-align: left;">36.7 (3.7)</td>
+                                                            <td style="text-align: left;"><strong><span>47.2</span> (2.8)</strong></td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Revolving</td>
+                                                            <td style="text-align: left;">62.7 (2.8)</td>
+                                                            <td style="text-align: left;">58.5 (3.2)</td>
+                                                            <td style="text-align: left;">63.2 (2.8)</td>
+                                                            <td style="text-align: left;">62.3 (2.8)</td>
+                                                            <td style="text-align: left;">60.7 (2.8)</td>
+                                                            <td style="text-align: left;"><strong><span>67.2</span> (2.5)</strong></td>
+                                                        </tr>
+                                                        <tr class="odd">
+                                                            <td style="text-align: left;">Mass retail</td>
+                                                            <td style="text-align: left;">52.8 (5.3)</td>
+                                                            <td style="text-align: left;">48.7 (6.0)</td>
+                                                            <td style="text-align: left;">61.4 (4.7)</td>
+                                                            <td style="text-align: left;"><strong><span>61.8</span> (4.6)</strong></td>
+                                                            <td style="text-align: left;">61.0 (4.7)</td>
+                                                            <td style="text-align: left;">60.3 (4.8)</td>
+                                                        </tr>
+                                                        <tr class="even">
+                                                            <td style="text-align: left;">Electronics</td>
+                                                            <td style="text-align: left;">52.9 (11.9)</td>
+                                                            <td style="text-align: left;">55.8 (10.8)</td>
+                                                            <td style="text-align: left;">56.3 (10.2)</td>
+                                                            <td style="text-align: left;"><strong><span>72.6</span> (7.4)</strong></td>
+                                                            <td style="text-align: left;">62.0 (9.5)</td>
+                                                            <td style="text-align: left;">63.7 (9.0)</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <h2 id="sec:ccl">Conclusion</h2>
+                                                <p>The essentially industrial problem of introducing pairwise interactions in a supervised multivariate classification setting was formalized and a new approach, relying on a Metropolis-Hastings algorithm has been proposed. This algorithm relies on the use of logistic regression, although other predictive models can be plugged in place of <span class="math inline">\(p_{\boldsymbol{\theta}}\)</span>.</p>
+                                                <p>The true underlying motivation was to perform interaction screening while quantizing data using the approach developed in an earlier post: <em>glmdisc</em>. The experiments showed that, as was sensed empirically by statisticians in the field of <em>Credit Scoring</em>, interactions between quantized features can indeed provide better models than without interactions, or standard logistic regression. This novel approach allows practitioners to have a fully automized and statistically well-grounded tool that achieves better performance than both <em>ad hoc</em> industrial practices and academic quantization heuristics at the price of decent computing time but much less of the practitioner’s valuable time.</p>
+                                                <p>Moreover, in Section <a href="#subsec:mcmc" data-reference-type="ref" data-reference="subsec:mcmc">1.3.3</a>, we set a uniform prior on the interaction matrix to simplify subsequent calculations and because it made sense for the <em>Credit Scoring</em> industry. However, without much modifications nor difficulty, it can be re-introduced which is of particular interest to <em>e.g.</em> biostatistics applications where a lot more features are considered and expert-knowledge is available to “guide” the Markov Chain by choosing an appropriate prior over the interaction matrix.</p>
+
+                                                <table>
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="james2001interaction">1</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        James Jaccard.
+                                                        <em>Interaction effects in logistic regression</em>, volume 135.
+                                                        SAGE Publications, Incorporated, 2001.
+                                                        [&nbsp;<a href="chapitre5_bib.html#james2001interaction">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="jaccard2003interaction">2</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        James Jaccard, Jim Jaccard, and Robert Turrisi.
+                                                        <em>Interaction effects in multiple regression</em>.
+                                                        Number&nbsp;72. Sage, 2003.
+                                                        [&nbsp;<a href="chapitre5_bib.html#jaccard2003interaction">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="morgan2014adversity">3</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Craig Morgan, Ulrich Reininghaus, Abraham Reichenberg, Souci Frissa, Matthew
+                                                        Hotopf, Stephani&nbsp;L Hatch, SELCoH&nbsp;Study Team, et&nbsp;al.
+                                                        Adversity, cannabis use and psychotic experiences: evidence of
+                                                        cumulative and synergistic effects.
+                                                        <em>The British Journal of Psychiatry</em>, 204(5):346-353, 2014.
+                                                        [&nbsp;<a href="chapitre5_bib.html#morgan2014adversity">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="calcagno2010glmulti">4</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Vincent Calcagno, Claire de&nbsp;Mazancours, et&nbsp;al.
+                                                        glmulti: an r package for easy automated model selection with
+                                                        (generalized) linear models.
+                                                        2010.
+                                                        [&nbsp;<a href="chapitre5_bib.html#calcagno2010glmulti">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="tibshirani1996regression">5</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Robert Tibshirani.
+                                                        Regression shrinkage and selection via the lasso.
+                                                        <em>Journal of the Royal Statistical Society. Series B
+                                                            (Methodological)</em>, pages 267-288, 1996.
+                                                        [&nbsp;<a href="chapitre5_bib.html#tibshirani1996regression">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="park2007penalized">6</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Mee&nbsp;Young Park and Trevor Hastie.
+                                                        Penalized logistic regression for detecting gene interactions.
+                                                        <em>Biostatistics</em>, 9(1):30-50, 2007.
+                                                        [&nbsp;<a href="chapitre5_bib.html#park2007penalized">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="wu2009genome">7</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Tong&nbsp;Tong Wu, Yi&nbsp;Fang Chen, Trevor Hastie, Eric Sobel, and Kenneth Lange.
+                                                        Genome-wide association analysis by lasso penalized logistic
+                                                        regression.
+                                                        <em>Bioinformatics</em>, 25(6):714-721, 2009.
+                                                        [&nbsp;<a href="chapitre5_bib.html#wu2009genome">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="bien2013lasso">8</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Jacob Bien, Jonathan Taylor, and Robert Tibshirani.
+                                                        A lasso for hierarchical interactions.
+                                                        <em>Annals of statistics</em>, 41(3):1111, 2013.
+                                                        [&nbsp;<a href="chapitre5_bib.html#bien2013lasso">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="wang2012interaction">9</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Haitian Wang, Shaw-Hwa Lo, Tian Zheng, and Inchi Hu.
+                                                        Interaction-based feature selection and classification for
+                                                        high-dimensional biological data.
+                                                        <em>Bioinformatics</em>, 28(21):2834-2842, 2012.
+                                                        [&nbsp;<a href="chapitre5_bib.html#wang2012interaction">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="kooperberg2005identifying">10</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Charles Kooperberg and Ingo Ruczinski.
+                                                        Identifying interacting snps using monte carlo logic regression.
+                                                        <em>Genetic epidemiology</em>, 28(2):157-170, 2005.
+                                                        [&nbsp;<a href="chapitre5_bib.html#kooperberg2005identifying">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="schwender2007identification">11</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Holger Schwender and Katja Ickstadt.
+                                                        Identification of snp interactions using logic regression.
+                                                        <em>Biostatistics</em>, 9(1):187-198, 2007.
+                                                        [&nbsp;<a href="chapitre5_bib.html#schwender2007identification">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="simon">12</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Noah Simon and Robert Tibshirani.
+                                                        A permutation approach to testing interactions for binary response by
+                                                        comparing correlations between classes.
+                                                        <em>Journal of the American Statistical Association</em>, 110(512),
+                                                        2015.
+                                                        [&nbsp;<a href="chapitre5_bib.html#simon">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="fan2015innovated">13</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Yingying Fan, Yinfei Kong, Daoji Li, Zemin Zheng, et&nbsp;al.
+                                                        Innovated interaction screening for high-dimensional nonlinear
+                                                        classification.
+                                                        <em>The Annals of Statistics</em>, 43(3):1243-1272, 2015.
+                                                        [&nbsp;<a href="chapitre5_bib.html#fan2015innovated">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="li2018robust">14</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Yang Li and Jun&nbsp;S Liu.
+                                                        Robust variable and interaction selection for logistic regression and
+                                                        general index models.
+                                                        <em>Journal of the American Statistical Association</em>, pages 1-16,
+                                                        2018.
+                                                        [&nbsp;<a href="chapitre5_bib.html#li2018robust">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="yang2008snpharvester">15</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Can Yang, Zengyou He, Xiang Wan, Qiang Yang, Hong Xue, and Weichuan Yu.
+                                                        Snpharvester: a filtering-based approach for detecting epistatic
+                                                        interactions in genome-wide association studies.
+                                                        <em>Bioinformatics</em>, 25(4):504-511, 2008.
+                                                        [&nbsp;<a href="chapitre5_bib.html#yang2008snpharvester">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="zhang2010team">16</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Xiang Zhang, Shunping Huang, Fei Zou, and Wei Wang.
+                                                        Team: efficient two-locus epistasis tests in human genome-wide
+                                                        association study.
+                                                        <em>Bioinformatics</em>, 26(12):i217-i227, 2010.
+                                                        [&nbsp;<a href="chapitre5_bib.html#zhang2010team">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="li2013model">17</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Jiahan Li, Jun Dan, Chunlei Li, and Rongling Wu.
+                                                        A model-free approach for detecting interactions in genetic
+                                                        association studies.
+                                                        <em>Briefings in bioinformatics</em>, 15(6):1057-1068, 2013.
+                                                        [&nbsp;<a href="chapitre5_bib.html#li2013model">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="dong2008exploration">18</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Changzheng Dong, Xun Chu, Ying Wang, Yi&nbsp;Wang, Li&nbsp;Jin, Tieliu Shi, Wei Huang,
+                                                        and Yixue Li.
+                                                        Exploration of gene-gene interaction effects using entropy-based
+                                                        methods.
+                                                        <em>European Journal of Human Genetics</em>, 16(2):229, 2008.
+                                                        [&nbsp;<a href="chapitre5_bib.html#dong2008exploration">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="zhang2007bayesian">19</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Yu&nbsp;Zhang and Jun&nbsp;S Liu.
+                                                        Bayesian inference of epistatic interactions in case-control studies.
+                                                        <em>Nature genetics</em>, 39(9):1167, 2007.
+                                                        [&nbsp;<a href="chapitre5_bib.html#zhang2007bayesian">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="wan2010boost">20</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Xiang Wan, Can Yang, Qiang Yang, Hong Xue, Xiaodan Fan, Nelson&nbsp;LS Tang, and
+                                                        Weichuan Yu.
+                                                        Boost: A fast approach to detecting gene-gene interactions in
+                                                        genome-wide case-control studies.
+                                                        <em>The American Journal of Human Genetics</em>, 87(3):325-340, 2010.
+                                                        [&nbsp;<a href="chapitre5_bib.html#wan2010boost">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="lebarbier">21</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Emilie Lebarbier and Tristan Mary-Huard.
+                                                        Le crit&egrave;re BIC : fondements th&eacute;oriques et
+                                                        interpr&eacute;tation.
+                                                        (RR-5315):17, 2004.
+                                                        [&nbsp;<a href="chapitre5_bib.html#lebarbier">bib</a>&nbsp;|
+                                                        <a href="https://hal.inria.fr/inria-00070685">http</a>&nbsp;|
+                                                        <a href="https://hal.inria.fr/inria-00070685/file/RR-5315.pdf">.pdf</a>&nbsp;]
+                                                        <blockquote><font size="-1">
+                                                            Keywords: Critère bay&eacute;sien ; approximation de Laplace ; consistance pour la dimension ; crit&egrave;re de s&eacute;lection de mod&egrave;les
+                                                        </font></blockquote>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="hastings1970monte">22</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        W&nbsp;Keith Hastings.
+                                                        Monte carlo sampling methods using markov chains and their
+                                                        applications.
+                                                        <em>Biometrika</em>, 57(1):97-109, 1970.
+                                                        [&nbsp;<a href="chapitre5_bib.html#hastings1970monte">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="meyn2012markov">23</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Sean&nbsp;P Meyn and Richard&nbsp;L Tweedie.
+                                                        <em>Markov chains and stochastic stability</em>.
+                                                        Springer Science &amp; Business Media, 2012.
+                                                        [&nbsp;<a href="chapitre5_bib.html#meyn2012markov">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="vital2016">24</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Clément Vital, Scoring pour le risque de crédit : variable réponse polytomique, sélection
+                                                        de variables, réduction de la dimension, applications.
+                                                        <em>URL: http://www.theses.fr/2016REN1S111.</em>, 2016.
+                                                    </td>
+                                                </tr>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="berry2010testing">25</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        William D Berry, Jacqueline HR DeMeritt, and Justin Esarey,
+                                                        Testing for interaction
+                                                        in binary logit and probit models: Is a product term essential?
+                                                        <em>American Journal of
+                                                            Political Science 54.1</em>, 2010.
+                                                    </td>
+                                                </tr>
+
+
+                                                </table>
+                                                
+                                                
+								</div>
+							</section>
+
+							<section id="footer">
+						<div class="container">
+							<ul class="copyright">
+								<li>&copy; Adrien Ehrhardt. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
