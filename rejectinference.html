@@ -21,17 +21,19 @@
 				<header>
 					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
 					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
-					<p>PhD Student @Lille I University & @Inria<br />
+					<p>PhD Student @Lille University & @Inria<br />
 					in Machine Learning applied to Finance<br />
 					I also work for Crédit Agricole Consumer Finance</p>
 				</header>
 				<nav id="nav">
 					<ul>
-					        <li><a href="index.html" class="active">Home</a></li>
+					        <li><a href="index.html">Home</a></li>
 						<li><a href="cifre.html">Informations CIFRE</a></li>
 						<li><a href="scoring.html">Intro to Credit Scoring</a></li>
-						<li><a href="rejectinference.html">Reject Inference</a></li>                                                
+						<li><a href="rejectinference.html" class="active">Reject Inference</a></li>
                         <li><a href="discretization.html">Discretization</a></li>
+                        <li><a href="interaction_screening.html">Interaction screening</a></li>
+                        <li><a href="logistic_trees.html">Logistic regression trees</a></li>
                         <li><a href="teaching.html">Teaching</a></li>
 					</ul>
 				</nav>
@@ -58,13 +60,965 @@
 								<div class="container">
 									<header class="major">
 										<h2>Reject Inference</h2>
-										<p>Under construction</p>
 									</header>
+                                    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
 
+                                    <p>The granting process of all credit institutions is based on the probability that the applicant will refund his loan given his characteristics. This probability also called <span data-acronym-label="score" data-acronym-form="singular+short">score</span> is learnt based on a dataset in which rejected applicants are <em>de facto</em> excluded. This implies that the population on which the <span data-acronym-label="score" data-acronym-form="singular+short">score</span> is used will be different from the learning population. Thus, this biased learning can have consequences on the scorecard’s relevance. Many methods dubbed “reject inference” have been developed in order to try to exploit the data available from the rejected applicants to build the score. However most of these methods are considered from an empirical point of view, and there is some lack of formalization of the assumptions that are really made, and of the theoretical properties that can be expected. We propose a formalisation of these usually hidden assumptions for some of the most common reject inference methods, and we discus the improvement that can be expected. These conclusions are illustrated on simulated data and on real data from <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>.</p>
+                                    <h2 id="introduction">Introduction</h2>
+                                    <p>In consumer loans, the acceptance process can be formalized as follows. For a new applicant’s profile and credit’s characteristics, the lender aims at estimating the repayment probability. To this end, the <em>credit modeler</em> fits a predictive model, often a logistic regression, between already financed clients’ characteristics <span class="math inline">\(\boldsymbol{x}=(x_1,\ldots,x_d)\)</span> and their repayment status, a binary variable <span class="math inline">\(y\in\{0,1\}\)</span> (where <span class="math inline">1</span> corresponds to good clients and <span class="math inline">0</span> to bad clients). The model is then applied to the new applicant and yields an estimate of its repayment probability, called <span data-acronym-label="score" data-acronym-form="singular+short">score</span> after an increasing transformation. Under some cut-off value of the <span data-acronym-label="score" data-acronym-form="singular+short">score</span>, the applicant is rejected, except if further expert rules come into play as can be seen from Figure <a href="#fig:figure1" data-reference-type="ref" data-reference="fig:figure1">[1]</a>.</p>
+                                    <figure>
+                                    <img src="figures/chapitre2/schema.png" alt="Simplified Acceptance status in Crédit Agricole Consumer Finance - scale relations not respected" id="fig:figure1" style="width:100%" /><figcaption>[1] Simplified Acceptance status in Crédit Agricole Consumer Finance - scale relations not respected<span label="fig:figure1"></span></figcaption>
+                                    </figure>
+                                    <br>
+                                    <p>The through-the-door population (all applicants) can be classified into two categories thanks to a binary variable <span class="math inline"><em>z</em></span> taking values in <span class="math inline">\(\{\text{f},\text{nf}\}\)</span> where <span class="math inline">\(\text{f}\)</span> stands for financed applicants and <span class="math inline">\(\text{nf}\)</span> for not financed ones. As the repayment variable <span class="math inline">\(y\)</span> is unobserved for not financed applicants, credit scorecards are only constructed on financed clients’ data but then applied to the whole through-the-door population. The relevance of this process is a natural question which is dealt in the field of <span>reject inference</span>. The idea is to use the characteristics of not financed clients in the scorecard building process to avoid a population bias, and thus to improve the prediction on the whole through-the-door population. Such methods have been described in <a href="#RI6" class="citation" data-cites="RI6">[36]</a>, <a href="#saporta" class="citation" data-cites="saporta">[46]</a>, <a href="#banasik" class="citation" data-cites="banasik">[43]</a>, <a href="#economix" class="citation" data-cites="economix">[47]</a>, and have also notably been investigated in <a href="#RI2" class="citation" data-cites="RI2">[44]</a> who first saw <span>reject inference</span> as a missing data problem. In <a href="#RI3" class="citation" data-cites="RI3">[39]</a>, the misspecified model case on real data is studied specifically and is also developed here.</p>
+                                    <p>In fact, it can be considered as a part of the semi-supervised learning setting, which consists in learning from both labelled and unlabelled data. However, in the semi-supervised setting <a href="#ChaSchZie06" class="citation" data-cites="ChaSchZie06">[8]</a> it is generally assumed that labelled data and unlabelled data come from the same distribution, which is rarely the case in <em>Credit Scoring</em>. Moreover, the main use case of semi-supervised learning is when the number of unlabelled data is far larger than the number of labelled data, which is not the case in <em>Credit Scoring</em> since the number of rejected clients and accepted clients is often balanced and depends heavily on the financial institution, the portfolio considered, etc.</p>
+                                    <p>The purpose of the present post is twofold: a clarification of which mathematical hypotheses, if any, underlie those reject inference methods and a clear conclusion on their relevance. In Section <a href="#sec:criteres" data-reference-type="ref" data-reference="sec:criteres">1.2</a>, we present a criterion to assess a method’s performance and discuss missingness mechanisms that characterize the relationship of <span class="math inline">\(z\)</span> with respect to <span class="math inline">\(\boldsymbol{x}\)</span> and <span class="math inline">\(y\)</span>. In Section <a href="#sec:methods_reject" data-reference-type="ref" data-reference="sec:methods_reject">1.3</a>, we go through some of the most common reject inference methods and exhibit their mathematical properties. To confirm our theoretical findings, we test each method on real data from Crédit Agricole Consumer Finance in Section <a href="#sec:num_exp_reject" data-reference-type="ref" data-reference="sec:num_exp_reject">1.4</a>. Finally, some guidelines are given to practitioners in Section <a href="#sec:conclusion_reject" data-reference-type="ref" data-reference="sec:conclusion_reject">1.5</a>.</p>
+                                    <h2 id="sec:criteres"><em>Credit Scoring</em> modelling</h2>
+                                    <h3 id="data">Data</h3>
+                                    <p>The decision process of financial institutions to accept a credit application is usually embedded in the probabilistic framework. The latter offers rigorous tools for taking into account both the variability of applicants and the uncertainty on their ability to pay back the loan. In this context, the important term is <span class="math inline">\(p(y|\boldsymbol{x})\)</span>, designing the probability that a new applicant (described by his characteristics <span class="math inline">\(\boldsymbol{x}\)</span>) will pay back his loan (<span class="math inline">\(y=1\)</span>) or not (<span class="math inline">\(y=0\)</span>). Estimation of <span class="math inline">\(p(y|\boldsymbol{x})\)</span> is thus an essential task of any <em>Credit Scoring</em> process.</p>
+                                    <p>To perform estimation, a specific <span class="math inline"><em>n</em> + <em>n'</em></span>-sample <span class="math inline">\(\mathcal{T}\)</span> is available, decomposed into two disjoint and meaningful subsets, denoted by <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span> and <span class="math inline">\(\mathcal{T}_{\text{nf}}\)</span> (<span class="math inline">\(\mathcal{T}=\mathcal{T}_{\text{f}} \cup \mathcal{T}_{\text{nf}}\)</span>, <span class="math inline">\(\mathcal{T}_{\text{f}} \cap \mathcal{T}_{\text{nf}}=\emptyset\)</span>). The first subset (<span class="math inline">\(\mathcal{T}_{\text{f}}\)</span>) corresponds to <span class="math inline"><em>n</em></span> applicants with features <span class="math inline">\(\boldsymbol{x}_i\)</span> who have been financed (<span class="math inline">\(z_i={\text{f}}\)</span>) and, consequently, for who the repayment status <span class="math inline">\(y_i\)</span> is known, with their respective matrix notation <span class="math inline">\(\boldsymbol{\mathbf{x}}_\text{f}\)</span>, <span class="math inline">\(\boldsymbol{\mathbf{z}}_\text{f}\)</span> and <span class="math inline">\(\boldsymbol{\mathbf{y}}_\text{f}\)</span>. Thus, <span class="math inline">\(\mathcal{T}_{\text{f}}=(\boldsymbol{x}_i,y_i,z_i)_{i\in \text{F}} = (\boldsymbol{\mathbf{x}}_\text{f},\boldsymbol{\mathbf{y}}_\text{f},\boldsymbol{\mathbf{z}}_\text{f})\)</span> where <span class="math inline">\(\text{F}=\{i:z_i={\text{f}}\}\)</span> denotes the corresponding subset of indexes. The second subset (<span class="math inline">\(\mathcal{T}_{\text{nf}}\)</span>) corresponds to <span class="math inline"><em>n</em>′</span> applicants with features <span class="math inline">\(\boldsymbol{x}_i\)</span> who have <span><em>not</em></span> been financed (<span class="math inline">\(z_i={\text{nf}}\)</span>) and, consequently, for who the repayment status <span class="math inline">\(y_i\)</span> is <span><em>unknown</em></span>, with their respective matrix notation <span class="math inline">\(\boldsymbol{\mathbf{x}}_{\text{nf}}\)</span> and <span class="math inline">\(\boldsymbol{\mathbf{z}}_{\text{nf}}\)</span>. Thus, <span class="math inline">\(\mathcal{T}_{\text{nf}}=(\boldsymbol{x}_i,z_i)_{i\in \text{NF}} = (\boldsymbol{\mathbf{x}}_{\text{nf}}, \boldsymbol{\mathbf{z}}_{\text{nf}})\)</span> where <span class="math inline">\(\text{NF}=\{i:z_i={\text{nf}}\}\)</span> denotes the corresponding subset of indexes. We notice that <span class="math inline">\(y_i\)</span> values are excluded from the observed sample <span class="math inline">\(\mathcal{T}_{\text{nf}}\)</span>, since they are missing. These data can be represented schematically as:</p>
+                                    <p><br /><span class="math display">$$\mathcal{T} = \begin{array}{c}
+                                    \mathcal{T}_{\text{f}} = \bigg( \; \boldsymbol{\mathbf{x}}_{\text{f}} \\
+                                    \\
+                                    \cup \\
+                                    \\
+                                    \mathcal{T}_{\text{nf}} = \bigg( \; \boldsymbol{\mathbf{x}}_{\text{nf}} \end{array}
+                                    \left( \begin{array}{ccc}
+                                    %\rowcolor{red!20}
+                                     \; \; x_{1,1} &amp; \cdots &amp; x_{1,d}  \\
+                                    \vdots &amp; \vdots &amp; \vdots  \\
+                                    x_{n,1} &amp; \cdots &amp; x_{n,d} \\
+                                     \; \; x_{n+1,1} &amp; \cdots &amp; x_{n+1,d}  \\
+                                    \vdots &amp; \vdots &amp; \vdots \\
+                                    x_{n+n',1} &amp; \cdots &amp; x_{n+n',d} \end{array} \right),
+                                    \hspace{1.5cm}
+                                    \begin{array}{c}
+                                     \boldsymbol{\mathbf{y}}_{\text{f}} \\
+                                    \\
+                                    \\
+                                    \\
+                                     \boldsymbol{\mathbf{y}}_{\text{nf}} \end{array}
+                                    \left( \begin{array}{c}
+                                     y_1 \\
+                                    \vdots \\
+                                    y_n  \\
+                                     \text{NA} \\
+                                    \vdots \\
+                                    \text{NA} \end{array} \right) ,
+                                    \hspace{1.5cm}
+                                    \begin{array}{c}
+                                     \boldsymbol{\mathbf{z}}_{\text{f}} \\
+                                    \\
+                                    \\
+                                    \\
+                                     \boldsymbol{\mathbf{z}}_{\text{nf}} \end{array}
+                                    \left( \begin{array}{c}
+                                     \text{f} \\
+                                    \vdots \\
+                                    \text{f} \\
+                                     \text{nf} \\
+                                    \vdots \\
+                                    \text{nf} \end{array} \right)
+                                    \hspace{0.2cm}
+                                    \begin{array}{c}
+                                    \bigg). \\
+                                    \\
+                                    \\
+                                    \\
+                                    \bigg). \end{array}$$</span><br /></p>
+                                    <h3 id="general-parametric-model">General parametric model</h3>
+                                    <p>Estimation of <span class="math inline">\(p(y|\boldsymbol{x})\)</span> has to rely on modelling since the true probability distribution is unknown. Firstly, it is both convenient and realistic to assume that triplets in <span class="math inline">\(\mathcal{T}_{\text{c}} = (\boldsymbol{x}_i,y_i,z_i)_{1\le i\le n+n'}\)</span> are all independent and identically distributed (i.i.d.), including the unknown values of <span class="math inline">\(y_i\)</span> when <span class="math inline">\(i\in \text{NF}\)</span>. Secondly, it is usual and convenient to assume that the unknown distribution <span class="math inline">\(p(y|\boldsymbol{x})\)</span> belongs to a given parametric family <span class="math inline">\(\{p_{\boldsymbol{\theta}}(y|\boldsymbol{x})\}_{\boldsymbol{\theta} \in\Theta}\)</span>, where <span class="math inline">Θ</span> is the parameter space. For instance, logistic regression is often considered in practice, even if we will be more general in this section. However, logistic regression will be important for other sections since some standard reject inference methods are specific to this family (Section <a href="#sec:methods_reject" data-reference-type="ref" data-reference="sec:methods_reject">1.3</a>) and numerical experiments (Section <a href="#sec:num_exp_reject" data-reference-type="ref" data-reference="sec:num_exp_reject">1.4</a>) will implement them.</p>
+                                    <p>As in any missing data situation (here <span class="math inline">\(z\)</span> indicates if <span class="math inline">\(y\)</span> is observed or not), the relative modelling process, namely <span class="math inline">\(p(z|\boldsymbol{x},y)\)</span>, has also to be clarified. For convenience, we can also consider a parametric family <span class="math inline">\(\{p_{\boldsymbol{\phi}}(z|\boldsymbol{x},y)\}_{\boldsymbol{\phi} \in \Phi}\)</span>, where <span class="math inline">\(\boldsymbol{\phi}\)</span> denotes the parameter and <span class="math inline">Φ</span> the associated parameter space of the financing mechanism. Note we consider here the most general missing data situation, namely a mechanism <a href="#littlerubin" class="citation" data-cites="littlerubin">[23]</a>. It means that <span class="math inline">\(z\)</span> can be stochastically dependent on some missing data <span class="math inline">\(y\)</span>, namely that <span class="math inline">\(p(z|\boldsymbol{x},y)\neq p(z|\boldsymbol{x})\)</span>. We will discuss this fact in Section <a href="#sec:mechanisms" data-reference-type="ref" data-reference="sec:mechanisms">1.2.4</a>.</p>
+                                    <p>Finally, combining both previous distributions <span class="math inline">\(p_{\boldsymbol{\theta}}(y|\boldsymbol{x})\)</span> and <span class="math inline">\(p_{\boldsymbol{\phi}}(z|\boldsymbol{x},y)\)</span> leads to express the joint distribution of <span class="math inline">\((y,z)\)</span> conditionally to <span class="math inline">\(\boldsymbol{x}\)</span> as: <br /><span class="math display">$$\label{eq:generative}
+                                        p_{\gamma}(y,z|\boldsymbol{x}) = p_{\boldsymbol{\phi}(\gamma)}(z|y,\boldsymbol{x})p_{\boldsymbol{\theta}(\gamma)}(y|\boldsymbol{x})$$</span><br /> where <span class="math inline">\(\{p_{\gamma}(y,z|\boldsymbol{x})\}_{\gamma \in \Gamma}\)</span> denotes a distribution family indexed by a parameter <span class="math inline"><em>γ</em></span> evolving in a space <span class="math inline">Γ</span>. Here it is clearly expressed that both parameters <span class="math inline">\(\boldsymbol{\phi}\)</span> and <span class="math inline">\(\boldsymbol{\theta}\)</span> can depend on <span class="math inline"><em>γ</em></span>, even if in the following we will note shortly <span class="math inline">\(\boldsymbol{\phi}=\boldsymbol{\phi}(\gamma)\)</span> and <span class="math inline">\(\boldsymbol{\theta}=\boldsymbol{\theta}(\gamma)\)</span>. In this very general missing data situation, the missing process is said to be <span><em>non-ignorable</em></span>, meaning that parameters <span class="math inline">\(\boldsymbol{\phi}\)</span> and <span class="math inline">\(\boldsymbol{\theta}\)</span> can be functionally dependent (thus <span class="math inline">\(\gamma\neq (\boldsymbol{\phi},\boldsymbol{\theta})\)</span>). We also discuss this fact in Section <a href="#sec:mechanisms" data-reference-type="ref" data-reference="sec:mechanisms">1.2.4</a>.</p>
+                                    <h3 id="sec:EM">Maximum likelihood estimation</h3>
+                                    <p>Mixing previous model and data, the maximum likelihood principle can be invoked for estimating the whole parameter <span class="math inline"><em>γ</em></span>, thus yielding as a by-product an estimate of the parameter <span class="math inline">\(\boldsymbol{\theta}\)</span>. Indeed, <span class="math inline">\(\boldsymbol{\theta}\)</span> is of particular interest, the goal of the financial institutions being solely to obtain an estimate of <span class="math inline">\(p_{\boldsymbol{\theta}}(y|\boldsymbol{x})\)</span>. The observed log-likelihood can be written as: <br /><span class="math display">$$\label{eq:like.MNAR}
+                                        \ell(\gamma;\mathcal{T}) = \sum_{i\in\text{F}}\ln p_{\gamma}(y_i,\text{f} | \boldsymbol{x}_i) + \sum_{i'\in\text{NF}} \ln \left[ \sum_{y\in\{0,1\}} p_{\gamma}(y,\text{nf} | \boldsymbol{x}_{i'}) \right].$$</span><br /> Within this missing data paradigm, the EM algorithm (see <a href="#dempster1977maximum" class="citation" data-cites="dempster1977maximum">[14]</a>) can be used: it aims at maximizing the expectation of the complete likelihood <span class="math inline">ℓ<sub><em>c</em></sub>(<em>γ</em>; \(\mathcal{T}_c\)</span> (defined hereafter) where <span class="math inline">\(\mathcal{T}_{\text{c}} = \mathcal{T} \cup \boldsymbol{\mathbf{y}}_{\text{nf}}\)</span> over the missing labels. Starting from an initial value <span class="math inline"><em>γ</em><sup>(0)</sup></span>, iteration <span class="math inline">(<em>s</em>)</span> of the algorithm is decomposed into the following two classical steps:</p>
+                                    <h5 id="e-step">E-step</h5>
+                                    <p>compute the conditional probabilities of missing <span class="math inline">\(y_i\)</span> values: <br /><span class="math display">$$t_{iy}^{(s)} = p_{\boldsymbol{\theta}(\gamma^{(s-1)})}(y|\boldsymbol{x}_i,\text{nf}) = \frac{p_{\gamma^{(s-1)}}(y, \text{nf}|\boldsymbol{x}_i)}{\sum_{y' = 0}^{1} p_{\gamma^{(s-1)}}(y', \text{nf}|\boldsymbol{x}_i)};$$</span><br /></p>
+                                    <h5 id="m-step">M-step</h5>
+                                    <p>maximize the conditional expectation of the complete log-likelihood: <br /><span class="math display">$$\label{eq:like.c}
+                                        \ell_c(\gamma;\mathcal{T}_{\text{c}}) = \sum_{i=1}^{n+n'}\ln p_{\gamma}(y_i,z_i | \boldsymbol{x}_i) = \sum_{i=1}^{n}\ln p_{\gamma}(y_i,\text{f} | \boldsymbol{x}_i) + \sum_{i=n+1}^{n+n'}\ln p_{\gamma}(y_i,\text{nf} | \boldsymbol{x}_i);$$</span><br /> leading to: <br /><span class="math display">$$\begin{aligned}
+                                            \gamma^{(s)} &amp; = \arg\max_{\gamma \in \Gamma} \mathbb{E}_{\boldsymbol{\mathbf{y}}_{\text{nf}}} [\ell_c(\gamma;\mathcal{T}_{\text{c}}) | \mathcal{T},\gamma^{(s-1)}] \\
+                                            &amp; = \arg\max_{\gamma \in \Gamma} \sum_{i\in \text{F}} \ln p_{\gamma}(y_i, \text{f}|\boldsymbol{x}_i) +  \sum_{i'\in \text{NF}}\sum_{y = 0}^{1}t_{i'y}^{(s)} \ln p_{\gamma}(y, \text{nf} | \boldsymbol{x}_{i'}).\end{aligned}$$</span><br /> Usually, stopping rules rely either on a predefined number of iterations, or on a predefined stability criterion of the observed log-likelihood.</p>
+                                        <h3 id="sec:mechanisms">Some current restrictive missingness mechanisms</h3>
+                                        <p>The latter parametric family is very general since it considers both that the missingness mechanism is <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> and non-ignorable. But in practice, it is common to consider ignorable models for the sake of simplicity, meaning that <span class="math inline">\(\gamma= (\boldsymbol{\phi},\boldsymbol{\theta})\)</span>. There exists also some restrictions to the <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> mechanism.</p>
+                                        <p>The first restriction to <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> is the MCAR setting, meaning that <span class="math inline">\(p(z| \boldsymbol{x},y) = p(z)\)</span>. In that case, applicants should be accepted or rejected without taking into account their descriptors <span class="math inline">\(\boldsymbol{x}\)</span>. Such a process is not realistic at all for representing the actual process followed by financial institutions. Consequently it is always discarded in <em>Credit Scoring</em>.</p>
+                                        <p>The second restriction to <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> is the MAR setting, meaning that <span class="math inline">\(p(z| \boldsymbol{x},y) = p(z|\boldsymbol{x})\)</span>. The <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> missingness mechanism seems realistic for <em>Credit Scoring</em> applications, for example when financing is based solely on a function of <span class="math inline">\(\boldsymbol{x}\)</span>, <span><em>e.g.</em></span> in the case of a score associated to a cut-off, provided all clients’ characteristics of this existing <span data-acronym-label="score" data-acronym-form="singular+short">score</span> are included in <span class="math inline">\(\boldsymbol{x}\)</span>. It is a usual assumption in <em>Credit Scoring</em> even if, in practice, the financing mechanism may depend also on unobserved features (thus not present in <span class="math inline">\(\boldsymbol{x}\)</span>), which is particularly true when an operator (see Figure <a href="#fig:figure1" data-reference-type="ref" data-reference="fig:figure1">[1]</a>) adds a subjective, often intangible, expertise. In the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> situation the log-likelihood can be reduced to: <br /><span class="math display">$$\label{eq:like.MAR}
+                                            \ell(\gamma;\mathcal{T}) = \ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}}) + \sum_{i=1}^{n+n'} \ln p_{\boldsymbol{\phi}}(z_{i} | \boldsymbol{x}_{i}),$$</span><br /> with <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}})=\sum_{i\in\text{F}}\ln p_{\boldsymbol{\theta}}(y_i | \boldsymbol{x}_i)\)</span>. Combining it with the ignorable assumption, estimation of <span class="math inline">\(\boldsymbol{\theta}\)</span> relies only on the first part <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}})\)</span>, since the value <span class="math inline">\(\boldsymbol{\phi}\)</span> has no influence on <span class="math inline">\(\boldsymbol{\theta}\)</span>. In that case, invoking an EM algorithm due to missing data <span class="math inline">\(y\)</span> is no longer required as will be made explicit in Section <a href="#subsec:strat1" data-reference-type="ref" data-reference="subsec:strat1">1.3.2</a>.</p>
+                                        <h3 id="subsec:model_selection">Model selection</h3>
+                                        <p>At this step, several kinds of parametric model have been assumed. It concerns obviously the parametric family <span class="math inline">\(\{p_{\boldsymbol{\theta}}(y|\boldsymbol{x})\}_{\boldsymbol{\theta} \in\Theta}\)</span>, and also the missingness mechanism <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> or <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span>. However, it has to be noticed that <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> versus <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> cannot be tested since we do not have access to <span class="math inline">\(y\)</span> for not financed clients <a href="#molenberghs2008every" class="citation" data-cites="molenberghs2008every">[48]</a>. However, model selection is possible by modelling also the whole financing mechanism, namely the family <span class="math inline">\(\{p_{\boldsymbol{\phi}}(z|\boldsymbol{x},y)\}_{\boldsymbol{\phi} \in \Phi}\)</span>.</p>
+                                        <p>Scoring for credit application can be recast as a semi-supervised classification problem <a href="#ChaSchZie06" class="citation" data-cites="ChaSchZie06">[8]</a>. In this case, classical model selection criteria can be divided into two categories <a href="#vandewalle:tel-00447141" class="citation" data-cites="vandewalle:tel-00447141">[7]</a>: either scoring performance criteria as <em>e.g.</em> error rate on a test set <span class="math inline">\(\mathcal{T}^{\text{test}}\)</span>, or information criteria like <em>e.g.</em> BIC.</p>
+                                        <p>In the category of error rate criteria, the typical error rate is expressed as follows: <br /><span id="eq:error" class="math display">$$\label{eq:error}
+                                            \mbox{Error}(\mathcal{T}^\text{test}) = \frac{1}{|\mathcal{T}^\text{test}|} \sum_{i \in \mathcal{T}^\text{test}} \mathbb{I}(\hat y_i \neq y_i),$$</span><br /> where <span class="math inline">\(\mathcal{T}^\text{test}\)</span> is an i.i.d. test sample from <span class="math inline">\(p(y|\boldsymbol{x})\)</span> and where <span class="math inline">\(\hat{y}_i\)</span> is the estimated value of the related <span class="math inline">\(y_i\)</span> value involved by the estimated model at hand. The model leading to the lowest error value is then retained. However, in the <em>Credit Scoring</em> context this criterion family is not available since no sample <span class="math inline">\(\mathcal{T}^\text{test}\)</span> is itself available. This problem can be exhibited through the following straightforward expression <br /><span class="math display">$$\label{eq:error2}
+                                                p(y|\boldsymbol{x}) = \sum_{z\in\{\text{f},\text{nf}\}} p(y|\boldsymbol{x},z) p(z|\boldsymbol{x})$$</span><br /> where <span class="math inline">\(p(y|\boldsymbol{x},z)\)</span> is unknown and <span class="math inline">\(p(z|\boldsymbol{x})\)</span> is known since this latter is defined by the financial institution itself. We notice that obtaining a sample from <span class="math inline">\(p(y|\boldsymbol{x})\)</span> would require that the financial institution draws <span class="math inline">\(\boldsymbol{\mathbf{z}}^\text{test}\)</span> i.i.d. from <span class="math inline">\(p(z|\boldsymbol{x})\)</span> before to observe the results <span class="math inline">\(\boldsymbol{\mathbf{y}}^\text{test}\)</span> i.i.d. from <span class="math inline">\(p(y|\boldsymbol{x},z)\)</span>. But in practice it is obviously not the case, a threshold being applied to the distribution <span class="math inline">\(p(z|\boldsymbol{x})\)</span> for retaining only a set of fundable applicants, the non-fundable applicants being definitively discarded, preventing us from getting a test sample <span class="math inline">\(\mathcal{T}^\text{test}\)</span> from <span class="math inline">\(p(y | \boldsymbol{x})\)</span>. As a matter of fact, only a sample <span class="math inline">\(\mathcal{T}_{\text{f}}^\text{test}\)</span> of <span class="math inline">\(p(y|\boldsymbol{x},\text{f})\)</span> is available, irrevocably prohibiting the calculus of (<a href="#eq:error" data-reference-type="ref" data-reference="eq:error">[eq:error]</a>) as a model selection criterion.</p>
+                                            <p>In the category of information criteria, the BIC criterion is expressed as the following penalization of the maximum log-likelihood: <br /><span class="math display" id="eq:AIC">$$\label{eq:AIC}
+                                                \mbox{BIC} = - 2 \ell(\hat\gamma;\mathcal{T}) + \text{dim}(\Gamma) \ln n,$$</span><br /> where <span class="math inline"><em>γ̂</em></span> is the maximum likelihood estimate of <span class="math inline"><em>γ</em></span> and <span class="math inline">dim(<em>Γ</em>)</span> is the number of parameters to be estimated in the model at hand. The model leading to the lowest BIC value is then retained. Many other BIC-like criteria exist <a href="#vandewalle:tel-00447141" class="citation" data-cites="vandewalle:tel-00447141">[7]</a> but the underlined idea is unchanged. Contrary to the error rate criteria like (<a href="#eq:error" data-reference-type="ref" data-reference="eq:error">[eq:error]</a>), it is thus possible to compare models without funding “non-fundable applicants” since just the available sample <span class="math inline">\(\mathcal{T}\)</span> is required. However, computing (<a href="#eq:AIC" data-reference-type="ref" data-reference="eq:AIC">[eq:BIC]</a>) requires to precisely express the model families <span class="math inline">\(\{p_{\gamma}(y,z|\boldsymbol{x})\}_{\gamma \in \Gamma}\)</span> which compete.</p>
+                                            <h2 id="sec:methods_reject">Rational reinterpretation of <span>reject inference</span> methods</h2>
+                                            <h3 id="subsec:challenge">The reject inference challenge</h3>
+                                            <p>As discussed in the previous section, a regular way to use the whole observed sample <span class="math inline">\(\mathcal{T}\)</span> in the estimation process implies some challenging modelling and assumption steps. A method using the whole sample <span class="math inline">\(\mathcal{T}\)</span> is traditionally called a <span>reject inference</span> method since it uses not only financed applicants (sample <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span>) but also not financed, or rejected, applicants (sample <span class="math inline">\(\mathcal{T}_{\text{nf}}\)</span>). Since modelling the financing mechanism <span class="math inline">\(p(z | \boldsymbol{x}, y)\)</span> is sometimes a too heavy task, such methods propose alternatively to use the whole sample <span class="math inline">\(\mathcal{T}\)</span> in a more empirical manner. However, this is somehow a risky strategy since we have also seen in the previous section that validating methods with error rate like criteria is not possible through the standard <em>Credit Scoring</em> process. As a result, some strategies are proposed to perform a “good” <span data-acronym-label="score" data-acronym-form="singular+short">score</span> function estimation without possibility to access their real performance.</p>
+                                            <p>However, most of the proposed reject inference strategies may make some hidden assumptions on the modelling process. Our challenge is to reveal as far as possible such hidden assumptions to then discuss their realism, failing to be able to compare them by the model selection principle.</p>
+                                            <h3 id="subsec:strat1">Strategy 1: ignoring not financed clients</h3>
+                                            <h4 id="definition">Definition</h4>
+                                            <p>The simplest reject inference strategy is to ignore not financed clients for estimating <span class="math inline">\(\boldsymbol{\theta}\)</span>. Thus it consists to estimate <span class="math inline">\(\boldsymbol{\theta}\)</span> by maximizing the log-likelihood <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}})\)</span>.</p>
+                                            <h4 id="missing-data-reformulation">Missing data reformulation</h4>
+                                            <p>In fact, this strategy is equivalent to using the whole sample <span class="math inline">\(\mathcal{T}\)</span> (financed and not financed applicants) under both the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> and ignorable assumptions. See the related explanation in Section <a href="#sec:mechanisms" data-reference-type="ref" data-reference="sec:mechanisms">1.2.4</a> and <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a>. Consequently, this strategy is truly a particular “reject inference” strategy although it does not seem to be.</p>
+                                            <h4 id="estimate-property">Estimate property</h4>
+                                            <p>By noting <span class="math inline">\(\hat{\boldsymbol{\theta}}_\text{f}\)</span> and <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> respectively the maximum likelihood estimates of <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}})\)</span> and <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T}_{\text{c}})\)</span> provided we know <span class="math inline">\(y_i\)</span> for <span class="math inline">\(i \in \text{NF}\)</span>, classic maximum likelihood properties <a href="#10.2307/1912526" class="citation" data-cites="10.2307/1912526">[6]</a>, <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a> yield under a well-specified model hypothesis (there exists <span class="math inline">\(\boldsymbol{\theta}^\star\)</span> s.t. <span class="math inline">\(p(y | \boldsymbol{x}) = p_{\boldsymbol{\theta}^\star}(y | \boldsymbol{x})\)</span> for all <span class="math inline">\((\boldsymbol{x},y)\)</span>) and a <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> missingness mechanism that <span class="math inline">\(\hat{\boldsymbol{\theta}} \approx \hat{\boldsymbol{\theta}}_\text{f}\)</span> for large-enough samples <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span> and <span class="math inline">\(\mathcal{T}_{\text{nf}}\)</span>.</p>
+                                            <h3 id="strategy-2-fuzzy-augmentation">Strategy 2: fuzzy augmentation</h3>
+                                            <h4 id="definition-1">Definition</h4>
+                                            <p>This strategy can be found in <a href="#economix" class="citation" data-cites="economix">[47]</a>. It corresponds to an algorithm which is starting with <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(0)} = \hat{\boldsymbol{\theta}}_\text{f}\)</span> (see previous section). Then, all <span class="math inline">\((y_i)^{(1)}_{i \in \text{NF}}\)</span> are imputed by their expected value given by: <span class="math inline">\(\hat{y}^{(1)}_i = p_{\hat{\boldsymbol{\theta}}^{(0)}}(1 | \boldsymbol{x}_i)\)</span> (notice that these imputed values are not in <span class="math inline">{0, 1}</span> but in <span class="math inline">]0, 1[</span>). The completed log-likelihood <span class="math inline">\(\ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}}^{(1)})\)</span> with <span class="math inline">\(\mathcal{T}_{\text{c}}^{(1)}=\mathcal{T}_{\text{f}} \cup (y_i)^{(1)}_{i \in \text{NF}}\)</span> is maximized and yields parameter estimate <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(1)}\)</span>.</p>
+                                            <h4 id="missing-data-reformulation-1">Missing data reformulation</h4>
+                                            <p>Following the notations introduced in Section <a href="#sec:EM" data-reference-type="ref" data-reference="sec:EM">1.2.3</a>, and recalling that this method does not take into account the financing mechanism <span class="math inline">\(p(z | \boldsymbol{x},y)\)</span>, this method is an <span data-acronym-label="em" data-acronym-form="singular+short">em</span>-algorithm yielding <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(1)} = \arg\max_{\boldsymbol{\theta}} \mathbb{E}_{\boldsymbol{\mathbf{y}}_{\text{nf}}} [\ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}}) | \mathcal{T},\hat{\boldsymbol{\theta}}^{(0)}]\)</span>. The complete data <span class="math inline">\(\mathcal{T}_{\text{c}}\)</span> can be schematically expressed as: <br /><span class="math display">$$\mathcal{T}_{\text{c}}^{(1)} = \left(\begin{array}{c}
+                                                 \boldsymbol{\mathbf{x}}_{\text{f}} \\
+                                                \\
+                                                \\
+                                                \boldsymbol{\mathbf{x}}_{\text{nf}} \end{array}
+                                                \left( \begin{array}{ccc}
+                                                %\rowcolor{red!20}
+                                                 \; \; x_{1,1} &amp; \cdots &amp; x_{1,d}  \\
+                                                \vdots &amp; \vdots &amp; \vdots \\
+                                                x_{n,1} &amp; \cdots &amp; x_{n,d} \\
+                                                x_{n+1,1} &amp; \cdots &amp; x_{n+1,d}  \\
+                                                \vdots &amp; \vdots &amp; \vdots \\
+                                                x_{n+n',1} &amp; \cdots &amp; x_{n+n',d} \end{array} \right),
+                                                \hspace{1.5cm}
+                                                \begin{array}{c}
+                                                 \boldsymbol{\mathbf{y}}_{\text{f}} \\
+                                                \\
+                                                \\
+                                                 \boldsymbol{\mathbf{y}}_{\text{nf}}  \end{array}
+                                                \left( \begin{array}{c}
+                                                 \; \; y_1 \; \; \; \\
+                                                \vdots \\
+                                                y_n \\
+                                                \hat{y}_{n+1}^{(1)} \\
+                                                \vdots \\
+                                                \hat{y}_{n+n'}^{(1)} \end{array} \right),
+                                                \hspace{1.5cm}
+                                                \begin{array}{c}
+                                                 \boldsymbol{\mathbf{z}}_{\text{f}} \\
+                                                \\
+                                                \\
+                                                 \boldsymbol{\mathbf{z}}_{\text{nf}} \end{array}
+                                                \left( \begin{array}{c}
+                                                 \text{f} \\
+                                                \vdots \\
+                                                \text{f} \\
+                                                \text{nf} \\
+                                                \vdots \\
+                                                \text{nf} \end{array} \right) \right).$$</span><br /></p>
+                                            <h4 id="estimate-property-1">Estimate property</h4>
+                                            <p>It can be easily shown that <span class="math inline">\(\arg\max_{\boldsymbol{\theta}} \ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}}^{(1)}) = \hat{\boldsymbol{\theta}}_{\text{f}}\)</span> so that this method is similar to the scorecard learnt on the financed clients.</p>
+                                            <h3 id="strategy-3-reclassification">Strategy 3: reclassification</h3>
+                                            <h4 id="definition-2">Definition</h4>
+                                            <p>This strategy corresponds to an algorithm which is starting with <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(0)} = \hat{\boldsymbol{\theta}}_\text{f}\)</span> (see Section <a href="#subsec:strat1" data-reference-type="ref" data-reference="subsec:strat1">1.3.2</a>). Then, all <span class="math inline">\((y_i)^{(1)}_{i \in \text{NF}}\)</span> are imputed by the <span><em>maximum a posteriori</em></span> (MAP) principle given by: <span class="math inline">\(\hat{y}^{(1)}_i = \arg\max_{y \in \{0,1\}} p_{\hat{\boldsymbol{\theta}}^{(0)}}(y | \boldsymbol{x}_i)\)</span>. The completed log-likelihood <span class="math inline">\(\ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}}^{(1)})\)</span> with <span class="math inline">\(\mathcal{T}_{\text{c}}^{(1)}=\mathcal{T} \cup (y_i)^{(1)}_{i \in \text{NF}}\)</span> is maximized and yields parameter estimate <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(1)}\)</span>.</p>
+                                            <p>Its first variant stops at this value <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(1)}\)</span>. Its second variant iterates until potential convergence of <span class="math inline">\((\hat{\boldsymbol{\theta}}^{(s)})\)</span>, <span class="math inline"><em>s</em></span> designing the iteration number. In practice, this method can be found in <a href="#saporta" class="citation" data-cites="saporta">[46]</a> under the name “iterative reclassification”, in <a href="#" class="citation" data-cites="RI6">[36]</a> under the name “reclassification” or under the name “extrapolation” in <a href="#banasik" class="citation" data-cites="banasik">[43]</a>.</p>
+                                            <h4 id="missing-data-reformulation-2">Missing data reformulation</h4>
+                                            <p>This algorithm is equivalent to the so-called <span data-acronym-label="cem" data-acronym-form="singular+short">CEM</span> algorithm where a Classification (or MAP) step is inserted between the Expectation and Maximization steps of an <span data-acronym-label="em" data-acronym-form="singular+short">em</span> algorithm (described in Section <a href="#sec:EM" data-reference-type="ref" data-reference="sec:EM">1.2.3</a>). <span data-acronym-label="cem" data-acronym-form="singular+short">cem</span> aims at maximizing the completed log-likelihood <span class="math inline">\(\ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}})\)</span> over both <span class="math inline">\(\boldsymbol{\theta}\)</span> and <span class="math inline">\((y_i)_{i \in \text{NF}}\)</span>. Since <span class="math inline">\(\boldsymbol{\phi}\)</span> is not involved in this process, we first deduce from Section <a href="#sec:mechanisms" data-reference-type="ref" data-reference="sec:mechanisms">1.2.4</a> that, again, <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> and ignorable assumptions are present. Then, standard properties of the estimate maximizing the completed likelihood indicate that it is not a consistent estimate of <span class="math inline">\(\boldsymbol{\theta}\)</span> <a href="#celeux1992classification" class="citation" data-cites="celeux1992classification">[4]</a>, contrary to the traditional maximum likelihood one.</p>
+                                            <h4 id="estimate-property-2">Estimate property</h4>
+                                            <p>The <span data-acronym-label="cem" data-acronym-form="singular+short">cem</span> algorithm is known for “sharpening” the decision boundary: predicted probabilities are closer to <span class="math inline">0</span> and <span class="math inline">1</span> than their true values as can be seen from simulated data from a <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> mechanism on Figure <a href="#fig:biais_CEM" data-reference-type="ref" data-reference="fig:biais_CEM">[2]</a>. The scorecard <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\text{f}}\)</span> on financed clients (in <span style="color: green">green</span>) is asymptotically consistent as was emphasized in Section <a href="#subsec:strat1" data-reference-type="ref" data-reference="subsec:strat1">1.3.2</a> while the reclassified scorecard (in <span style="color: red">red</span>) is biased even asymptotically.</p>
+                                            <figure>
+                                                <img width="600" src="figures/chapitre2/CEM_bias.png" alt="In the context of a probabilistic classifier, it is known that the CEM algorithm employed implicitly by the Reclassification method amounts to a bigger bias in terms of lr parameters, but a “sharper” decision boundary." /><figcaption>[2] In the context of a probabilistic classifier, it is known that the CEM algorithm employed implicitly by the Reclassification method amounts to a bigger bias in terms of logistic regression parameters, but a “sharper” decision boundary.</figcaption>
+                                            </figure>
+                                            <p><span id="fig:biais_CEM" label="fig:biais_CEM"></span></p>
+                                            <h3 id="subsec:augmentation">Strategy 4: augmentation</h3>
+                                            <h4 id="definition-3">Definition</h4>
+                                            <p>Augmentation can be found in <a href="#RI6" class="citation" data-cites="RI6">[36]</a>. It is also documented as a “Re-Weighting method” in <a href="#saporta" class="citation" data-cites="saporta">[46]</a>, <a href="#banasik" class="citation" data-cites="banasik">[43]</a> and <a href="#economix" class="citation" data-cites="economix">[47]</a>. This technique is directly influenced by the Importance Sampling <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a> literature because intuitively, as for all selection mechanism such as survey respondents, observations should be weighted according to their probability of being in the sample w.r.t. the whole population, i.e. by <span class="math inline">\(p(z | \boldsymbol{x},y)\)</span>. By assuming implicitly a <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> missingness mechanism, as emphasized in Section <a href="#sec:mechanisms" data-reference-type="ref" data-reference="sec:mechanisms">1.2.4</a>, we get <span class="math inline">\(p(z | \boldsymbol{x}, y) = p(z | \boldsymbol{x})\)</span>.</p>
+                                            <p>For <em>Credit Scoring</em> practitioner, the estimate of interest is the <span data-acronym-label="mle" data-acronym-form="singular+short">mle</span> of <span class="math inline">\(\ell(\boldsymbol{\theta};\mathcal{T} \cup \boldsymbol{\mathbf{y}}_{\text{nf}})\)</span>, which cannot be computed since we don’t know <span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span>. However we can derive the likelihood from the <span class="math inline">\(\text{KL}\)</span> divergence by focusing on <span class="math inline">\(\mathbb{E}_{\boldsymbol{x},y} [\ln[p_{\boldsymbol{\theta}}(y|\boldsymbol{x})]]\)</span>. By noticing that <span class="math inline">\(p(\boldsymbol{x}) = \dfrac{p(\boldsymbol{x} | \text{f})}{p(\text{f} | \boldsymbol{x})} p(\text{f})\)</span> and by assuming a <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> missingness mechanism, we get: <br /><span class="math display">$$\mathbb{E}_{\boldsymbol{x},y} [\ln[p_{\boldsymbol{\theta}}(y|\boldsymbol{x})]] = p(\text{f}) \sum_{y=0}^1 \int_{\mathcal{X}} \dfrac{\ln p_{\boldsymbol{\theta}}(y | \boldsymbol{x})}{p(\text{f} | \boldsymbol{x})} p(y | \boldsymbol{x}) p(\boldsymbol{x} | \text{f}) d\boldsymbol{x} \approx_{n \to \infty} \dfrac{p(\text{f})}{n} \sum_{i \in \text{F}} \dfrac{1}{p(\text{f} | \boldsymbol{x}_i)} \ln p_{\boldsymbol{\theta}}(y_i | \boldsymbol{x}_i).$$</span><br /> Consequently, had we access to <span class="math inline">\(p(\text{f} | \boldsymbol{x})\)</span>, the parameter maximizing the above mentioned likelihood would asymptotically be equal to the one on the through-the-door population, had we access to <span class="math inline">\(\boldsymbol{\mathbf{y}}_\text{nf}\)</span>. However, <span class="math inline">\(p(\text{f} | \boldsymbol{x})\)</span> must be estimated by the practitioner’s method of choice, which will come with its bias and variance.</p>
+                                            <p>This method proposes to bin observations in <span class="math inline">\(\mathcal{T}\)</span> in, say, 10 <em>equal-length</em> intervals of the <span data-acronym-label="score" data-acronym-form="singular+short">score</span> given by <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}_\text{f}}(1 | \boldsymbol{x})\)</span> and estimate <span class="math inline">\(p(z | \boldsymbol{x})\)</span> as the proportion of financed clients in each of these bins. The inverse of this estimate is then used to weight financed clients in <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span> and retrain the model.</p>
+                                            <h4 id="missing-data-reformulation-3">Missing data reformulation</h4>
+                                            <p>The method aims at correcting for the selection procedure yielding the training data <span class="math inline">\(\mathcal{T}_{\text{f}}\)</span> in the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> case. As was argued in Section <a href="#subsec:strat1" data-reference-type="ref" data-reference="subsec:strat1">1.3.2</a>, if the model is well-specified, such a procedure is superfluous as the estimated parameter <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\text{f}}\)</span> is consistent. In the misspecified case however, it is theoretically justified as will be developed in the next paragraph. However, it is unclear if this apparent benefit is not offset by the added estimation procedure (which comes with its bias / variance trade-off).</p>
+                                            <h4 id="estimate-property-3">Estimate property</h4>
+                                            <p>The Importance Sampling paradigm requires <span class="math inline">\(p(\text{f} | \boldsymbol{x}) &gt; 0\)</span> for all <span class="math inline">\(\boldsymbol{x}\)</span> which is clearly not the case here: for example, jobless people are never financed.</p>
+                                            <h3 id="strategy-5-twins">Strategy 5: twins</h3>
+                                            <h4 id="definition-4">Definition</h4>
+                                            <p>This <span>reject inference</span> method is documented internally at <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>; it consists in combining two scorecards: one predicting <span class="math inline">\(y\)</span> learnt on financed clients (denoted by <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\text{f}}\)</span> as previously), the other predicting <span class="math inline">\(z\)</span> learnt on all applicants, before learning the final scorecard using the predictions made by both scorecards on financed clients.</p>
+                                            <h4 id="missing-data-reformulation-4">Missing data reformulation</h4>
+                                            <p>The method aims at re-injecting information about the financing mechanism in the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> missingness mechanism by estimating <span class="math inline">\(\hat{\boldsymbol{\phi}}\)</span> as a logistic regression on all applicants, calculating <span data-acronym-label="score" data-acronym-form="singular+short">score</span>s <span class="math inline">\((1,\boldsymbol{x})' \hat{\boldsymbol{\theta}}_\text{f}\)</span> and <span class="math inline">\((1,\boldsymbol{x})' \hat{\boldsymbol{\phi}}\)</span> and use these as two continuous features in a third logistic regression predicting again the repayment feature <span class="math inline">\(y\)</span>.</p>
+                                            <h4 id="estimate-property-4">Estimate property</h4>
+                                            <p>It can be easily shown that this method is similar to the scorecard learnt on the financed clients.</p>
+                                            <h3 id="subsec:parcel">Strategy 6: parcelling</h3>
+                                            <h4 id="definition-5">Definition</h4>
+                                            <p>The parcelling method can be found in <span class="citation" data-cites="saporta banasik RI6"></span>. This method aims to correct the log-likelihood estimation in the <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> case by making further assumptions on <span class="math inline">\(p(y | \boldsymbol{x}, z)\)</span>. It is a little deviation from the fuzzy augmentation method in a <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> setting: we start with <span class="math inline">\(\hat{\boldsymbol{\theta}}^{(0)} = \hat{\boldsymbol{\theta}}_\text{f}\)</span> and the practitioner arbitrarily decides to discretize the subsequent range of scores <span class="math inline">\((p_{\hat{\boldsymbol{\theta}}^{(0)} }(y_i | \boldsymbol{x}_i))_1^{n+n'}\)</span> into, say, <span class="math inline"><em>K</em></span> scorebands <span class="math inline"><em>B</em><sub>1</sub>, …, <em>B</em><sub><em>K</em></sub></span> and “prudence factors” <span class="math inline"><strong>ϵ</strong> = (<em>ϵ</em><sub>1</sub>, …, <em>ϵ</em><sub><em>K</em></sub>)</span> generally such that <span class="math inline">1 &lt; <em>ϵ</em><sub>1</sub> &lt; … &lt; <em>ϵ</em><sub><em>K</em></sub></span> (non-financed low refunding probability clients are considered way riskier, all other things equal, than their financed counterparts). The method is thereafter strictly equivalent to fuzzy reclassification: a new logistic regression parameter is deduced from maximizing the expected complete log-likelihood as follows: <br /><span class="math display">$$\hat{\boldsymbol{\theta}}^{(1)} = \arg\max_{\boldsymbol{\theta}} \mathbb{E}_{\boldsymbol{\mathbf{y}}_{\text{nf}}} [\ell_c(\boldsymbol{\theta};\mathcal{T}_{\text{c}}) | \mathcal{T},\hat{\boldsymbol{\theta}}^{(0)}, \boldsymbol{\epsilon}] = \ell(\boldsymbol{\theta};\mathcal{T}_{\text{f}}) + \sum_{i' = n + 1}^{n+n'} \epsilon_i p_{\hat{\boldsymbol{\theta}}^{(0)}}(y_i | \boldsymbol{x}_i) \ln p_{\boldsymbol{\theta}}(y_i | \boldsymbol{x}_i),$$</span><br /> where <span class="math inline">\(\epsilon_i = \sum_{k=1}^K \epsilon_k \unicode{x1D7D9}(p_{\hat{\boldsymbol{\theta}}^{(0)}}(y_i | \boldsymbol{x}_i) \in B_k)\)</span> is simply the prudence factor of each individual, depending on their scoreband, decided by the practitioner.</p>
+                                            <h4 id="missing-data-reformulation-5">Missing data reformulation</h4>
+                                            <p>By considering not-financed clients as riskier than financed clients with the same level of <span data-acronym-label="score" data-acronym-form="singular+short">score</span>, <em>i.e.</em> <span class="math inline">\(p(y | \boldsymbol{x}, \text{nf}) &gt; p(y | \boldsymbol{x}, \text{f})\)</span>, it is implicitly assumed that manual operators (see Figure <a href="#fig:figure1" data-reference-type="ref" data-reference="fig:figure1">[1]</a>) have access to additional information, say <span class="math inline">\(\tilde{\boldsymbol{x}}\)</span> such as supporting documents, that influence the outcome <span class="math inline">\(y\)</span> even when <span class="math inline">\(\boldsymbol{x}\)</span> is accounted for. In this setting, rejected and accepted clients with the same <span data-acronym-label="score" data-acronym-form="singular+short">score</span> differ only by <span class="math inline">\(\tilde{\boldsymbol{x}}\)</span>, to which we do not have access and is accounted for “quantitatively” in a user-defined prudence factor <span class="math inline"><strong>ϵ</strong></span> stating that rejected clients would have been riskier than accepted ones.</p>
+                                            <h4 id="estimate-property-5">Estimate property</h4>
+                                            <p>The prudence factor encompasses the practitioner’s <em>belief</em> about the effectiveness of the operators’ rejections. It cannot be estimated from the data nor tested and is consequently a matter of unverifiable expert knowledge.</p>
+                                            <h2 id="sec:num_exp_reject">Numerical experiments</h2>
+<!--                                            <p>Appendix <a href="#subsec:app_reject_sim" data-reference-type="ref" data-reference="subsec:app_reject_sim">[subsec:app_reject_sim]</a> shows all reject inference methods developed here applied to simulated data from a multivariate Gaussian distribution for each class. A logistic regression is learnt on all drawn observations, yielding <span class="math inline">\(\hat{\boldsymbol{\theta}} = \arg\max_{\boldsymbol{\theta}} \ell(\boldsymbol{\theta}; \mathcal{T}_{\text{c}})\)</span> where <span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span> is known. We simulate not-financed clients by progressively “rejecting” observations such that <span class="math inline">\(p_{\hat{\boldsymbol{\theta}}}(1 | \boldsymbol{x}_i) &lt; \epsilon\)</span> with a varying threshold <span class="math inline"><em>ϵ</em></span>. This corresponds to a well-specified logistic regression and a MAR missingness mechanism. It comes as no surprise that no reject inference method performs better than standard logistic regression on financed clients (strategy 1). Since the data generating mechanism is Gaussian homoscedastic, we also resorted to semi-supervised linear discriminant analysis (LDA). This is straightforward with the Rmixmod <span class="sans-serif">R</span> package <span class="citation" data-cites="lebret2014rmixmod"></span>: the membership of unlabeled observations is assessed by the <span data-acronym-label="em" data-acronym-form="singular+short">em</span> algorithm. Although the decision boundaries of these two models is asymptotically equivalent, by making further assumptions, LDA suffers from less variance even asymptotically <span class="citation" data-cites="efron1975efficiency"></span>. With less financed clients, its advantage becomes clearer since it benefits from information on non-financed clients to evaluate <span class="math inline">\(p(\boldsymbol{x})\)</span>. This model was tested on real data but since the normality assumption does not hold, it shows poor results.</p>-->
+                                            <p>Here we focus on reject inference methods based on logistic regression applied to various <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> datasets: Electronics loans, Sports goods and Standard loans. They contain <span class="math inline"><em>n</em> = 180, 000</span>, <span class="math inline"><em>n</em> = 35, 000</span> and <span class="math inline"><em>n</em> = 28, 000</span> respectively and <span class="math inline"><em>d</em> = 5</span>, <span class="math inline"><em>d</em> = 8</span> and <span class="math inline"><em>d</em> = 6</span> categorical features with <span class="math inline">3</span> to <span class="math inline">10</span> levels per feature. The Electronics dataset consists in one year of financed clients through a partner of <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> that mainly sells electronics goods. The Sports dataset consists in one year of financed clients through a partner of <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> that sells all kinds of sports goods. The Standard consists in one year of financed clients stemming directly from sofinco.fr. The acceptance / rejection mechanism <span class="math inline">\(p_{\boldsymbol{\phi}}(z | \boldsymbol{x})\)</span> is the existing scorecard and we simulate rejected applicants by progressively increasing the <span data-acronym-label="cut" data-acronym-form="singular+short">cut</span> (the preceding threshold <span class="math inline"><em>ϵ</em></span>) of the existing scorecard.</p>
+                                            <p>The results in terms of Gini index are reported in Figure <a href="#fig:darty_reject" data-reference-type="ref" data-reference="fig:darty_reject">[3]</a>, <a href="#fig:decathlon_reject" data-reference-type="ref" data-reference="fig:decathlon_reject">[4]</a> and <a href="#fig:M3_reject" data-reference-type="ref" data-reference="fig:M3_reject">[5]</a> respectively. All methods perform relatively similarly and suffer from a big performance drop once the acceptance rate is below 50 % (at which point there are very few “bad borrower” events - <span class="math inline"><em>y</em> = 0</span>). If we were to report 95 % confidence intervals around the Gini indices, we would get insignificant predictive performances, which confirms our theoretical findings.</p>
+<!--                                            <p>Other predictive models are compared to logistic regression on the real datasets presented here in Appendix <a href="#subsec:app_reject_real_method" data-reference-type="ref" data-reference="subsec:app_reject_real_method">[subsec:app_reject_real_method]</a>. These experiments confirm that “global” methods in the sense of <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a> (which explicitly or implicitly estimate <span class="math inline">\(p(\boldsymbol{x})\)</span> to access <span class="math inline">\(p(y | \boldsymbol{x})\)</span> like LDA without unlabelled observations) degrade rapidly when the proportion of financed clients decreases.</p>-->
 
+                                            <figure>
+                                                <img src="figures/chapitre2/electronics.png" alt="" id="fig:darty_reject" style="width:100.00%" /><figcaption>[3] Performance resulting from the use of reject inference methods in terms of Gini on an Electronics loans dataset from CACF.<span label="fig:darty_reject"></span></figcaption>
+                                            </figure>
 
+                                            <figure>
+                                                <img src="figures/chapitre2/sports.png" alt="" id="fig:decathlon_reject" style="width:100.00%" /><figcaption>[4] Performance resulting from the use of reject inference methods in terms of Gini on a Sports goods loans dataset from CACF.<span label="fig:decathlon_reject"></span></figcaption>
+                                            </figure>
 
-
+                                            <figure>
+                                                <img src="figures/chapitre2/standard.png" alt="" id="fig:M3_reject" style="width:100.00%" /><figcaption>[5] Performance resulting from the use of Reject Inference methods in terms of Gini on Standard loans dataset from CACF.<span label="fig:M3_reject"></span></figcaption>
+                                            </figure>
+                                            
+                                            
+                                            <h2 id="sec:conclusion_reject">Discussion: choosing the right model</h2>
+                                            <h3 id="sticking-with-the-financed-clients-model">Sticking with the financed clients model</h3>
+                                            <p>Constructing scorecards by using a logistic regression on financed clients is a trade-off: on the one hand, it is implicitly assumed that it is well-specified, and that the missingness mechanism governing the observation of <span class="math inline">\(y\)</span> is <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span>. In other words, we suppose <span class="math inline">\(p(y | \boldsymbol{x}) = p_{\boldsymbol{\theta}^\star}(y | \boldsymbol{x}, \text{f})\)</span>. On the other hand, these assumptions, which seem strong at first hand, cannot really be relaxed: first, the use of logistic regression is a requirement from the financial institution. Second, the comparison of models cannot be performed using standard techniques since <span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span> is missing (section <a href="#subsec:model_selection" data-reference-type="ref" data-reference="subsec:model_selection">1.2.5</a>). Third, strategies 4 and 6 that tackle the misspecified model and <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> settings respectively require additional estimation procedures that, supplemental to their estimation bias and variance, take time from the practitioner’s perspective and are rather subjective (see sections <a href="#subsec:augmentation" data-reference-type="ref" data-reference="subsec:augmentation">1.3.5</a> and <a href="#subsec:parcel" data-reference-type="ref" data-reference="subsec:parcel">1.3.7</a>), which is not ideal in the banking industry since there are auditing processes and model validation teams that might question these practices.</p>
+                                            <h3 id="mcar-through-a-control-group"><span data-acronym-label="mcar" data-acronym-form="singular+short">MCAR</span> through a Control Group</h3>
+                                            <p>Another simple solution often stated in the literature would be to keep a small portion of the population where applicants are not filtered: everyone gets accepted. This so-called <em>Control Group</em> would constitute the learning and test sets for all scorecard developments.</p>
+                                            <p>Although theoretically perfect, this solution faces a major drawback: it is costly, as many more loans will default. To construct the scorecard, a lot of data is required, so the minimum size of the <em>Control Group</em> is equivalent to a much bigger loss than the amount a bank would accept to lose to get a few more Gini points.</p>
+                                            <h3 id="keep-several-models-in-production-champion-challengers">Keep several models in production: &quot;champion challengers&quot;</h3>
+                                            <p>Several scorecards could also be developed, e.g. one using each <span>reject inference</span> technique. Each application is randomly scored by one of these scorecards. As time goes by, we would be able to put more weight on the most performing scorecard(s) and progressively less on the least performing one(s): this is the field of Reinforcement Learning <span class="citation" data-cites="Sutton1998"></span>.</p>
+                                            <p>The major drawback of this method, although its cost is very limited unlike the <em>Control Group</em>, is that it is very time-consuming for the credit modeller who has to develop several scorecards, for the IT who has to put them all into production, for the auditing process and for the regulatory institutions.</p>
+                                            
+                                            <p>For years, the necessity of <span>reject inference</span> at <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span> and other institutions (as it seems from the large literature coverage this research area has had) has been a question of personal belief. Moreover, there even exists contradictory findings in this area.</p>
+                                            <p>By formalizing the <span>reject inference</span> problem in section <a href="#sec:criteres" data-reference-type="ref" data-reference="sec:criteres">1.2</a>, we were able to pinpoint in which cases the current scorecard construction methodology, using only financed clients’ data, could be unsatisfactory: under a <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> missingness mechanism and / or a misspecified model. We also defined criteria to reinterpret existing <span>reject inference</span> methods and assess their performance in Section <a href="#subsec:model_selection" data-reference-type="ref" data-reference="subsec:model_selection">1.2.5</a>. We concluded that no current <span>reject inference</span> method could enhance the current scorecard construction methodology: only the augmentation method (strategy 4) and the parcelling method (strategy 6) had theoretical justifications but introduce other estimation procedures. Additionally, they cannot be compared through classical model selection tools (Section <a href="#subsec:model_selection" data-reference-type="ref" data-reference="subsec:model_selection">1.2.5</a>).</p>
+                                            <p>We confirmed numerically these findings in the Appendices: given a true model and the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> assumption, no logistic regression-based <span>reject inference</span> method performed best than the current method. In the misspecified model case, the Augmentation method seemed promising but it introduces a model that also comes with its bias and variance resulting in very close performances compared with the current method. With real data provided by <span data-acronym-label="cacf" data-acronym-form="singular+short">CACF</span>, we showed that all methods gave very similar results: the “best” method (by the Gini index) was highly dependent on the data and/or the proportion of unlabelled observations. Last but not least, in practice such a benchmark would not be tractable as <span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span> is missing. In light of those limitations, adding to the fact that implementing those methods is a non-negligible time-consuming task, we recommend credit modellers to work only with financed loans’ data unless there is significant information available on either rejected applicants (<span class="math inline">\(\boldsymbol{\mathbf{y}}_{\text{nf}}\)</span> - credit bureau information for example, which does not apply to France) or on the acceptance mechanism <span class="math inline">\(\boldsymbol{\phi}\)</span> in the <span data-acronym-label="mnar" data-acronym-form="singular+short">MNAR</span> setting. On a side note, it must be emphasized that this work only applies to logistic regression and can be extended to all “local” models per the terminology introduced in <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a>. For “global” models, <em>e.g.</em> decision trees, it can be shown that they are biased even in the <span data-acronym-label="mar" data-acronym-form="singular+short">MAR</span> and well-specified settings, thus requiring <em>ad hoc</em> reject inference techniques such as an adaptation of the augmentation method (strategy 4 - see <a href="#zadrozny2004learning" class="citation" data-cites="zadrozny2004learning">[5]</a>).</p>
+                                            
+                                            <br></br>
+                                            All reject inference methods are detailed <a href="annexes_reject.html">here</a>.
+                                            <br></br>
+                                            <h4>Références</h4>
+                                            
+                                            <table>
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="efron1975efficiency">1</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Bradley Efron.
+                                                        The efficiency of logistic regression compared to normal discriminant
+                                                        analysis.
+                                                        <em>Journal of the American Statistical Association</em>,
+                                                        70(352):892-898, 1975.
+                                                        [&nbsp;<a href="chapitre2_bib.html#efron1975efficiency">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="lebret2014rmixmod">2</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        R&eacute;mi Lebret, Serge Iovleff, Florent Langrognet, Christophe Biernacki,
+                                                        Gilles Celeux, and G&eacute;rard Govaert.
+                                                        Rmixmod: the r package of the model-based unsupervised, supervised
+                                                        and semi-supervised classification mixmod library.
+                                                        <em>Journal of Statistical Software</em>, 67(6):241-270, 2014.
+                                                        [&nbsp;<a href="chapitre2_bib.html#lebret2014rmixmod">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="Sutton1998">3</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Richard&nbsp;S. Sutton and Andrew&nbsp;G. Barto.
+                                                        <em>Reinforcement Learning: An Introduction</em>.
+                                                        The MIT Press, second edition, 2018.
+                                                        [&nbsp;<a href="chapitre2_bib.html#Sutton1998">bib</a>&nbsp;|
+                                                        <a href="http://incompleteideas.net/book/the-book-2nd.html">.html</a>&nbsp;]
+                                                        <blockquote><font size="-1">
+                                                            Keywords: 2018 book reference reinforcement-learning
+                                                        </font></blockquote>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="celeux1992classification">4</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Gilles Celeux and G&eacute;rard Govaert.
+                                                        A classification em algorithm for clustering and two stochastic
+                                                        versions.
+                                                        <em>Computational statistics &amp; Data analysis</em>, 14(3):315-332,
+                                                        1992.
+                                                        [&nbsp;<a href="chapitre2_bib.html#celeux1992classification">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="zadrozny2004learning">5</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Bianca Zadrozny.
+                                                        Learning and evaluating classifiers under sample selection bias.
+                                                        In <em>Proceedings of the twenty-first international conference on
+                                                            Machine learning</em>, page 114. ACM, 2004.
+                                                        [&nbsp;<a href="chapitre2_bib.html#zadrozny2004learning">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="10.2307/1912526">6</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Halbert White.
+                                                        Maximum likelihood estimation of misspecified models.
+                                                        <em>Econometrica</em>, 50(1):1-25, 1982.
+                                                        [&nbsp;<a href="chapitre2_bib.html#10.2307/1912526">bib</a>&nbsp;|
+                                                        <a href="http://www.jstor.org/stable/1912526">http</a>&nbsp;]
+                                                        <blockquote><font size="-1">
+                                                            This paper examines the consequences and detection of model misspecification when using maximum likelihood techniques for estimation and inference. The quasi-maximum likelihood estimator (OMLE) converges to a well defined limit, and may or may not be consistent for particular parameters of interest. Standard tests (Wald, Lagrange Multiplier, or Likelihood Ratio) are invalid in the presence of misspecification, but more general statistics are given which allow inferences to be drawn robustly. The properties of the QMLE and the information matrix are exploited to yield several useful tests for model misspecification.
+                                                        </font></blockquote>
+                                                        <p>
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="vandewalle:tel-00447141">7</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Vincent Vandewalle.
+                                                        <em>Estimation et s&eacute;lection en classification
+                                                            semi-supervis&eacute;e</em>.
+                                                        Theses, Universit&eacute; des Sciences et Technologie de Lille - Lille
+                                                        I, December 2009.
+                                                        [&nbsp;<a href="chapitre2_bib.html#vandewalle:tel-00447141">bib</a>&nbsp;|
+                                                        <a href="https://tel.archives-ouvertes.fr/tel-00447141">http</a>&nbsp;|
+                                                        <a href="https://tel.archives-ouvertes.fr/tel-00447141/file/These.pdf">.pdf</a>&nbsp;]
+                                                        <blockquote><font size="-1">
+                                                            Keywords: mixture models ; maximum likelihood estimation ; missing data ; EM algorithm ; discriminant analysis ; semi-supervised classification ; parsimonious models ; model choice ; mod&egrave;les de m&eacute;lange ; estimation par maximum de vraisemblance ; donn&eacute;es manquantes ; algorithme EM ; analyse discriminante ; classification semi-supervis&eacute;e ; mod&egrave;les parcimonieux ; choix de mod&egrave;le
+                                                        </font></blockquote>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="Chapelle:2010:SL:1841234">8</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Olivier Chapelle, Bernhard Schlkopf, and Alexander Zien.
+                                                        <em>Semi-Supervised Learning</em>.
+                                                        The MIT Press, 1st edition, 2010.
+                                                        [&nbsp;<a href="chapitre2_bib.html#Chapelle:2010:SL:1841234">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="van1999multiple">9</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Stef Van&nbsp;Buuren, Hendriek&nbsp;C Boshuizen, Dick&nbsp;L Knook, et&nbsp;al.
+                                                        Multiple imputation of missing blood pressure covariates in survival
+                                                        analysis.
+                                                        <em>Statistics in medicine</em>, 18(6):681-694, 1999.
+                                                        [&nbsp;<a href="chapitre2_bib.html#van1999multiple">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="little2008selection">10</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Roderick&nbsp;JA Little.
+                                                        Selection and pattern-mixture models.
+                                                        <em>Longitudinal data analysis</em>, pages 409-431, 2008.
+                                                        [&nbsp;<a href="chapitre2_bib.html#little2008selection">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="rubin2004multiple">11</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Donald&nbsp;B Rubin.
+                                                        <em>Multiple imputation for nonresponse in surveys</em>, volume&nbsp;81.
+                                                        John Wiley &amp; Sons, 2004.
+                                                        [&nbsp;<a href="chapitre2_bib.html#rubin2004multiple">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="tuffery2010data">12</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Stéphane Tufféry.
+                                                        <em>Data mining et statistique décisionnelle : l'intelligence des
+                                                            données</em>.
+                                                        Editions Technip, 2010.
+                                                        [&nbsp;<a href="chapitre2_bib.html#tuffery2010data">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="seaman2013meant">13</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Shaun Seaman, John Galati, Dan Jackson, John Carlin, et&nbsp;al.
+                                                        What is meant by “missing at random”?
+                                                        <em>Statistical Science</em>, 28(2):257-268, 2013.
+                                                        [&nbsp;<a href="chapitre2_bib.html#seaman2013meant">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="dempster1977maximum">14</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Arthur&nbsp;P Dempster, Nan&nbsp;M Laird, and Donald&nbsp;B Rubin.
+                                                        Maximum likelihood from incomplete data via the em algorithm.
+                                                        <em>Journal of the royal statistical society. Series B
+                                                            (methodological)</em>, pages 1-38, 1977.
+                                                        [&nbsp;<a href="chapitre2_bib.html#dempster1977maximum">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="little1988test">15</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Roderick&nbsp;JA Little.
+                                                        A test of missing completely at random for multivariate data with
+                                                        missing values.
+                                                        <em>Journal of the American Statistical Association</em>,
+                                                        83(404):1198-1202, 1988.
+                                                        [&nbsp;<a href="chapitre2_bib.html#little1988test">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="efron">16</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Bradley Efron.
+                                                        The efficiency of logistic regression compared to normal discriminant
+                                                        analysis.
+                                                        <em>Journal of the American Statistical Association</em>,
+                                                        70(352):892-898, 1975.
+                                                        [&nbsp;<a href="chapitre2_bib.html#efron">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="oneill">17</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Terence&nbsp;J O'neill.
+                                                        The general distribution of the error rate of a classification
+                                                        procedure with application to logistic regression discrimination.
+                                                        <em>Journal of the American Statistical Association</em>,
+                                                        75(369):154-160, 1980.
+                                                        [&nbsp;<a href="chapitre2_bib.html#oneill">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="groupe">18</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Cr&eacute;dit Groupe.
+                                                        Scorecard development methodology guidelines.
+                                                        <em>Cr&eacute;dit Agricole Internal Guidelines</em>, 2015.
+                                                        [&nbsp;<a href="chapitre2_bib.html#groupe">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="reglog">19</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Ricco Rakotomalala.
+                                                        Pratique de la régression logistique.
+                                                        <em>Régression Logistique Binaire et Polytomique, Université
+                                                            Lumière Lyon</em>, 2, 2011.
+                                                        [&nbsp;<a href="chapitre2_bib.html#reglog">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="white">20</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Halbert White.
+                                                        Maximum likelihood estimation of misspecified models.
+                                                        <em>Econometrica: Journal of the Econometric Society</em>, pages 1-25,
+                                                        1982.
+                                                        [&nbsp;<a href="chapitre2_bib.html#white">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="missingness">21</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Joseph&nbsp;L Schafer and John&nbsp;W Graham.
+                                                        Missing data: our view of the state of the art.
+                                                        <em>Psychological methods</em>, 7(2):147, 2002.
+                                                        [&nbsp;<a href="chapitre2_bib.html#missingness">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="melangeclassif">22</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Christophe Biernacki.
+                                                        Pourquoi les modèles de mélange pour la classification.
+                                                        <em>Revue de MODULAD</em>, 40:1-22, 2009.
+                                                        [&nbsp;<a href="chapitre2_bib.html#melangeclassif">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="littlerubin">23</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Roderick&nbsp;JA Little and Donald&nbsp;B Rubin.
+                                                        <em>Statistical analysis with missing data</em>.
+                                                        John Wiley &amp; Sons, 2014.
+                                                        [&nbsp;<a href="chapitre2_bib.html#littlerubin">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="bart">24</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Bart Baesens.
+                                                        Developing intelligent systems for credit scoring using machine
+                                                        learning techniques.
+                                                        2003.
+                                                        [&nbsp;<a href="chapitre2_bib.html#bart">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="importance2">25</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Oleg Mazonka.
+                                                        Easy as : The importance sampling method.
+                                                        2016.
+                                                        [&nbsp;<a href="chapitre2_bib.html#importance2">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="Rmixmod">26</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Rémi Lebret, Serge Iovleff, Florent Langrognet, Christophe Biernacki, Gilles
+                                                        Celeux, and Gérard Govaert.
+                                                        Rmixmod: the r package of the model-based unsupervised, supervised
+                                                        and semi-supervised classification mixmod library.
+                                                        <em>Journal of Statistical Software</em>, pages In-press, 2015.
+                                                        [&nbsp;<a href="chapitre2_bib.html#Rmixmod">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="c45">27</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        J.&nbsp;Ross Quinlan.
+                                                        C4.5: programs for machine learning.
+                                                        1993.
+                                                        [&nbsp;<a href="chapitre2_bib.html#c45">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="rforest">28</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Tin&nbsp;Kam Ho.
+                                                        Random decision forests.
+                                                        1995.
+                                                        [&nbsp;<a href="chapitre2_bib.html#rforest">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="neural">29</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Kevin Gurney.
+                                                        An introduction to neural networks.
+                                                        1997.
+                                                        [&nbsp;<a href="chapitre2_bib.html#neural">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="svm">30</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Corinna Cortes and Vladimir Vapnik.
+                                                        Support-vector networks.
+                                                        1995.
+                                                        [&nbsp;<a href="chapitre2_bib.html#svm">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="celeux1985sem">31</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Gilles Celeux.
+                                                        The sem algorithm: a probabilistic teacher algorithm derived from the
+                                                        em algorithm for the mixture problem.
+                                                        <em>Computational statistics quarterly</em>, 2:73-82, 1985.
+                                                        [&nbsp;<a href="chapitre2_bib.html#celeux1985sem">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="cemvsem">32</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Christophe Biernacki, Gilles Celeux, and Gérard Govaert.
+                                                        Choosing starting values for the em algorithm for getting the highest
+                                                        likelihood in multivariate gaussian mixture models.
+                                                        <em>Computational Statistics &amp; Data Analysis</em>, 41(3):561-575,
+                                                        2003.
+                                                        [&nbsp;<a href="chapitre2_bib.html#cemvsem">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="finite">33</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Geoffrey McLachlan and David Peel.
+                                                        <em>Finite mixture models</em>.
+                                                        John Wiley &amp; Sons, 2004.
+                                                        [&nbsp;<a href="chapitre2_bib.html#finite">bib</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="crook">34</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Jonathan Crook and John Banasik.
+                                                        Does reject inference really improve the performance of application
+                                                        scoring models?
+                                                        <em>Journal of Banking &amp; Finance</em>, 28(4):857-874, April 2004.
+                                                        [&nbsp;<a href="chapitre2_bib.html#crook">bib</a>&nbsp;|
+                                                        <a href="http://dx.doi.org/10.1016/j.jbankfin.2003.10.010">DOI</a>&nbsp;|
+                                                        <a href="http://linkinghub.elsevier.com/retrieve/pii/S0378426603002036">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="gongyue_bound_????">35</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        G.&nbsp;Gongyue and Thomas.
+                                                        Bound and Collapse Bayesian Reject Inference When Data
+                                                        are Missing not at Random.
+                                                        [&nbsp;<a href="chapitre2_bib.html#gongyue_bound_????">bib</a>&nbsp;|
+                                                        <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.115.3430&rep=rep1&type=pdf">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="RI6">36</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Emmanuel Viennet, Françoise&nbsp;Fogelman Soulié, and Benoît Rognier.
+                                                        Evaluation de techniques de traitement des refusés pour l'octroi de
+                                                        crédit.
+                                                        <em>arXiv preprint cs/0607048</em>, 2006.
+                                                        [&nbsp;<a href="chapitre2_bib.html#RI6">bib</a>&nbsp;|
+                                                        <a href="http://arxiv.org/abs/cs/0607048">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="hand_graphical_1997">37</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        D.&nbsp;J. Hand, K.&nbsp;J. McConway, and E.&nbsp;Stanghellini.
+                                                        Graphical models of applicants for credit.
+                                                        <em>IMA Journal of Management Mathematics</em>, 8(2):143-155, 1997.
+                                                        [&nbsp;<a href="chapitre2_bib.html#hand_graphical_1997">bib</a>&nbsp;|
+                                                        <a href="http://imaman.oxfordjournals.org/content/8/2/143.short">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="heckman">38</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        James&nbsp;J. Heckman.
+                                                        Sample Selection Bias as a Specification Error.
+                                                        <em>Econometrica</em>, 47(1):153, January 1979.
+                                                        [&nbsp;<a href="chapitre2_bib.html#heckman">bib</a>&nbsp;|
+                                                        <a href="http://dx.doi.org/10.2307/1912352">DOI</a>&nbsp;|
+                                                        <a href="http://www.jstor.org/stable/1912352?origin=crossref">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="RI3">39</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Nicholas&nbsp;M. Kiefer and C.&nbsp;Erik Larson.
+                                                        Specification and informational issues in credit scoring.
+                                                        <em>Available at SSRN 956628</em>, 2006.
+                                                        [&nbsp;<a href="chapitre2_bib.html#RI3">bib</a>&nbsp;|
+                                                        <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=956628">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="banasik_credit_2005">40</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        J.&nbsp;Banasik and J.&nbsp;Crook.
+                                                        Credit scoring, augmentation and lean models.
+                                                        <em>Journal of the Operational Research Society</em>, 56(9):1072-1081,
+                                                        2005.
+                                                        [&nbsp;<a href="chapitre2_bib.html#banasik_credit_2005">bib</a>&nbsp;|
+                                                        <a href="http://link.springer.com/article/10.1057/palgrave.jors.2602017">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="fogarty_multiple_2006">41</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        David&nbsp;J. Fogarty.
+                                                        Multiple imputation as a missing data approach to reject inference on
+                                                        consumer credit scoring.
+                                                        <em>Interstat</em>, 2006.
+                                                        [&nbsp;<a href="chapitre2_bib.html#fogarty_multiple_2006">bib</a>&nbsp;|
+                                                        <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.627.6562&rep=rep1&type=pdf">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="van_ophem_reject_2008">42</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        J.&nbsp;C.&nbsp;M. van Ophem, L.&nbsp;B. Gerlagh, and W.&nbsp;J.&nbsp;H. Verkooijen.
+                                                        Reject Inference in Credit Scoring.
+                                                        2008.
+                                                        [&nbsp;<a href="chapitre2_bib.html#van_ophem_reject_2008">bib</a>&nbsp;|
+                                                        <a href="http://dare.uva.nl/cgi/arno/show.cgi?fid=107319">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="banasik">43</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        John Banasik and Jonathan Crook.
+                                                        Reject inference, augmentation, and sample selection.
+                                                        <em>European Journal of Operational Research</em>, 183(3):1582-1594,
+                                                        2007.
+                                                        [&nbsp;<a href="chapitre2_bib.html#banasik">bib</a>&nbsp;|
+                                                        <a href="http://www.sciencedirect.com/science/article/pii/S0377221706011969">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="RI2">44</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        A.&nbsp;Feelders.
+                                                        Credit scoring and reject inference with mixture models.
+                                                        <em>International Journal of Intelligent Systems in Accounting,
+                                                            Finance &amp; Management</em>, 9(1):1-8, 2000.
+                                                        [&nbsp;<a href="chapitre2_bib.html#RI2">bib</a>&nbsp;|
+                                                        <a href="http://www.ingentaconnect.com/content/jws/isaf/2000/00000009/00000001/art00177">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="sampleselection">45</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Corinna Cortes, Mehryar Mohri, Michael Riley, and Afshin Rostamizadeh.
+                                                        Sample selection bias correction theory.
+                                                        In <em>International Conference on Algorithmic Learning
+                                                            Theory</em>, pages 38-53. Springer, 2008.
+                                                        [&nbsp;<a href="chapitre2_bib.html#sampleselection">bib</a>&nbsp;|
+                                                        <a href="http://link.springer.com/chapter/10.1007/978-3-540-87987-9_8">http</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="saporta">46</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Asma Guizani, Besma Souissi, Salwa&nbsp;Ben Ammou, and Gilbert Saporta.
+                                                        Une comparaison de quatre techniques d'inférence des refusés dans
+                                                        le processus d'octroi de crédit.
+                                                        In <em>45 emes Journées de statistique</em>, 2013.
+                                                        [&nbsp;<a href="chapitre2_bib.html#saporta">bib</a>&nbsp;|
+                                                        <a href="http://cedric.cnam.fr/fichiers/art_2753.pdf">.pdf</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="economix">47</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Ha&nbsp;Thu Nguyen.
+                                                        Reject inference in application scorecards: evidence from France.
+                                                        Technical report, University of Paris West-Nanterre la Défense,
+                                                        EconomiX, 2016.
+                                                        [&nbsp;<a href="chapitre2_bib.html#economix">bib</a>&nbsp;|
+                                                        <a href="http://economix.fr/pdf/dt/2016/WP_EcoX_2016-10.pdf">.pdf</a>&nbsp;]
+                                                        
+                                                    </td>
+                                                </tr>
+                                                
+                                                
+                                                <tr valign="top">
+                                                    <td align="right" class="bibtexnumber">
+                                                        [<a name="molenberghs2008every">48</a>]
+                                                    </td>
+                                                    <td class="bibtexitem">
+                                                        Geert Molenberghs, Caroline Beunckens, Cristina Sotto, and Michael&nbsp;G Kenward.
+                                                        Every missingness not at random model has a missingness at random
+                                                        counterpart with equal fit.
+                                                        <em>Journal of the Royal Statistical Society: Series B (Statistical
+                                                            Methodology)</em>, 7(2):371-388, 2008.
+                                                        [&nbsp;<a href="chapitre2_bib.html#molenberghs2008every">bib</a>&nbsp;]
+                                                        
 
 
 
