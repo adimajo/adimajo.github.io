@@ -1,0 +1,52 @@
+\documentclass[convert]{standalone}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usetikzlibrary{arrows,intersections,positioning,shapes.arrows,babel,fit,backgrounds}
+
+\begin{document}
+\tikzstyle{int}=[draw, line width = 1mm, minimum size=8em]
+
+
+\begin{tikzpicture}[node distance=2.5cm,auto,>=latex', every node/.style={scale=0.7}, outer/.style={draw=gray,dashed,fill=green!1,thick,inner sep=45pt}]
+    \node [int] (a1) {Initialize $\mathfrak{q}^{(0)}$};
+    \node [int] (a2) [below=0.5cm of a1] {Initialize $\delta^{(0)}$};
+    \node (a3) [right=0.5cm of a1] {};
+    \node (a4) [right=0.5cm of a2] {};
+    \node (a5) [above=0.25cm of a4.center] {};
+    \path[-] (a1) edge node {} (a3.center);
+    \path[-] (a2) edge node {} (a4.center);
+    \path[-] (a3.center) edge node {} (a5.center);
+    \path[-] (a4.center) edge node {} (a5.center);
+    \node [int] (b) [right=0.5cm of a5, align=left] {Fit LR \\ $p_{\boldsymbol{\theta}^{(s)}}(y | \mathfrak{q}^{(s)}, \delta^{(s)})$};
+    \path[->] (a5.center) edge node {} (b);
+    \node [int] (c) [right=3cm of b, align=left] {Fit continuous \\ approximation $p_{\alpha_j^{(s)}}(\mathfrak{q}_j^{(s)} | x_j)$};
+    \path[->] (b) edge node {} (c);
+    \node [int] (d1) [below left=0.70cm and -1cm of c, align=left] {Draw ``fuzzy'' \\ candidate $\mathfrak{q}^{(s+1)} \sim p_{\boldsymbol{\theta}^{(s)}}(y | \mathfrak{q}^{(s)}, \delta) p_{\alpha^{(s)}}(\mathfrak{q}^{(s)} | x)$};
+    \node [int] (d2) [below=0.4cm of d1, align=left] {Draw interaction \\ candidate $\delta^{(s+1)} \sim p(\cdot | \mathfrak{q}^{(s)}, y)$};
+    \node (e) [below=1cm of c] {};
+    \node (e2) [below=2.1cm of c] {};
+    \path[-] (c) edge node {} (e.center);
+    \path[-] (c) edge node {} (e2.center);
+    \path[->] (e.center) edge node {} (d1);
+    \path[->] (e2.center) edge node {} (d2);
+    \node (f) [below=1.1cm of b] {};
+    \node (f2) [below=2.2cm of b] {};
+    \path[-] (d1) edge node {} (f.center);
+    \path[-] (d2) edge node {} (f2.center);
+    \path[->] (f.center) edge node {} (b);
+    \path[->] (f2.center) edge node {} (b);
+    \node [int] (g) [right=1cm of c, align=left] {Calculate ``hard'' \\ candidate $\hat{q}^{(s)}(\cdot) = (\arg\max_{h} p_{\alpha_j^{(s)}}(e^h_{m_j} | \cdot))_1^d$};
+    \path[->] (c.east) edge node {} (g);
+    \node [int] (h) [below=1cm of g, align=left] {Evaluate ``hard'' \\ candidate $\mbox{BIC}(\hat{\boldsymbol{\theta}}_{q^{(s)},\delta^{(s)}})$};
+    \path[->] (g) edge node {} (h);
+    \begin{pgfonlayer}{background}
+	\node[outer,fit=(b) (c) (d1) (d2)] (i) {};
+	\end{pgfonlayer}
+    \node (j) [above right=0.8cm of b, align=left] {As long as the budget $S$ is not over};
+\end{tikzpicture}
+
+
+\end{document}
