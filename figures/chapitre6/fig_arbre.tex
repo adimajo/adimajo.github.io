@@ -1,0 +1,60 @@
+\documentclass[convert]{standalone}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usetikzlibrary{arrows,intersections,positioning,shapes.arrows,babel,fit,backgrounds}
+
+\begin{document}
+
+\tikzstyle{level 1}=[level distance=2.2cm, sibling distance=7cm]
+\tikzstyle{level 2}=[level distance=2cm, sibling distance=5cm]
+\tikzstyle{level 3}=[level distance=2cm, sibling distance=3cm]
+
+\tikzset{
+  treenode/.style = {inner sep=2pt, outer sep=2pt, shape=rectangle, rounded corners,
+                     draw, align=right,
+                     top color=white, bottom color=blue!20},
+  root/.style     = {treenode, font=\Large, bottom color=red!30},
+  env/.style      = {treenode, font=\ttfamily\normalsize},
+  dummy/.style    = {circle,draw}
+}
+
+\begin{tikzpicture}
+  [
+    sibling distance        = 15em,
+    level distance          = 5em,
+    edge from parent/.style = {draw, -latex},
+    every node/.style       = {font=\footnotesize},
+    sloped
+  ]
+  \node [root] {\textcolor{black}{Applicants}}
+    child { node [dummy] {}
+      child { node [dummy] {}
+        child { node [env] {\textcolor{black}{$p_{\theta^1}(y|q^1(x),\delta^1)$ \hspace*{-0.4cm}}}
+          edge from parent node [below] {Renters} }
+        child { node [env] {\textcolor{black}{$p_{\theta^2}(y|q^2(x),\delta^2)$ \hspace*{-0.4cm}}}
+          edge from parent node [above] {Salaried} }
+        child { node [env] {\textcolor{black}{$p_{\theta^3}(y|q^3(x),\delta^3)$ \hspace*{-0.4cm}}}
+                edge from parent node [above] {Others} }
+        edge from parent node [above] {Revolving} }
+      child { node [env] {\textcolor{black}{$p_{\theta^4}(y|q^4(x),\delta^4)$ \hspace*{-0.4cm}}}
+              edge from parent node [above, align=center]
+                {Standard loan} }
+              edge from parent node [above] {Home Appliances} }
+    child { node [dummy] {}
+      child { node [dummy] {}
+        child { node [env] {\textcolor{black}{$p_{\theta^5}(y|q^5(x),\delta^5)$ \hspace*{-0.4cm}}}
+          edge from parent node [above] {Leasing} }
+        child { node [env] {\textcolor{black}{$p_{\theta^6}(y|q^6(x),\delta^6)$ \hspace*{-0.4cm}}}
+                edge from parent node [above] {Standard loan} }
+        edge from parent node [above] {Fiat} }
+      child { node [env] {\textcolor{black}{$p_{\theta^7}(y|q^7(x),\delta^7)$ \hspace*{-0.4cm}}}
+              edge from parent node [above, align=center]
+                {Kawasaki} }
+              edge from parent node [above] {Automobile} };
+\end{tikzpicture}
+
+
+\end{document}
