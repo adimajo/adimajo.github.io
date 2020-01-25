@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<!--
+	Read Only by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Adrien Ehrhardt - Inria, CA CF</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+	
+	
+	<!-- Start WOWSlider.com HEAD section --> <!-- add to the <head> of your page -->
+	<link rel="stylesheet" type="text/css" href="engine4/style.css" />
+	<script type="text/javascript" src="engine4/jquery.js"></script>
+	<!-- End WOWSlider.com HEAD section --></head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<header>
+					<span class="image avatar"><img src="../images/avatar.jpg" alt="" /></span>
+					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
+					<p>PhD Student @Lille University & @Inria<br />
+					in Machine Learning applied to Finance<br />
+					I also work for Crédit Agricole Consumer Finance</p>
+				</header>
+				<nav id="nav">
+					<ul>
+						<li><a href="../index.html">Home</a></li>
+						<li><a href="../tuscany/tuscany.html">Toscana</a></li>
+						<li><a href="../budapest/budapest.html">Budapest</a></li>
+						<li><a href="../scotland/scotland.html">Scotland</a></li>
+						<li><a href="../guyane/guyane.html">Guyane</a></li>
+						<li><a href="../wroclaw/wroclaw.html">Wroclaw</a></li>
+						<li><a href="../berlin/berlin.html" class="active">Berlin</a></li>
+                        <li><a href="../guadeloupe/guadeloupe.html">Guadeloupe</a></li>
+                        <li><a href="../newyork/newyork.html">New York</a></li>
+                    <li><a href="../london/london.html">London</a></li>
+                    <li><a href="../milano/milano.html">Milano</a></li>
+                    <li><a href="../norge/norge.html">Norge</a></li>
+					</ul>
+				</nav>
+				<footer>
+					<ul class="icons">
+						<!--<li><a href="https://www.linkedin.com/in/adrien-ehrhardt" class="icon fa-linkedin"><span class="label">Linked-In</span></a></li>-->
+						<!--<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>-->
+						<li><a href="https://www.facebook.com/adrien.ehrhardt.9" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="https://scholar.google.fr/citations?hl=fr&user=ISAbU0cAAAAJ&view_op=list_works" class="icon fa-google"><span class="label">Google</span></a></li>
+						<li><a href="https://www.github.com/adimajo/" class="icon fa-github"><span class="label">Github</span></a></li>
+						<li><a href="mailto:adrien.ehrhardt@centraliens-lille.org" class="icon fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+				</footer>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- One -->
+							<section id="one">
+								<div class="container">
+									<header class="major">
+										<h2>Photography</h2>
+										<h3>Berlin</h3>
+									</header>
+	<!-- Start WOWSlider.com BODY section --> <!-- add to the <body> of your page -->
+	<div id="wowslider-container4">
+	<div class="ws_images"><ul>
+		<li><img src="data4/images/dsc00394.jpg" alt="" title="" id="wows4_0"/></li>
+		<li><img src="data4/images/dsc00402.jpg" alt="" title="" id="wows4_1"/></li>
+		<li><img src="data4/images/dsc00410.jpg" alt="" title="" id="wows4_2"/></li>
+		<li><img src="data4/images/dsc00426panorama.jpg" alt="" title="" id="wows4_3"/></li>
+		<li><img src="data4/images/dsc00436.jpg" alt="" title="" id="wows4_4"/></li>
+		<li><img src="data4/images/dsc00443panorama.jpg" alt="" title="" id="wows4_5"/></li>
+		<li><img src="data4/images/dsc00492hdrpanorama.jpg" alt="" title="" id="wows4_6"/></li>
+		<li><img src="data4/images/dsc00584hdrpanorama.jpg" alt="" title="" id="wows4_7"/></li>
+		<li><img src="data4/images/dsc00621panorama.jpg" alt="" title="" id="wows4_8"/></li>
+		<li><img src="data4/images/dsc00695panorama.jpg" alt="" title="" id="wows4_9"/></li>
+		<li><img src="data4/images/dsc00864.jpg" alt="" title="" id="wows4_10"/></li>
+		<li><img src="data4/images/dsc00943panorama.jpg" alt="" title="" id="wows4_11"/></li>
+		<li><img src="data4/images/dsc00963panorama.jpg" alt="" title="" id="wows4_12"/></li>
+		<li><img src="data4/images/dsc00987hdrpanorama.jpg" alt="" title="" id="wows4_13"/></li>
+		<li><img src="data4/images/dsc01082panorama.jpg" alt="" title="" id="wows4_14"/></li>
+		<li><img src="data4/images/dsc01122hdrpanorama.jpg" alt="" title="" id="wows4_15"/></li>
+		<li><img src="data4/images/dsc01167.jpg" alt="" title="" id="wows4_16"/></li>
+		<li><img src="data4/images/dsc01206panorama.jpg" alt="" title="" id="wows4_17"/></li>
+		<li><img src="data4/images/dsc01216hdr.jpg" alt="" title="" id="wows4_18"/></li>
+		<li><img src="data4/images/dsc01223panorama.jpg" alt="" title="" id="wows4_19"/></li>
+		<li><img src="data4/images/dsc01264panorama.jpg" alt="" title="" id="wows4_20"/></li>
+		<li><img src="data4/images/dsc01314hdr.jpg" alt="" title="" id="wows4_21"/></li>
+		<li><img src="data4/images/dsc01330hdr.jpg" alt="" title="" id="wows4_22"/></li>
+		<li><img src="data4/images/dsc01349panorama.jpg" alt="" title="" id="wows4_23"/></li>
+		<li><img src="data4/images/dsc01358panorama.jpg" alt="" title="" id="wows4_24"/></li>
+		<li><img src="data4/images/dsc01364hdr.jpg" alt="" title="" id="wows4_25"/></li>
+		<li><img src="data4/images/dsc01375panorama.jpg" alt="" title="" id="wows4_26"/></li>
+		<li><img src="data4/images/dsc01393panorama.jpg" alt="" title="" id="wows4_27"/></li>
+		<li><img src="data4/images/dsc01460panorama.jpg" alt="" title="" id="wows4_28"/></li>
+		<li><img src="data4/images/dsc01473.jpg" alt="" title="" id="wows4_29"/></li>
+		<li><img src="data4/images/dsc01484hdr.jpg" alt="" title="" id="wows4_30"/></li>
+		<li><img src="data4/images/dsc01497panorama.jpg" alt="" title="" id="wows4_31"/></li>
+		<li><img src="data4/images/dsc01526panorama.jpg" alt="" title="" id="wows4_32"/></li>
+		<li><a href="http://wowslider.net"><img src="data4/images/dsc01550panorama.jpg" alt="jquery slider" title="" id="wows4_33"/></a></li>
+		<li><img src="data4/images/dsc01613hdr.jpg" alt="" title="" id="wows4_34"/></li>
+	</ul></div>
+	<div class="ws_bullets"><div>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00394.jpg" alt=""/>1</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00402.jpg" alt=""/>2</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00410.jpg" alt=""/>3</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00426panorama.jpg" alt=""/>4</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00436.jpg" alt=""/>5</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00443panorama.jpg" alt=""/>6</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00492hdrpanorama.jpg" alt=""/>7</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00584hdrpanorama.jpg" alt=""/>8</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00621panorama.jpg" alt=""/>9</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00695panorama.jpg" alt=""/>10</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00864.jpg" alt=""/>11</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00943panorama.jpg" alt=""/>12</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00963panorama.jpg" alt=""/>13</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc00987hdrpanorama.jpg" alt=""/>14</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01082panorama.jpg" alt=""/>15</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01122hdrpanorama.jpg" alt=""/>16</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01167.jpg" alt=""/>17</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01206panorama.jpg" alt=""/>18</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01216hdr.jpg" alt=""/>19</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01223panorama.jpg" alt=""/>20</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01264panorama.jpg" alt=""/>21</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01314hdr.jpg" alt=""/>22</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01330hdr.jpg" alt=""/>23</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01349panorama.jpg" alt=""/>24</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01358panorama.jpg" alt=""/>25</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01364hdr.jpg" alt=""/>26</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01375panorama.jpg" alt=""/>27</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01393panorama.jpg" alt=""/>28</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01460panorama.jpg" alt=""/>29</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01473.jpg" alt=""/>30</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01484hdr.jpg" alt=""/>31</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01497panorama.jpg" alt=""/>32</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01526panorama.jpg" alt=""/>33</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01550panorama.jpg" alt=""/>34</span></a>
+		<a href="#" title=""><span><img src="data4/tooltips/dsc01613hdr.jpg" alt=""/>35</span></a>
+	</div></div><div class="ws_script" style="position:absolute;left:-99%"><a href="http://wowslider.net">jquery carousel</a> by WOWSlider.com v9.0m</div>
+	<div class="ws_shadow"></div>
+	</div>	
+	<script type="text/javascript" src="engine4/wowslider.js"></script>
+	<script type="text/javascript" src="engine4/script.js"></script>
+	<!-- End WOWSlider.com BODY section -->
+	<!-- Start WOWSlider.com BODY section --> <!-- add to the <body> of your page -->
+	
+
+
+	<!-- Start WOWSlider.com BODY section --> <!-- add to the <body> of your page -->
+	
+	<!-- Start WOWSlider.com BODY section --> <!-- add to the <body> of your page -->
+	</section>
+
+
+
+
+
+					</div>
+
+				<!-- Footer -->
+					<section id="footer">
+						<div class="container">
+							<ul class="copyright">
+								<li>&copy; Adrien Ehrhardt. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+	<!-- Start WOWSlider.com BODY section --> <!-- add to the <body> of your page -->
+	
