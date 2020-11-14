@@ -347,11 +347,11 @@ Now we can get to the real stuff by first making Hadoop and Spark work on a sing
 
 <div class="shell-wrap">
 <ul class="shell-body">
-<li>cd && wget https://archive.apache.org/dist/hadoop/common/hadoop-3.2.0/hadoop-3.2.0.tar.gz</li>
-<li>sudo tar -xvf hadoop-3.2.0.tar.gz -C /opt/</li>
-<li>rm hadoop-3.2.0.tar.gz</li>
+<li>cd && wget http://apache.crihan.fr/dist/hadoop/common/hadoop-3.2.1/hadoop-3.2.1.tar.gz</li>
+<li>sudo tar -xvf hadoop-3.2.1.tar.gz -C /opt/</li>
+<li>rm hadoop-3.2.1.tar.gz</li>
 <li>cd /opt</li>
-<li>sudo mv hadoop-3.2.0 hadoop</li>
+<li>sudo mv hadoop-3.2.1 hadoop</li>
 <li>sudo chown pi:pi -R /opt/hadoop</li>
 </ul>
 </div>
@@ -363,10 +363,10 @@ We follow the same process for Spark:
 
 <div class="shell-wrap">
 <ul class="shell-body">
-<li>cd && wget http://miroir.univ-lorraine.fr/apache/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz</li>
-<li>sudo tar -xvf spark-2.4.4-bin-hadoop2.7.tgz -C /opt/</li>
-<li>rm spark-2.4.4-bin-hadoop2.7.tgz && cd /opt</li>
-<li>sudo mv spark-2.4.4-bin-hadoop2.7 spark</li>
+<li>cd && wget https://archive.apache.org/dist/spark/spark-3.0.0-preview2/spark-3.0.0-preview2-bin-hadoop3.2.tgz</li>
+<li>sudo tar -xvf spark-3.0.0-preview2-bin-hadoop3.2.tgz -C /opt/</li>
+<li>rm spark-3.0.0-preview2-bin-hadoop3.2.tgz && cd /opt</li>
+<li>sudo mv spark-3.0.0-preview2-bin-hadoop3.2 spark</li>
 <li>sudo chown pi:pi -R /opt/spark</li>
 </ul>
 </div>
@@ -630,7 +630,7 @@ We're almost there: we're gonna format the namenodes and start Hadoop, Yarn and 
 
 <br/>
 
-You should be able to browse Hadoop's dashboard at http://pi1:9870.
+You should be able to browse HDFS's dashboard at http://pi1:9870 and Yarn's dashboard at http://pi1:8088.
 
 <br/>
 
@@ -746,20 +746,65 @@ To force the installation and ran it:
 
 You can now go to http://pi1:8787 and login with any user credentials on pi1.
 
-<h3>H2O on the cluster</h3>
+<!--<h3>H2O on the cluster</h3>
 
-export MASTER="yarn"
-export _JAVA_OPTIONS="-Xmx256M"
+I wanted to add <a href="">H2O</a> to my configuration since I used it for some time at work, and we'll use it in the next section.
 
-wget http://h2o-release.s3.amazonaws.com/sparkling-water/spark-2.4/3.26.8-2.4/sparkling-water-3.26.8-2.4.zip
-unzip sparkling-water-3.26.8-2.4.zip
-rm sparkling-water-3.26.8-2.4.zip
-cd sparkling-water-3.26.8-2.4/
-bin/sparkling-shell --num-executors 3 --executor-memory 2g --master yarn --deploy-mode client
+On Pi1, first, a few environment variables:
 
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>export MASTER="yarn"</li>
+<li>export _JAVA_OPTIONS="-Xmx256M"</li>
+</ul>
+</div>
 
+Next, we download Sparkling Water (beware: there might be a newer version, so change the following commands accordingly):
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>wget http://h2o-release.s3.amazonaws.com/sparkling-water/spark-2.4/3.26.8-2.4/sparkling-water-3.26.8-2.4.zip</li>
+<li>unzip sparkling-water-3.26.8-2.4.zip</li>
+<li>rm sparkling-water-3.26.8-2.4.zip</li>
+<li>cd sparkling-water-3.26.8-2.4/</li>
+</ul>
+</div>
+
+    You can now start Sparkling Water in your shell to see if everything went well with this command:
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>bin/sparkling-shell --num-executors 3 --executor-memory 512m --master yarn --deploy-mode client</li>
+</ul>
+</div>-->
 
 <h3>Machine Learning on the cluster</h3>
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>hadoop fs -mkdir /tmp</li>
+
+<li>wget https://www.data.gouv.fr/fr/datasets/r/b4aaeede-1a80-4d76-8f97-543dad479167 | hdfs dfs -put - /tmp/vehicules-2018.csv</li>
+</ul>
+</div>
+
+for some reason, the result of wget is also stored in locally in a file named after the last part of the URL ("b4aaeede-1a80-4d76-8f97-543dad479167") which kind of defeats the purpose... I did not investigate why.
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>hadoop fs -ls /tmp</li>
+
+Found 2 items
+-rw-r--r--   4 pi supergroup          0 2020-05-03 17:40 /tmp/-
+-rw-r--r--   4 pi supergroup          0 2020-05-03 17:41 /tmp/vehicules-2018.csv
+
+<li>wget https://www.data.gouv.fr/fr/datasets/r/72b251e1-d5e1-4c46-a1c2-c65f1b26549a | hdfs dfs -put - /tmp/usagers-2018.csv<li>
+
+<li>wget https://www.data.gouv.fr/fr/datasets/r/6eee0852-cbd7-447e-bd70-37c433029405 | hdfs dfs -put - /tmp/caracteristiques-2018.csv</li>
+
+<li>wget https://www.data.gouv.fr/fr/datasets/r/d9d65ca1-16a3-4ea3-b7c8-2412c92b69d9 | hdfs dfs -put - /tmp/lieux-2018.csv</li>
+</ul>
+</div>
+
 
 
 <h3>Watercooling the cluster</h3>
@@ -789,8 +834,11 @@ Basically, you need:</br>
 
 Total cost: a little under 200 €.</br>
 
-<h4>Benchmarks</h4>
+To be honest, I did try to overclock my Pi's, which I managed ridiculously easily, but there is no real point for my use case.
 
+<h4>The final beast</h4>
+
+<img src="images/final_cluster.jpg" alt="" width="100%"/>
 
 
 <h3>Sources</h3>
@@ -818,6 +866,7 @@ Total cost: a little under 200 €.</br>
 <a href="https://community.rstudio.com/t/setting-up-your-own-shiny-server-rstudio-server-on-a-raspberry-pi-3b/18982">https://community.rstudio.com/t/setting-up-your-own-shiny-server-rstudio-server-on-a-raspberry-pi-3b/18982</a>
 </br>
 <a href="http://herb.h.kobe-u.ac.jp/raspiinfo/rstudio_en.html">http://herb.h.kobe-u.ac.jp/raspiinfo/rstudio_en.html</a>
+<a href="https://weidongzhou.wordpress.com/2017/11/16/access-sparkling-water-via-r-studio/">https://weidongzhou.wordpress.com/2017/11/16/access-sparkling-water-via-r-studio/</a>
 
 
                                     <!-- begin wwww.htmlcommentbox.com -->
