@@ -1,0 +1,975 @@
+<!DOCTYPE HTML>
+<!--
+	Read Only by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+        <title>Adrien Ehrhardt - X, CA SA</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<link rel="icon" type="image/png" href="images/favicon.png" />
+        <link rel="stylesheet" type="text/css" href="shell_look.css">
+	</head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<header>
+					<span class="image avatar"><img src="images/avatar.jpg" alt="" /></span>
+					<h1 id="logo"><a>Adrien Ehrhardt</a></h1>
+                    <p>AI Assistant Professor @Polytechnique<br />
+                    PhD @Lille University & @Inria<br />
+                    in Machine Learning applied to Finance<br />
+                    Machine Learning Engineer @Crédit Agricole</p>
+				</header>
+				<nav id="nav">
+					<ul>
+					        <li><a href="index.html">Home</a></li>
+						<li><a href="cifre.html">Informations CIFRE</a></li>
+						<li><a href="scoring.html">Intro to Credit Scoring</a></li>
+						<li><a href="rejectinference.html">Reject Inference</a></li>
+                        <li><a href="discretization.html">Discretization</a></li>
+                        <li><a href="interaction_screening.html">Interaction screening</a></li>
+                        <li><a href="logistic_trees.html">Logistic regression trees</a></li>
+                        <li><a href="picluster.html" class="active">Raspberry cluster</a></li>
+                        <li><a href="teaching.html">Teaching</a></li>
+					</ul>
+				</nav>
+				<footer>
+					<ul class="icons">
+						<!--<li><a href="https://www.linkedin.com/in/adrien-ehrhardt" class="icon fa-linkedin"><span class="label">Linked-In</span></a></li>-->
+						<!--<li><a href="#" class="icon fa-twitter"><span class="label">Twitter</span></a></li>-->
+						<li><a href="https://www.facebook.com/adrien.ehrhardt.9" class="icon fa-facebook"><span class="label">Facebook</span></a></li>
+						<li><a href="https://scholar.google.fr/citations?hl=fr&user=ISAbU0cAAAAJ&view_op=list_works" class="icon fa-google"><span class="label">Google</span></a></li>
+						<li><a href="https://www.github.com/adimajo/" class="icon fa-github"><span class="label">Github</span></a></li>
+						<li><a href="mailto:adrien.ehrhardt@centraliens-lille.org" class="icon fa-envelope"><span class="label">Email</span></a></li>
+					</ul>
+				</footer>
+			</section>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- One -->
+							<section id="one">
+								<div class="container">
+									<header class="major">
+										<h2>Raspberry Pi cluster for Big Data frameworks</h2>
+
+                                    </header>
+
+<h3>Motivation</h3>
+
+My personal motivation for starting this project is that I've had a little introductory course to Hadoop while at Centrale Lille, but not enough to claim being a Big Data Engineer or whatever, and that we have, at Crédit Agricole Consumer Finance, a small MapR cluster for storing e.g. web log files, that nobody understands properly except the prepocessed data that lands in structured Vertica tables.
+</br>
+My motivation for writing this guide is that I've found a few tutorials on the subject already, but they were either outdated, had missing stuff, went into great lengths on interesting stuff (to me) and only got to the point of a working install without any real world use case example.
+</br>
+Nevertheless, I obviously borrowed lots of stuff from existing material which you'll find in the "Ressources" section at the end of the post.
+</br>
+<h3>Tools and prerequisites</h3>
+
+I wanted this to be really cost-efficient since it's only to play with it for a few days and I'll have to think about ways to recycle the Pis (maybe IoT stuff?), but I didn't want to compromise on performance (and versatility, e.g. the Ethernet port), so I went with the <a href="https://amzn.to/2QfKpjp">Raspberry Pi 3B+ (affiliate link)</a> which I got in January 2019 for 32.80 euros each! With the Raspberry Pi 4 going out around these days, there are already tons of deals on the 3B+ for a very good performance / price ratio.
+</br>
+
+<figure>
+<a href="https://amzn.to/2QfKpjp">
+<img src="images/raspberry-pi-3.png"
+alt="Raspberry Pi 3B+" width="100%">
+</a>
+</figure>
+
+I needed a switch as well because I wanted everything to be wired. I went for the <a href="https://amzn.to/2NjiCMC">TP-Link TL-SG105 (affiliate link)</a> switch for 17.84 euros on Amazon.fr.
+</br>
+
+<figure>
+<a href="https://amzn.to/2NjiCMC">
+<img src="images/tplink.png"
+alt="TP-Link TL-SG105" width="100%">
+</a>
+</figure>
+
+I considered the PoE (power over Ethernet) feature but it made no sense cost-wise since the switch would have costed a lot more, and the Pis would have needed a special PoE board. The total cost would have shot through the roof for the same computational power just to remove 4 USB cables and a USB port. For those interested in the PoE feature, <a href="https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2">this tutorial</a> implements it well.
+</br>
+</br>
+So in the end, I needed a powered USB multiport, which can be had very cheaply. However, I had power problems with cheap adaptors on a first gen Raspberry Pi, so I wanted something that could withstand at least 2A per port. I heard lots of good stuff from Anker so I bought their <a href="https://amzn.to/2Ao0CrV">PowerPort 10 (affiliate link)</a> for 29.99 euros. This is probably the least cost-effective stuff of my project, but again, it's been the weak point of a previous one and I wanted it to serve for other stuff as well...
+</br>
+
+<figure>
+<a href="https://amzn.to/2Ao0CrV">
+<img src="images/anker.png"
+alt="Anker PowerPort 10" width="100%">
+</a>
+</figure>
+</br>
+</br>
+
+I ordered the <a href="http://s.click.aliexpress.com/e/B4PMVB0M
+">USB</a> and <a href="http://s.click.aliexpress.com/e/lR8ZWHde
+">Ethernet</a> cables from AliExpress (affiliate links) for 0.79 and 0.64 euros each respectively. Make sure you get USB cables that scan withstand 2.4A and Ethernet cables with CAT6 or more (for the price difference: better safe than sorry).
+</br>
+
+<div>
+<img src="images/usb_cable.png"
+alt="USB cable" width="49%">
+<img src="images/flat_rj45.png"
+alt="Flat RJ45 cable" width="49%">
+</div>
+</br>
+</br>
+
+I got the Micro SD cards from AliExpress as well. After going through SD card read / write speed tests (some are even dedicated to the Raspberry Pi, see e.g. <a href="https://www.pidramble.com/wiki/benchmarks/microsd-cards">this one</a>, or <a href="https://jamesachambers.com/raspberry-pi-storage-benchmarks-2019-benchmarking-script/">that one</a>), I decided to get what was at the time the best performance / price ratio, namely the <a href="http://s.click.aliexpress.com/e/lxAdZNVQ
+">Samsung Evo + (affilite link)</a> (in its 32Gb version - <a href="https://amzn.to/2NjCdfH">Amazon affiliate link</a>) for 5.68 euros each. Please be aware that when ordering these stuff on AliExpress, you are exposed to getting a fake one (check the reviews), not having any kind of warranty, and potentially not paying VAT.
+</br>
+
+<figure>
+<a href="https://amzn.to/2NjCdfH">
+<img src="images/samsung_sd.jpg"
+alt="Samsung Evo + SD card" width="40%">
+</a>
+</figure>
+</br>
+</br>
+
+Total cost: 207.47 euros.
+</br>
+</br>
+
+For fun, I explain how I watercooled the cluster (see below), which is totally not cost-effective and does not make much sense since the Pi's temperature (which can be really high and result in speed throttling) can be well managed by <a href="http://s.click.aliexpress.com/e/EpSNEAbQ
+">small fans (affiliate link)</a> and / or <a href="http://s.click.aliexpress.com/e/euw3ju92
+">passive dissipators</a>.
+</br>
+
+<figure>
+<img src="images/small_fan.png"
+alt="small fan" width="40%">
+</figure>
+</br>
+</br>
+
+Moreover, there are several ways to "overclock" the Pi: <a href="https://github.com/novaspirit/rpi_zram">enabling zram</a>, <a href="https://www.jeffgeerling.com/blog/2016/how-overclock-microsd-card-reader-on-raspberry-pi-3">overclocking the SD card reader</a> and <a href="https://retropie.org.uk/forum/topic/21138/overclocking-the-pi3b-gpu-results/132">standard overclocking</a> i.e. CPU, GPU speeds and voltages, etc.
+</br>
+</br>
+
+<h3>Setting up the Pis individually</h3>
+
+For obvious versatility + potential debugging <em>via</em> Google + simplicity reasons, I've decided to go with the "standard" Pi distro: Raspbian, in its Lite version (see <a href="https://www.raspberrypi.org/downloads/raspbian/">here</a>).
+</br>
+</br>
+
+Most micro SD cards come with an SD adaptor, which was the case for me. To install the distro on all 4 Pi's, I went with the terminal approach (since I already used it a lot and we're gonna use it a lot here), but there's also a GUI approach. For both aproaches, refer to <a href="https://www.raspberrypi.org/documentation/installation/installing-images/README.md">the installation instructions</a>.
+</br>
+</br>
+
+
+Here is the first tricky part: for a few years now, Raspbian does not enable ssh login at first boot. You either need to plug a monitor to each Pi (or sequentially if you don't have 4 monitors :-)) or put a file named <a class="shell-body">ssh</a> at the root of the Pi's boot partition (which is what I did).
+</br>
+</br>
+
+Tip: at this point, you should either mark the SD cards or the Pi's to know which is which. I've gone with using small stickers on the Ethernet port.
+</br>
+</br>
+
+<h3>Configuring the network</h3>
+
+Once all is hooked up, let's fire them up one by one!
+</br>
+Check e.g. your router for their IP adress, from your command line type:
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>ssh pi@IP_adress</li>
+</ul>
+</div>
+
+and login with <a class="shell-body">raspberry</a> as a password.
+
+</br>
+
+Update the password for obvious security reasons (+ not the same for all Pi's !) using:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>passwd</li>
+</ul>
+</div>
+
+Update the packages using:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>sudo apt-get update</li>
+<li>sudo apt-get upgrade</li>
+</ul>
+</div>
+
+Next, we want all Pi's to have static IPs so that we know which is which. You could either do this from your router or the Pi. To do this on the Pi, let's edit <a class="shell-body">/etc/dhcpcd.conf</a> by uncommenting and editing:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>interface eth0</li>
+<li>static ip_address=192.168.1.21/24</li>
+<li>static routers=192.168.1.1</li>
+<!--<li>sudo route add default gw 192.168.1.1</li>-->
+</ul>
+</div>
+
+where <a class="shell-body">192.168.1.1</a> is the IP adress of my router. I've decided to use <a class="shell-body">21</a> for the first Pi, <a class="shell-body">22</a> for the second, etc.
+
+</br>
+</br>
+
+
+At that point, you can fire up all of them. In <a class="shell-body">/etc/hostname</a>, you can give your Pi's sweet names for each others on the network. By default, their hostname is raspberrypi which I changed to <a class="shell-body">pi1, ..., pi4</a>.
+
+</br>
+</br>
+
+Likewise, for Pi's to communicate, we'll pass on their respective names by adding a file <a class="shell-body">/etc/hosts</a> which contains the names of the other Pi's, e.g. on <a class="shell-body">pi1</a> we have:
+</br>
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>192.168.1.22 pi2</li>
+<li>192.168.1.23 pi3</li>
+<li>192.168.1.24 pi4</li>
+</ul>
+</div>
+
+In these files, there should be a line that maps <a class="shell-body">raspberrypi</a> (which is no longer the hostname) to <a class="shell-body">127.0.1.1</a>, and one that maps <a class="shell-body">localhost</a> to <a class="shell-body">127.0.0.1</a>: for Hadoop and Spark to work on the cluster, we need to remove/comment these lines.
+
+</br>
+</br>
+
+We will now enable each Pi to ssh to other Pi's and send commands to them. This wouldn't be possible giving their respective passwords each time. Instead, we will use public / private SSH keys. On each Pi (exemplified with pi1), do the following:
+
+</br>
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>ssh-keygen # no passphrase!</li>
+<li>ssh-copy-id pi@pi1</li>
+<li>ssh-copy-id pi@pi2</li>
+<li>ssh-copy-id pi@pi3</li>
+<li>ssh-copy-id pi@pi4</li>
+</ul>
+</div>
+
+All these commands in all these terminals was impractical. For the rest, we'll need some kind of way to distribute the same command to all other Pi's. Edit <a class="shell-body">~/.bashrc</a> to add these lines (modified from <a href="https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2">this tutorial</a>):
+
+</br>
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>function otherpis { #this tells the Pi other Pi's hostnames</li>
+<li>grep "pi" /etc/hosts | awk '{print $2}' | grep -v $(hostname)</li>
+<li>}</li>
+<li></li>
+<li>function clustercmd { #this will forward our command to all Pi's</li>
+<li>for pi in $(otherpis); do ssh $pi "source ~/.bashrc;$@"; done</li>
+<li>$@</li>
+<li>}</li>
+<li></li>
+<li>function clusterscp { #same with file transfer</li>
+<li>for pi in $(otherpis); do</li>
+<li>cat $1 | ssh $pi "sudo tee $1" > /dev/null 2>&1</li>
+<li>done</li>
+<li>}</li>
+<li></li>
+<li>function clusterreboot { #reboot the cluster</li>
+<li>stop-yarn.sh && stop-dfs.sh && \</li>
+<li>clustercmd sudo shutdown -r now</li>
+<li>}</li>
+<li></li>
+<li>function clustershutdown { #shutdown the cluster</li>
+<li>stop-yarn.sh && stop-dfs.sh && \</li>
+<li>clustercmd sudo shutdown now</li>
+<li>}</li>
+</ul>
+</div>
+<a class="shell-body">stop-yarn.sh && stop-dfs.sh</a> are not yet available since we did not install Hadoop yet but since we're in there...
+<br/>
+<br/>
+
+And to comment these lines (so that we can use environment variables in each Pi when sshing non-interactively to them, see <a href="https://stackoverflow.com/questions/216202/why-does-an-ssh-remote-command-get-fewer-environment-variables-then-when-run-man">here</a>):
+<div class="shell-wrap">
+<ul class="shell-file">
+<li># If not running interactively, don't do anything</li>
+<li>#case $- in</li>
+<li>#    *i*) ;;</li>
+<li>#      *) return;;</li>
+<li>#esac</li>
+</ul>
+</div>
+
+Simply source your <a class="shell-body">~/.bashrc</a>.
+You can now use functions defined above on all Pi's (e.g. shutdown using <a class="shell-body">clustercmd sudo shutdown -r now</a>).
+<br/>
+<br/>
+
+One clumsy thing that was the source of errors before I refer to this tutorial was the absence of date synchronisation (which is of foremost importance if we want all Pi's to communicate, keep logs, etc.). So the following commands will install <a class="shell-body">htpdate</a> and synchronise their time with the same server.
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>clustercmd "sudo apt install htpdate"</li>
+<li>clustercmd sudo htpdate -a -l time.nist.gov</li>
+<li>clustercmd date</li>
+</ul>
+</div>
+
+You should now have very similar times.
+<br/>
+<br/>
+
+A crucial point is to ensure that Java, Hadoop, Spark, and H2O Sparkling Water have compatible versions.
+At the time of this writing, Java 11, Hadoop 3.3.4, Spark 3.0.1 and "Sparkling Water for Spark 3.0" seem to be mutually compatible.
+
+To get Hadoop working, we need Java 11, which is not installed by default since we have the 'Lite' Raspbian. I installed open-jdk by typing:
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>sudo apt-get install openjdk-11-jre-headless -y</li>
+</ul>
+</div>
+<br/>
+<br/>
+
+Return to your <a class="shell-body">~/.bashrc</a> file to add Java's location:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>export JAVA_HOME=$(readlink –f /usr/bin/java | sed "s:bin/java::")</li>
+</ul>
+</div>
+
+<h3>Installing Hadoop and Spark on Pi 1: single-machine cluster</h3>
+
+Now we can get to the real stuff by first making Hadoop and Spark work on a single Pi. At the time of writing, Hadoop is on its 3.3.0 version, so be careful to use the latest version and update the following links if need be.
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>cd && wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.4/hadoop-3.3.4.tar.gz</li>
+<li>sudo tar -xvf hadoop-3.3.4.tar.gz -C /opt/</li>
+<li>rm hadoop-3.3.4.tar.gz</li>
+<li>cd /opt</li>
+<li>sudo mv hadoop-3.3.4 hadoop</li>
+<li>sudo chown pi:pi -R /opt/hadoop</li>
+</ul>
+</div>
+<br/>
+<br/>
+
+
+We follow the same process for Spark:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>cd && wget https://dlcdn.apache.org/spark/spark-3.3.1/spark-3.3.1-bin-hadoop3.tgz</li>
+<li>sudo tar -xvf spark-3.3.1-bin-hadoop3.tgz -C /opt/</li>
+<li>rm spark-3.3.1-bin-hadoop3.tgz && cd /opt</li>
+<li>sudo mv spark-3.3.1-bin-hadoop3 spark</li>
+<li>sudo chown pi:pi -R /opt/spark</li>
+</ul>
+</div>
+<br/>
+<br/>
+
+NOTE: some system administrators recommend having a separate user id for all things related to Hadoop. Here, pi (the standard user) is the user we'll be using to launch Hadoop and its related processes, but also tons of other stuff which might get confusing.
+
+We still need to do some configuration in some Hadoop files to get it working:
+
+In <a class="shell-body">/opt/hadoop/etc/hadoop/core-site.xml</a>, between the &lt;configuration&gt; anchors, insert:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;fs.defaultFS&lt;/name&gt;</li>
+<li>&lt;value&gt;hdfs://pi1:9000&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+</ul>
+</div>
+<br/>
+<br/>
+
+In <a class="shell-body">/opt/hadoop/etc/hadoop/hdfs-site.xml</a>, between the &lt;configuration> anchors as well, insert:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;</li>
+<li>&lt;value&gt;file:///opt/hadoop_tmp/hdfs/datanode&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;</li>
+<li>&lt;value&gt;file:///opt/hadoop_tmp/hdfs/namenode&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;dfs.replication&lt;/name&gt;</li>
+<li>&lt;value&gt;1&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+</ul>
+</div>
+<br/>
+
+In <a class="shell-body">/opt/hadoop/etc/hadoop/mapred-site.xml</a>, between the &lt;configuration> anchors as well, insert:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;mapreduce.framework.name&lt;/name&gt;</li>
+<li>&lt;value&gt;yarn&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+</ul>
+</div>
+<br/>
+
+
+In <a class="shell-body">/opt/hadoop/etc/hadoop/yarn-site.xml</a>, between the &lt;configuration> anchors as well, insert:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;</li>
+<li>&lt;value&gt;mapreduce_shuffle&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+<li>&lt;property&gt;</li>
+<li>&lt;name&gt;yarn.nodemanager.auxservices.mapreduce.shuffle.class&lt;/name&gt;</li>
+<li>&lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;</li>
+<li>&lt;/property&gt;</li>
+</ul>
+</div>
+<br/>
+
+
+In <a class="shell-body">/opt/hadoop/etc/hadoop/hadoop-env.sh</a>, we need to tell Hadoop as well where Java is located:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>export JAVA_HOME=$(readlink –f /usr/bin/java | sed "s:bin/java::")</li>
+</ul>
+</div>
+
+
+
+Okay, now we need to create the temporary directories where Hadoop can write its logs:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>sudo mkdir -p /opt/hadoop_tmp/hdfs/datanode</li>
+<li>sudo mkdir -p /opt/hadoop_tmp/hdfs/namenode</li>
+<li>sudo chown pi:pi -R /opt/hadoop_tmp</li>
+</ul>
+</div>
+<br/>
+
+
+On all Pi's (or through rsync), modify again <a class="shell-body">~/.bashrc</a> (don't forget to source it, at least on the Pi you're installing the single machine cluster):
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")</li>
+<li>export HADOOP_HOME=/opt/hadoop</li>
+<li>export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</li>
+<li>export SPARK_HOME=/opt/spark</li>
+<li>export PATH=$PATH:$SPARK_HOME/bin</li>
+<li>export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop</li>
+<li>export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH</li>
+</ul>
+</div>
+<br/>
+
+
+We can now format the HDFS, start the service, verify that it works well, and stop it again:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>hdfs namenode -format -force</li>
+<li>start-dfs.sh</li>
+<li>hdfs dfsadmin -report</li>
+<li>stop-dfs.sh</li>
+</ul>
+</div>
+<br/>
+
+<h3>Hadoop and Spark, orchestrated by Yarn, on the Pi cluster</h3>
+
+Now we need to re-configure Hadoop on Pi 1 (master) so that it knows it has to speak to the other Pi's. We go back to <a class="shell-body">core-site.xml</a> in <a class="shell-body">/opt/hadoop/etc/hadoop</a>:
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+            <li>&lt;property&gt;</li>
+                <li>&lt;name&gt;fs.default.name&lt;/name&gt;</li>
+                <li>&lt;value&gt;hdfs://pi1:9000&lt;/value&gt;</li>
+            <li>&lt;/property&gt;</li>
+</ul>
+</div>
+
+Then to <a class="shell-body">hdfs-site.xml</a> to increase the replica (there was no point in having replicas on the same machine...):
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+        <li>&lt;property&gt;</li>
+        <li>&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;</li>
+        <li>&lt;value&gt;/opt/hadoop_tmp/hdfs/datanode&lt;/value&gt;</li>
+        <li>&lt;/property&gt;</li>
+        <li>&lt;property&gt;</li>
+            <li>&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;</li>
+            <li>&lt;value&gt;/opt/hadoop_tmp/hdfs/namenode&lt;/value&gt;</li>
+        <li>&lt;/property&gt;</li>
+        <li>&lt;property&gt;</li>
+            <li>&lt;name&gt;dfs.replication&lt;/name&gt;</li>
+            <li>&lt;value&gt;2&lt;/value&gt;</li>
+            <li>&lt;/property&gt;</li>
+    </ul>
+</div>
+
+Then to <a class="shell-body">mapred-site.xml</a>:
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+        <li>&lt;property&gt;</li>
+        <li>&lt;name&gt;mapreduce.framework.name&lt;/name&gt;</li>
+        <li>&lt;value&gt;yarn&lt;/value&gt;</li>
+        <li>&lt;/property&gt;</li>
+        <li>&lt;property&gt;</li>
+        <li>    &lt;name&gt;yarn.app.mapreduce.am.resource.mb&lt;/name&gt;</li>
+        <li>    &lt;value&gt;256&lt;/value&gt;</li>
+        <li>&lt;/property&gt;</li>
+        <li>&lt;property&gt;</li>
+        <li>    &lt;name&gt;mapreduce.map.memory.mb&lt;/name&gt;</li>
+        <li>    &lt;value&gt;128&lt;/value&gt;</li>
+        <li>&lt;/property&gt;</li>
+        <li>&lt;property&gt;</li>
+        <li>    &lt;name&gt;mapreduce.reduce.memory.mb&lt;/name&gt;</li>
+        <li>    &lt;value&gt;128&lt;/value&gt;</li>
+            <li>&lt;/property&gt;</li>
+    </ul>
+</div>
+
+Finally to <a class="shell-body">yarn-site.xml</a>:
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+        <li>&lt;property&gt;</li>
+        <li>&lt;name&gt;yarn.acl.enable&lt;/name&gt;<li>
+        <li>&lt;value&gt;0&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+        <li>    &lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;<li>
+        <li>    &lt;value&gt;pi1&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+        <li>    &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;<li>
+        <li>    &lt;value&gt;mapreduce_shuffle&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+            <li>&lt;name&gt;yarn.nodemanager.auxservices.mapreduce.shuffle.class&lt;/name&gt;<li>
+            <li>&lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+            <li>&lt;name&gt;yarn.nodemanager.resource.memory-mb&lt;/name&gt;<li>
+            <li>&lt;value&gt;900&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+            <li>&lt;name&gt;yarn.scheduler.maximum-allocation-mb&lt;/name&gt;<li>
+            <li>&lt;value&gt;900&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+            <li>&lt;name&gt;yarn.scheduler.minimum-allocation-mb&lt;/name&gt;<li>
+            <li>&lt;value&gt;64&lt;/value&gt;<li>
+        <li>&lt;/property&gt;<li>
+        <li>&lt;property&gt;<li>
+            <li>&lt;name&gt;yarn.nodemanager.vmem-check-enabled&lt;/name&gt;<li>
+            <li>&lt;value&gt;false&lt;/value&gt;<li>
+            <li>&lt;/property&gt;</li>
+    </ul>
+</div>
+
+We create a file named <a class="shell-file">master</a> in <a class="shell-file">$HADOOP_HOME/etc/hadoop/</a> containing <a class="shell-file">pi1</a>.
+
+We create a file named <a class="shell-file">workers</a> in <a class="shell-file">$HADOOP_HOME/etc/hadoop/</a> containing <a class="shell-file">pi2</a>, <a class="shell-file">pi3</a> and <a class="shell-file">pi4</a> on separate lines. This tells Hadoop which Pi is the master node and which are workers.
+
+Then, we create the appropriate directories, copy all files from Hadoop and Spark to the other Pi's using:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>clustercmd sudo mkdir -p /opt/hadoop_tmp/hdfs</li>
+<li>clustercmd sudo chown pi:pi -R /opt/hadoop_tmp</li>
+<li>clustercmd sudo mkdir -p /opt/hadoop</li>
+<li>clustercmd sudo chown pi:pi /opt/hadoop</li>
+<li>clustercmd sudo mkdir -p /opt/spark</li>
+<li>clustercmd sudo chown pi:pi /opt/spark</li>
+<li>rsync -a /opt/hadoop/ pi@pi2:/opt/hadoop/</li>
+<li>rsync -a /opt/hadoop/ pi@pi3:/opt/hadoop/</li>
+<li>rsync -a /opt/hadoop/ pi@pi4:/opt/hadoop/</li>
+<li>rsync -a /opt/spark/ pi@pi2:/opt/spark/</li>
+<li>rsync -a /opt/spark/ pi@pi3:/opt/spark/</li>
+<li>rsync -a /opt/spark/ pi@pi4:/opt/spark/</li>
+</ul>
+</div>
+
+Now we need to remove all previous data that might have been created from our earlier test:
+
+<div class="shell-wrap">
+    <ul class="shell-body">
+<li>clustercmd rm -rf /opt/hadoop_tmp/hdfs/datanode/*</li>
+<li>clustercmd rm -rf /opt/hadoop_tmp/hdfs/namenode/*</li>
+</ul>
+</div>
+
+We're almost there: we're gonna format the namenodes and start Hadoop, Yarn and Spark:
+
+<div class="shell-wrap">
+    <ul class="shell-body">
+<li>hdfs namenode -format -force</li>
+<li>start-dfs.sh && start-yarn.sh</li>
+</ul>
+</div>
+
+<br/>
+
+You should be able to browse HDFS's dashboard at <a href="http://pi1:9870">pi1:9870</a> and Yarn's dashboard at <a href="http://pi1:8088">pi1:8088</a>.
+<br/>
+
+So that's where most tutorials end, leaving you with a nice command line tool and some nice logging web interface, which is usually, if you're in a Data Scientist role, what is brought to you by Software Engineers and co. Doing analytical stuff / machine learning / etc. will require additional tools and ad hoc knowledge.
+I'm an R aficionado, so I will illustrate it with RStudio Server and a small example. For an equivalent to RStudio Server for various languages, including Python, check <a href="https://github.com/coder/code-server">code-server</a> (or <a href="https://jupyter.org/">JupyterLab</a> for notebooks).
+
+<h3>Installing RStudio Server</h3>
+
+If you're not familiar with R, there are tons of great resources out there. The language has really been modernized and although I don't want to go in the endless R vs Python debate, it's not the clumsy, buggy, not-production-ready language I've been told...
+
+<br/>
+
+It also integrates in a point-and-click fashion lots of useful tools: Git(hub), ODBC connectors to lots of kinds of databases, help and vignette pages, Markdown functionality, Python's virtual environments "equivalents" (packrat, renv)...
+
+<br/>
+
+So we're going to install RStudio-server in pi1, since its ressources are less used than the other Pi's, in the same fashion as explained on <a href="">RStudio</a>'s website.
+
+<br/>
+Until recently, you'd have to install RStudio-Server from source. Binaries are now available
+from <a href=https://github.com/ArturKlauser/raspberrypi-rstudio/releases>this Github repo</a> but they're a bit outdated. I document both approaches.
+
+<h4>From binaries</h4>
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>wget https://github.com/ArturKlauser/raspberrypi-rstudio/releases/download/v1.5/rstudio-server-1.2.5033-1.r2r.buster_armhf.deb</li>
+<li>sudo apt --fix-broken install rstudio-server-1.2.5033-1.r2r.buster_armhf.deb</li>
+</ul>
+</div>
+
+You can now go to http://pi1:8787 and login with any user credentials on pi1.
+
+<br/>
+
+<h4>From source</h4>
+
+For this part of the tutorial, I relied heavily on <a href="https://community.rstudio.com/t/setting-up-your-own-shiny-server-rstudio-server-on-a-raspberry-pi-3b/18982">this tutorial</a>.
+
+<br/>
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>sudo apt-get update</li>
+<li>sudo apt-get upgrade</li>
+<li>sudo apt-get install r-base-dev apt install postgresql libpq-dev postgresql-client postgresql-client-common</li>
+<li>cd /usr/local/lib/R/</li>
+<li>sudo chmod 7777 site-library/</li>
+<li>sudo apt-get install git libpam0g-dev uuid-dev ant libssl-dev cmake</li>
+<li>sudo curl https://sh.rustup.rs -sSf | sh</li>
+<li>source $HOME/.cargo/env</li>
+<li>cd && git clone https://github.com/getsentry/sentry-cli.git</li>
+<li>cd sentry-cli</li>
+</ul>
+</div>
+
+If you run into a memory error while building cargo, you can raise the swap to 1Gb.
+Unfortunately, you can also run into the same error when building and installing RStudio, so it's better to raise it to 3Gb right now.
+Maybe with the Raspberry 4B 4Gb, one wouldn't have to deal with such a big swap, which could damage the SD card.
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>sudo service dphys-swapfile stop</li>
+<li>sudo nano /etc/dphys-swapfile</li>
+<li>sudo service dphys-swapfile restart</li>
+</ul>
+</div>
+
+Modify the following line:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>CONF_SWAPSIZE = 3072</li>
+</ul>
+</div>
+
+You can now go on to build sentry-cli, downloading RStudio's source files, installing dependencies, building and installing it:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>cargo build</li>
+<li>cd && rm -rf sentry-cli</li>
+<li>git clone https://github.com/rstudio/rstudio.git</li>
+<li>cd rstudio/dependencies/common</li>
+<li>nano install-common</li>
+</ul>
+</div>
+
+There, I commented install <a class="shell-file">sentry-cli</a> and <a class="shell-file">./install-crashpad</a>.
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>./install-common</li>
+<li>cd rstudio/dependencies/linux</li>
+<li>wget http://snapshot.debian.org/archive/debian-security/20220210T093340Z/pool/updates/main/o/openjdk-8/openjdk-8-jdk-headless_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>wget http://snapshot.debian.org/archive/debian-security/20220210T093340Z/pool/updates/main/o/openjdk-8/openjdk-8-jdk_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>wget http://snapshot.debian.org/archive/debian-security/20220210T093340Z/pool/updates/main/o/openjdk-8/openjdk-8-jre-headless_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>wget http://snapshot.debian.org/archive/debian-security/20220210T093340Z/pool/updates/main/o/openjdk-8/openjdk-8-jre_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>sudo dpkg -i openjdk-8-jre-headless_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>sudo dpkg -i openjdk-8-jre_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>sudo dpkg -i openjdk-8-jdk-headless_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>sudo dpkg -i openjdk-8-jdk_8u322-b06-1~deb9u1_arm64.deb</li>
+<li>sudo apt --fix-broken install</li>
+<li>nano install-dependencies-jammy</li>
+</ul>
+</div>
+
+There I commented:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+</li>platform_codename=$(lsb_release -sc)</li>
+</li>if [ $platform_codename != "jammy" ] ; then</li>
+</li>echo Error: This script is only for use on Ubuntu Jammy</li>
+<li>exit 1</li>
+</li>fi</li>
+</ul>
+</div>
+
+To force the installation on Raspberry (<a class="shell-file">platform_codename=</a>) and then run:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>./install-dependencies-jammy</li>
+<li>cd ../.. && mkdir build && cd build</li>
+<li>cmake .. -DRSTUDIO_TARGET=Server -DCMAKE_BUILD_TYPE=Release</li>
+<li>sudo ln -sf "$(which node)" /usr/bin/node</li>
+<li>sudo NODE_OPTIONS="--max-old-space-size=8196" make install  # this takes 1-2 days!</li>
+<li>sudo useradd -r rstudio-server</li>
+<li>sudo cp src/cpp/server/extras/init.d/debian/rstudio-server /etc/init.d/rstudio-server</li>
+<li>sudo chmod +x /etc/init.d/rstudio-server</li>
+<li>sudo ln -f -s /usr/local/bin/rstudio-server /usr/sbin/rstudio-server</li>
+<li>sudo ln -f -s /usr/local/extras/systemd/rstudio-server.service /etc/systemd/system/rstudio-server.service</li>
+<li>sudo rstudio-server start</li>
+</ul>
+</div>
+
+You can now go to <a href=http://pi1:8787>pi1:8787</a> and login with any user credentials on pi1.
+
+<h3>H2O on the cluster</h3>
+
+I wanted to add <a href="https://h2o.ai/">H2O</a> to my configuration since I used it for some time at work, and we'll use it in the next section.
+
+On pi1, first, a few environment variables:
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>export MASTER="yarn"</li>
+<li>export _JAVA_OPTIONS="-Xmx512M"</li>
+</ul>
+</div>
+
+Next, we download Sparkling Water (beware: there might be a newer version, so change the following commands accordingly):
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>wget https://h2o-release.s3.amazonaws.com/sparkling-water/spark-3.3/3.38.0.2-1-3.3/sparkling-water-3.38.0.2-1-3.3.zip</li>
+<li>unzip sparkling-water-3.38.0.2-1-3.3.zip</li>
+<li>rm sparkling-water-3.38.0.2-1-3.3.zip</li>
+<li>sudo mv sparkling-water-3.38.0.2-1-3.3 /opt/sparkling-water</li>
+<li>cd /opt/sparkling-water</li>
+</ul>
+</div>
+
+You can now start Sparkling Water in your shell to see if everything went well with this command:
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>bin/sparkling-shell --num-executors 3 --executor-memory 512m --driver-memory 512m --master yarn --deploy-mode client</li>
+</ul>
+</div>
+
+<h3>Machine Learning on the cluster</h3>
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>hadoop fs -mkdir /tmp</li>
+
+<li>curl https://www.data.gouv.fr/fr/datasets/r/b4aaeede-1a80-4d76-8f97-543dad479167 | hdfs dfs -put - /tmp/vehicules-2018.csv</li>
+</ul>
+</div>
+
+<!-- for some reason, the result of wget is also stored in locally in a file named after the last part of the URL ("b4aaeede-1a80-4d76-8f97-543dad479167") which kind of defeats the purpose... I did not investigate why. -->
+
+<div class="shell-wrap">
+<ul class="shell-body">
+<li>hadoop fs -ls /tmp</li>
+
+Found 2 items
+-rw-r--r--   4 pi supergroup          0 2020-05-03 17:40 /tmp/-
+-rw-r--r--   4 pi supergroup          0 2020-05-03 17:41 /tmp/vehicules-2018.csv
+
+<li>curl https://www.data.gouv.fr/fr/datasets/r/72b251e1-d5e1-4c46-a1c2-c65f1b26549a | hdfs dfs -put - /tmp/usagers-2018.csv<li>
+
+<li>curl https://static.data.gouv.fr/resources/base-de-donnees-accidents-corporels-de-la-circulation/20191014-111741/caracteristiques-2018.csv | hdfs dfs -put - /tmp/caracteristiques-2018.csv</li>
+
+<li>curl https://www.data.gouv.fr/fr/datasets/r/d9d65ca1-16a3-4ea3-b7c8-2412c92b69d9 | hdfs dfs -put - /tmp/lieux-2018.csv</li>
+</ul>
+</div>
+
+The analysis of these datasets were the subject of a previous "projet informatique" I gave for a course
+at Ecole Polytechnique (see <a href=https://adimajo.github.io/assets/publications/p8-accidents_corporels.pdf>here</a>).
+
+Most of my students used Python, and as I plan to give this project again this year, let's not go into details.
+
+<br/>
+
+<!-- First, we need a few additional dependencies:
+
+<div class="shell-wrap">
+<ul class="shell-file">
+<li>sudo apt install libcurl4-openssl-dev libssl-dev libxml2-dev</li>
+</ul>
+</div> -->
+
+Let's go back to RStudio Server (normally at <a href="http://pi1:8787">pi1:8787</a>) and install sparklyr, h2o, and rsparkling like so:
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+        <li>install.packages('sparklyr')</li>
+        <li>install.packages("http://h2o-release.s3.amazonaws.com/h2o/latest_stable_R/src/contrib/h2o_3.38.0.2.tar.gz", type="source")</li>
+        <li>install.packages("/opt/sparkling-water/rsparkling_3.38.0.2-1-3.3.tar.gz", repos = NULL, type="source")</li>
+        <li>library(sparklyr)</li>
+        <li>options(sparklyr.log.console = TRUE)</li>
+        <li>library(rsparkling)</li>
+        <li>library(h2o)</li>
+        <li>Sys.setenv(SPARK_HOME="/opt/spark/")</li>
+        <li>Sys.setenv(HADOOP_HOME="/opt/hadoop/")</li>
+        <li>Sys.setenv(HADOOP_CONF_DIR="/opt/hadoop/etc/hadoop")</li>
+        <li>Sys.setenv(JAVA_HOME="/usr/lib/jvm/java-1.11.0-openjdk-arm64")</li>
+        <li>Sys.setenv("_JAVA_OPTIONS"="-Xmx512M")</li>
+        <li>conf <- spark_config()</li>
+        <li>conf$spark.executor.memory <- "512M"</li>
+        <li>conf$spark.sparklyr.gateway.start.timeout <- 180</li>
+        <li>conf$spark.executor.cores <- 2</li>
+        <li>conf$spark.dynamicAllocation.enabled <- "false"</li>
+        <li>sc <- spark_connect(master = "yarn", method = "shell", config = conf)</li>
+    </ul>
+</div>
+
+<div class="shell-wrap">
+    <ul class="shell-file">
+        <li>caracteristiques <- spark_read_csv(sc=sc, name="caracteristiques", path="hdfs:///tmp/caracteristiques-2018.csv")</li>
+        <li>h2o.init(ip = "localhost", nthreads = 1, max_mem_size = "512M")</li>
+        <li>caracteristiques_hf <- as.h2o(caracteristiques)</li>
+    </ul>
+</div>
+
+You can finally train any model using H2O, e.g. h2o.gbm!
+
+<h3>Watercooling the cluster</h3>
+
+OK this is where things go out of control!
+
+I saw a few YouTube videos of people watercooling Raspberry Pis and I thought it would be great to the same... Also, I did not know anything about watercooling so I learnt a lot along the way...
+
+<h4>Parts</h4>
+
+Basically, you need:</br>
+
+1. <a href="https://www.aliexpress.com/item/32971424272.html?spm=a2g0s.9042311.0.0.345f6c37O2QYjx">A pump</a> that will run the water into the circuit.</br></br>
+
+2. <a href="https://www.aquatuning.fr/refroidissement-par-eau/radiateurs/radiateurs-aktiv/16417/phobya-xtreme-200-85mm-v.2-full-copper">A radiator</a>, just like the ones you have in your home or your car, in which there is a very long canal which yields a very big exchange system with the air around it which in turn cools the liquid. It's extremely big and overkill for the Raspberry so you might want a way smaller one if size matters.</br></br>
+
+3. Fans, to further enhance the heat exchange process, at each side of the radiator: if you don't have any fan, you risk having "hot" air around the radiator that does not cool efficiently. To be compatible with my radiator, I've bought big 180mm fans (Phobya G-Silent 18).</br></br>
+
+4. <a href="https://www.aquatuning.fr/refroidissement-par-eau/blocs-gpu/mini-waterblock/599/alphacool-mcx-ram-waterblock-mini-ram">Waterblocks</a> which will be put on the parts that you want to cool. Typically, you would want to cool the CPU first, then the network chip (if you intend to use your Raspberry Pis intensively for their networking capabilities) and / or the memory chip (RAM) that is on the other side of the board (I've gone for that option since I thought it was cool to have waterblocks on both sides).</br></br>
+
+5. Various connectors and tubes: <a href="http://s.click.aliexpress.com/e/_sEAWjx
+">1/4'' plug</a>, <a href="http://s.click.aliexpress.com/e/_s4oRwd
+">1/4'' thread</a>, <a href="http://s.click.aliexpress.com/e/_sPXSzJ">5/16'' compression fittings</a>, <a href="https://www.aquatuning.fr/refroidissement-par-eau/liquides-de-refroidissement/ready-to-use/779/aquatuning-at-protect-uv-vert-1000ml">coolant</a>, <a href="https://www.aquatuning.fr/refroidissement-par-eau/tubes-souples/tuyau/867/tuyau-pvc-11/8mm-5/16-diametre-interieur-transparent">big tubes for the pump and the radiator</a>, <a href="https://www.aquatuning.fr/refroidissement-par-eau/tubes-souples/tuyau/762/tuyau-pvc-5/3mm-transparent">small tubes for the Pis</a>, <a href="https://www.aquatuning.fr/refroidissement-par-eau/blocs-gpu/mini-waterblock/594/alphacool-mcx-5x-repartiteur-1/4">splitters/dividers</a>, <a href="https://www.aquatuning.fr/refroidissement-par-eau/blocs-gpu/gpu-pieces-de-rechange-accessoires/12104/alphacool-mcx-bouchon-noir-kit-de-10-pieces">seal plugs</a>.</br></br>
+
+6. Optional: an enclosure. I've made a custom one using <a href="http://s.click.aliexpress.com/e/_sdfri1">these acrylic cases</a>, <a href="https://www.aliexpress.com/item/33028360740.html?spm=a2g0s.9042311.0.0.345f6c37X5XfoO">additionnal screws for the cases</a>, <a href="https://www.aliexpress.com/item/32964731892.html?spm=a2g0s.9042311.0.0.345f6c37X5XfoO">additional screws for the Pis</a>, a USB 5V to 12V adapter for the pump (now unavailable) and a <a href="http://s.click.aliexpress.com/e/_smhaU9
+">3-to-1 3-pin connector for the pump and the two fans</a>.</br></br>
+
+Total cost: a little under 200 €.</br>
+
+To be honest, I did try to overclock my Pi's, which I managed ridiculously easily, but there is no real point for my use case.
+
+<h4>The final beast</h4>
+
+<img src="images/final_cluster.jpg" alt="" width="100%"/>
+
+
+<h3>Sources</h3>
+
+<a href="https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2
+">https://dev.to/awwsmm/building-a-raspberry-pi-hadoop-spark-cluster-8b2</a>
+</br>
+<a href="https://eltechs.com/overclock-raspberry-pi-3/
+">https://eltechs.com/overclock-raspberry-pi-3/</a>
+</br>
+<a href="https://developer.ibm.com/recipes/tutorials/building-a-hadoop-cluster-with-raspberry-pi/
+">https://developer.ibm.com/recipes/tutorials/building-a-hadoop-cluster-with-raspberry-pi/</a>
+</br>
+<a href="https://dqydj.com/raspberry-pi-hadoop-cluster-apache-spark-yarn/
+">https://dqydj.com/raspberry-pi-hadoop-cluster-apache-spark-yarn/</a>
+</br>
+<a href="https://web.archive.org/web/20170221231927/http://www.becausewecangeek.com/building-a-raspberry-pi-hadoop-cluster-part-1/
+">https://web.archive.org/web/20170221231927/</a>
+</br>
+<a href="http://www.becausewecangeek.com/building-a-raspberry-pi-hadoop-cluster-part-1/">http://www.becausewecangeek.com/building-a-raspberry-pi-hadoop-cluster-part-1/</a>
+<br/>
+<a href="https://medium.com/@oliver_hu/build-a-hadoop-3-cluster-with-raspberry-pi-3-f451b7f93254
+">https://medium.com/@oliver_hu/build-a-hadoop-3-cluster-with-raspberry-pi-3-f451b7f93254</a>
+</br>
+<a href="https://community.rstudio.com/t/setting-up-your-own-shiny-server-rstudio-server-on-a-raspberry-pi-3b/18982">https://community.rstudio.com/t/setting-up-your-own-shiny-server-rstudio-server-on-a-raspberry-pi-3b/18982</a>
+</br>
+<a href="http://herb.h.kobe-u.ac.jp/raspiinfo/rstudio_en.html">http://herb.h.kobe-u.ac.jp/raspiinfo/rstudio_en.html</a>
+<a href="https://weidongzhou.wordpress.com/2017/11/16/access-sparkling-water-via-r-studio/">https://weidongzhou.wordpress.com/2017/11/16/access-sparkling-water-via-r-studio/</a>
+
+
+                                    <!-- begin wwww.htmlcommentbox.com -->
+ <div id="HCB_comment_box"><a href="http://www.htmlcommentbox.com">Comment Box</a> is loading comments...</div>
+ <link rel="stylesheet" type="text/css" href="//www.htmlcommentbox.com/static/skins/bootstrap/twitter-bootstrap.css?v=0" />
+ <script type="text/javascript" id="hcb"> /*<!--*/ if(!window.hcb_user){hcb_user={};} (function(){var s=document.createElement("script"), l=hcb_user.PAGE || (""+window.location).replace(/'/g,"%27"), h="//www.htmlcommentbox.com";s.setAttribute("type","text/javascript");s.setAttribute("src", h+"/jread?page="+encodeURIComponent(l).replace("+","%2B")+"&mod=%241%24wq1rdBcg%247122Rf3pq5RdU5hlkjJ4L1"+"&opts=16862&num=50&ts=1486459652719");if (typeof s!="undefined") document.getElementsByTagName("head")[0].appendChild(s);})(); /*-->*/ </script>
+<!-- end www.htmlcommentbox.com -->
+								</div>
+							</section>
+
+							<section id="footer">
+						<div class="container">
+							<ul class="copyright">
+								<li>&copy; Adrien Ehrhardt. All rights reserved.</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							</ul>
+						</div>
+					</section>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollzer.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
